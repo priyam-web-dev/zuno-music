@@ -1,25 +1,56 @@
-# P's favourites — React V1
+# P's Favourites
 
-This is the React/Vite version of the site.
+> A personal music space for songs that deserve a replay.
 
-## Important: don't open index.html with `file://`
-YouTube can return Error 153 when the page has no normal HTTP Referer/origin.
+**P's Favourites** is a minimal, cinematic web-based music player built around a simple idea: keep a personal collection of favourite songs in one beautiful place.
 
-### Run locally
-1. Install Node.js.
-2. Open a terminal in this folder.
-3. Run:
-   `npm install`
-4. Then:
-   `npm run dev`
-5. Open the `http://localhost:...` address Vite gives you.
+Instead of hard-coding the playlist into the application, the project uses **Google Sheets as a lightweight content source**. This makes it possible to add, remove, or update songs without changing the application code.
 
-The React app already sets the YouTube `origin` to the current site.
+The interface combines a visual village-inspired environment with a focused music-player experience powered by YouTube.
 
-## Current test links
-- 9UDkYz64ehA
-- G_eZ-piYwu0
-- WOZSI2_m-3o
-- 1usErKKsNGM
+---
 
-The displayed title is read from the YouTube player metadata, so we are not guessing the names.
+## Features
+
+- Personal favourite-song collection
+- Google Sheets powered playlist
+- Automatic playlist refresh
+- YouTube video playback
+- Play / pause controls
+- Previous / next song navigation
+- Automatic next-song playback
+- Interactive progress bar
+- Click-to-seek functionality
+- Volume control
+- Favourite/like interaction
+- Playlist overlay
+- Responsive layout for desktop and mobile
+- Cinematic background environment
+- Custom typography
+- Subtle UI animations
+- Glassmorphic footer
+- No traditional backend required
+
+---
+
+## How It Works
+
+The application follows a simple data flow:
+
+```text
+Google Sheets
+     │
+     ▼
+CSV Endpoint
+     │
+     ▼
+React Application
+     │
+     ▼
+Song Data Processing
+     │
+     ▼
+YouTube Player
+     │
+     ▼
+Music Player Interface
