@@ -3,19 +3,6 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 
 /* =========================================================
-   GOOGLE SHEET
-   ========================================================= */
-
-const SHEET_ID =
-  "1Owb2596w3vp_JWOtKGkpiR94OUO73CMRYANDZbBKHYw";
-
-const SHEET_GID = "0";
-
-const SHEET_URL =
-  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
-
-
-/* =========================================================
    SUPABASE
    ========================================================= */
 
@@ -76,88 +63,6 @@ const BACKGROUNDS = [
 
 
 /* =========================================================
-   CSV PARSER
-   ========================================================= */
-
-function parseCSV(text) {
-  const rows = [];
-
-  let row = [];
-  let cell = "";
-  let insideQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const next = text[i + 1];
-
-    if (
-      char === '"' &&
-      insideQuotes &&
-      next === '"'
-    ) {
-      cell += '"';
-      i++;
-    }
-
-    else if (char === '"') {
-      insideQuotes = !insideQuotes;
-    }
-
-    else if (
-      char === "," &&
-      !insideQuotes
-    ) {
-      row.push(cell.trim());
-      cell = "";
-    }
-
-    else if (
-      (char === "\n" || char === "\r") &&
-      !insideQuotes
-    ) {
-      if (
-        char === "\r" &&
-        next === "\n"
-      ) {
-        i++;
-      }
-
-      row.push(cell.trim());
-
-      if (
-        row.some(
-          (value) => value !== ""
-        )
-      ) {
-        rows.push(row);
-      }
-
-      row = [];
-      cell = "";
-    }
-
-    else {
-      cell += char;
-    }
-  }
-
-  if (cell || row.length) {
-    row.push(cell.trim());
-
-    if (
-      row.some(
-        (value) => value !== ""
-      )
-    ) {
-      rows.push(row);
-    }
-  }
-
-  return rows;
-}
-
-
-/* =========================================================
    YOUTUBE ID
    ========================================================= */
 
@@ -189,91 +94,6 @@ function getYouTubeId(url) {
   catch {
     return null;
   }
-}
-
-
-/* =========================================================
-   LOAD GOOGLE SHEET SONGS
-   ========================================================= */
-
-async function loadSongs() {
-  const response = await fetch(
-    `${SHEET_URL}&cache=${Date.now()}`
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      "Google Sheet load failed"
-    );
-  }
-
-  const csv =
-    await response.text();
-
-  const rows =
-    parseCSV(csv);
-
-  if (rows.length < 2) {
-    return [];
-  }
-
-  const headers =
-    rows[0].map((header) =>
-      header.toLowerCase().trim()
-    );
-
-  const songIndex =
-    headers.indexOf("song name");
-
-  const artistIndex =
-    headers.indexOf("artist");
-
-  const urlIndex =
-    headers.indexOf("url");
-
-  if (
-    songIndex === -1 ||
-    artistIndex === -1 ||
-    urlIndex === -1
-  ) {
-    throw new Error(
-      "Sheet must contain Song Name, Artist and URL columns"
-    );
-  }
-
-  return rows
-    .slice(1)
-    .map((row) => {
-      const songName =
-        row[songIndex]?.trim();
-
-      const artist =
-        row[artistIndex]?.trim();
-
-      const url =
-        row[urlIndex]?.trim();
-
-      return {
-        id: getYouTubeId(url),
-
-        title:
-          songName ||
-          "अज्ञात गीत",
-
-        artist:
-          artist ||
-          "अज्ञात कलाकार",
-
-        url,
-      };
-    })
-
-    .filter(
-      (song) =>
-        song.id &&
-        song.title &&
-        song.artist
-    );
 }
 
 
@@ -596,6 +416,60 @@ async function addSongToPlaylist(
     },
     token
   );
+}
+
+
+/* =========================================================
+   LOAD CURRENT USER PLAYLIST
+
+   Homepage songs come ONLY from the logged-in user's
+   Supabase playlist. Google Sheets are not used here.
+   ========================================================= */
+
+async function loadCurrentUserPlaylist(
+  userId,
+  token
+) {
+  const playlists =
+    await getPlaylists(
+      userId,
+      token
+    );
+
+  if (!playlists?.length) {
+    return {
+      playlist: null,
+      songs: [],
+    };
+  }
+
+  const savedPlaylistId =
+    localStorage.getItem(
+      "pf_active_playlist_id"
+    );
+
+  let playlist =
+    playlists.find(
+      (item) =>
+        String(item.id) ===
+        String(savedPlaylistId)
+    ) || playlists[0];
+
+  const songs =
+    await getPlaylistSongs(
+      playlist.id,
+      token
+    );
+
+  localStorage.setItem(
+    "pf_active_playlist_id",
+    playlist.id
+  );
+
+  return {
+    playlist,
+    songs: songs || [],
+  };
 }
 
 
@@ -1190,6 +1064,10 @@ function PlaylistPanel({
 
   const openPlaylist = async (playlist) => {
     setSelected(playlist);
+    localStorage.setItem(
+      "pf_active_playlist_id",
+      playlist.id
+    );
     setMessage("");
 
     try {
@@ -1794,7 +1672,7 @@ function PlaylistPanel({
 
                 <button
                   type="button"
-                  onClick={() => onPlayPlaylist(songs)}
+                  onClick={() => onPlayPlaylist(songs, selected.id)}
                   disabled={!songs.length}
                   style={panelStyles.playPlaylist}
                 >
@@ -2253,55 +2131,62 @@ function App() {
   const refreshSongs =
     async () => {
 
+      if (!user || !token) {
+        return;
+      }
+
       try {
 
-        const songs =
-          await loadSongs();
-
-
-        if (!songs.length) {
-
-          throw new Error(
-            "Google Sheet में कोई valid song नहीं मिला।"
+        const result =
+          await loadCurrentUserPlaylist(
+            user.id,
+            token
           );
 
-        }
-
+        const songs =
+          (result.songs || [])
+            .map((song) => ({
+              id: song.youtube_id,
+              title:
+                song.song_name ||
+                "अज्ञात गीत",
+              artist:
+                song.artist ||
+                "अज्ञात कलाकार",
+            }))
+            .filter(
+              (song) =>
+                song.id &&
+                song.title
+            );
 
         tracksRef.current =
           songs;
 
-        setTracks(
-          songs
-        );
+        setTracks(songs);
 
-
-        if (
-          indexRef.current >=
-          songs.length
-        ) {
-
-          indexRef.current =
-            0;
-
+        if (indexRef.current >= songs.length) {
+          indexRef.current = 0;
           setIndex(0);
-
         }
-
 
         setError("");
         setLoading(false);
 
-      }
+      } catch (err) {
 
-      catch (err) {
-
-        console.error(err);
-
-        setError(
-          "गीतों की सूची लोड नहीं हो सकी।"
+        console.error(
+          "User playlist load failed:",
+          err
         );
 
+        // IMPORTANT: an empty/error playlist must NOT
+        // replace the whole homepage with an error screen.
+        tracksRef.current = [];
+        setTracks([]);
+        setError(
+          "Playlist load नहीं हो सकी।"
+        );
         setLoading(false);
       }
     };
@@ -2710,68 +2595,63 @@ function App() {
      ======================================================= */
 
   const playPlaylist =
-    (songs) => {
+    (songs, playlistId = null) => {
 
-      if (
-        !songs?.length
-      ) {
+      if (!songs?.length) {
+        tracksRef.current = [];
+        setTracks([]);
+        indexRef.current = 0;
+        setIndex(0);
+        setPlaylistOpen(false);
+        setQueueOpen(false);
         return;
       }
 
+      if (playlistId) {
+        localStorage.setItem(
+          "pf_active_playlist_id",
+          playlistId
+        );
+      }
 
       const mapped =
-        songs.map(
-          (song) => ({
-            id:
-              song.youtube_id,
-
+        songs
+          .map((song) => ({
+            id: song.youtube_id,
             title:
-              song.song_name,
-
+              song.song_name ||
+              "अज्ञात गीत",
             artist:
-              song.artist,
-          })
-        );
-
+              song.artist ||
+              "अज्ञात कलाकार",
+          }))
+          .filter((song) => song.id);
 
       tracksRef.current =
         mapped;
 
-      setTracks(
-        mapped
-      );
+      setTracks(mapped);
 
-      indexRef.current =
-        0;
-
+      indexRef.current = 0;
       setIndex(0);
+      setLiked(false);
+      setProgress(0);
+      setElapsed("0:00");
+      setDuration("0:00");
 
-      setPlaylistOpen(
-        false
-      );
+      setPlaylistOpen(false);
+      setQueueOpen(false);
 
-      setQueueOpen(
-        false
-      );
-
-
-      setTimeout(
-        () => {
-
-          if (
-            playerRef.current
-          ) {
-
-            playerRef.current
-              .loadVideoById(
-                mapped[0].id
-              );
-
-          }
-
-        },
-        100
-      );
+      setTimeout(() => {
+        if (
+          playerRef.current &&
+          mapped[0]?.id
+        ) {
+          playerRef.current.loadVideoById(
+            mapped[0].id
+          );
+        }
+      }, 100);
     };
 
 
@@ -2906,52 +2786,8 @@ function App() {
   }
 
 
-  /* =======================================================
-     ERROR
-     ======================================================= */
-
-  if (error) {
-
-    return (
-      <div
-        className="scene"
-        style={{
-          backgroundImage:
-            `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
-        }}
-      >
-
-        <div
-          style={{
-            minHeight:
-              "100vh",
-
-            display:
-              "flex",
-
-            alignItems:
-              "center",
-
-            justifyContent:
-              "center",
-
-            color:
-              "#f5dfb7",
-
-            fontSize:
-              18,
-          }}
-        >
-          {error}
-        </div>
-
-      </div>
-    );
-  }
-
-
   const currentTrack =
-    tracks[index];
+    tracks[index] || null;
 
 
   /* =======================================================
@@ -3096,7 +2932,53 @@ function App() {
 
             <div className="video-shell">
 
-              <div id="youtube-player" />
+              {currentTrack ? (
+
+                <div id="youtube-player" />
+
+              ) : (
+
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    minHeight: 280,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "#080808",
+                    color: "#f5dfb7",
+                    textAlign: "center",
+                    padding: 24,
+                    boxSizing: "border-box",
+                  }}
+                >
+
+                  <div>
+
+                    <div
+                      style={{
+                        fontSize: 22,
+                        marginBottom: 8,
+                      }}
+                    >
+                      अभी playlist में कोई song नहीं है
+                    </div>
+
+                    <div
+                      style={{
+                        opacity: 0.7,
+                        fontSize: 14,
+                      }}
+                    >
+                      ऊपर <b>Playlists</b> खोलकर अपना पहला song add करो।
+                    </div>
+
+                  </div>
+
+                </div>
+
+              )}
 
             </div>
 
@@ -3112,14 +2994,16 @@ function App() {
 
                 <div className="song-title">
                   {
-                    currentTrack.title
+                    currentTrack?.title ||
+                    "अभी कोई गीत नहीं है"
                   }
                 </div>
 
 
                 <div className="artist">
                   {
-                    currentTrack.artist
+                    currentTrack?.artist ||
+                    "Playlist में song add करो"
                   }
                 </div>
 
@@ -3151,7 +3035,11 @@ function App() {
 
             <div
               className="seek"
-              onClick={seek}
+              onClick={currentTrack ? seek : undefined}
+              style={{
+                opacity: currentTrack ? 1 : 0.45,
+                cursor: currentTrack ? "pointer" : "default",
+              }}
             >
 
               <div
@@ -3184,11 +3072,13 @@ function App() {
                 type="button"
                 className="control"
                 onClick={() =>
+                  currentTrack &&
                   changeTrack(
                     indexRef.current -
                       1
                   )
                 }
+                disabled={!currentTrack}
               >
                 ‹
               </button>
@@ -3200,6 +3090,7 @@ function App() {
                 onClick={
                   togglePlay
                 }
+                disabled={!currentTrack}
               >
                 {
                   playing
@@ -3213,11 +3104,13 @@ function App() {
                 type="button"
                 className="control"
                 onClick={() =>
+                  currentTrack &&
                   changeTrack(
                     indexRef.current +
                       1
                   )
                 }
+                disabled={!currentTrack}
               >
                 ›
               </button>
