@@ -2936,11 +2936,8 @@ function App() {
                 profile.display_name ||
                 "Priyam"
               }
-
-              की
-
+              {" "}की
               <br />
-
               पसंद
             </h1>
 
@@ -2952,6 +2949,43 @@ function App() {
             </p>
 
           </section>
+
+
+          {/* VIDEO CARD */}
+
+          <section className="video-card">
+
+            <div className="video-card-heading">
+
+              <div>
+                <div className="video-card-kicker">
+                  VIDEO
+                </div>
+
+                <div className="video-card-title">
+                  अभी चल रहा गीत
+                </div>
+              </div>
+
+              <span className="video-card-mark">
+                ▶
+              </span>
+
+            </div>
+
+            <div className="video-shell">
+
+              <div id="youtube-player" />
+
+            </div>
+
+            <div className="video-card-note">
+              संगीत YouTube के आधिकारिक प्लेयर के माध्यम से चल रहा है।
+            </div>
+
+          </section>
+
+
 
 
           {/* PLAYER */}
@@ -3150,40 +3184,6 @@ function App() {
 
           </section>
 
-
-          {/* VIDEO CARD */}
-
-          <section className="video-card">
-
-            <div className="video-card-heading">
-
-              <div>
-                <div className="video-card-kicker">
-                  VIDEO
-                </div>
-
-                <div className="video-card-title">
-                  अभी चल रहा गीत
-                </div>
-              </div>
-
-              <span className="video-card-mark">
-                ▶
-              </span>
-
-            </div>
-
-            <div className="video-shell">
-
-              <div id="youtube-player" />
-
-            </div>
-
-            <div className="video-card-note">
-              संगीत YouTube के आधिकारिक प्लेयर के माध्यम से चल रहा है।
-            </div>
-
-          </section>
 
         </main>
 

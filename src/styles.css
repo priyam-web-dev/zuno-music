@@ -195,43 +195,21 @@ input{
     "DM Sans",
     sans-serif!important;
 
-  font-size:0!important;
+  font-size:clamp(58px,6vw,86px)!important;
   font-weight:700!important;
 
   line-height:1.05!important;
   letter-spacing:-2px!important;
 
-  color:transparent!important;
-  text-shadow:none!important;
+  color:#fff8e9!important;
+  text-shadow:
+    3px 3px 0 rgba(0,0,0,.55),
+    0 8px 24px rgba(0,0,0,.45)!important;
 }
 
 .hero h1::after{
-  content:"Priyam की पसंद";
-  display:block;
-
-  font-family:
-    "Tiro Devanagari Hindi",
-    "DM Sans",
-    sans-serif;
-
-  font-size:clamp(58px,6vw,86px);
-  font-weight:700;
-
-  line-height:1.05;
-  letter-spacing:-2px;
-
-  color:#fff8e9;
-
-  text-shadow:
-    3px 3px 0 rgba(0,0,0,.55),
-    0 8px 24px rgba(0,0,0,.45);
-
-  animation:
-    titleReveal
-    1s
-    .28s
-    cubic-bezier(.22,1,.36,1)
-    both;
+  content:none;
+  display:none;
 }
 
 .player-card{
@@ -1706,5 +1684,111 @@ body .footer,
 
   .video-card .video-shell{
     border-radius:5px;
+  }
+}
+
+
+/* =========================================================
+   FINAL UI LAYOUT — VIDEO TOP / MUSIC PLAYER BOTTOM
+   ========================================================= */
+
+.layout{
+  min-height:calc(100vh - 76px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:34px;
+  padding:56px 7vw 86px;
+}
+
+.video-card{
+  order:1;
+  width:min(620px,100%);
+  margin:0;
+}
+
+.player-card{
+  order:2;
+  width:min(500px,100%);
+  margin:0;
+}
+
+/* Do not alter the profile-selected background. */
+.scene{
+  background-attachment:fixed;
+}
+
+/* Fast, restrained motion. */
+.scene,
+.nav,
+.hero,
+.player-card,
+.video-card,
+.footer{
+  animation-duration:.45s !important;
+}
+
+.player-card,
+.video-card{
+  transition:
+    transform .16s ease,
+    box-shadow .16s ease;
+}
+
+@media(max-width:900px){
+  .layout{
+    min-height:auto;
+    flex-direction:column;
+    gap:30px;
+    padding:46px 5vw 72px;
+  }
+
+  .hero{
+    position:relative;
+    left:auto;
+    top:auto;
+    width:100%;
+    max-width:600px;
+    transform:none;
+    text-align:center;
+  }
+
+  .hero h1{
+    font-size:64px!important;
+  }
+
+  .video-card,
+  .player-card{
+    width:100%;
+    max-width:570px;
+  }
+}
+
+@media(max-width:520px){
+  .layout{
+    gap:24px;
+    padding:35px 4vw 58px;
+  }
+
+  .hero h1{
+    font-size:52px!important;
+    letter-spacing:-1.5px!important;
+  }
+
+  .video-card,
+  .player-card{
+    width:100%;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .scene,
+  .nav,
+  .hero,
+  .player-card,
+  .video-card,
+  .footer{
+    animation:none !important;
   }
 }
