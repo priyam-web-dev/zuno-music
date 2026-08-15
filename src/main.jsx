@@ -63,41 +63,6 @@ const BACKGROUNDS = [
 
 
 /* =========================================================
-   YOUTUBE ID
-   ========================================================= */
-
-function getYouTubeId(url) {
-  if (!url) return null;
-
-  try {
-    const parsed = new URL(url);
-
-    if (
-      parsed.hostname.includes("youtu.be")
-    ) {
-      return parsed.pathname.replace(
-        "/",
-        ""
-      );
-    }
-
-    if (
-      parsed.hostname.includes("youtube.com") ||
-      parsed.hostname.includes("music.youtube.com")
-    ) {
-      return parsed.searchParams.get("v");
-    }
-
-    return null;
-  }
-
-  catch {
-    return null;
-  }
-}
-
-
-/* =========================================================
    YOUTUBE API
    ========================================================= */
 
@@ -416,60 +381,6 @@ async function addSongToPlaylist(
     },
     token
   );
-}
-
-
-/* =========================================================
-   LOAD CURRENT USER PLAYLIST
-
-   Homepage songs come ONLY from the logged-in user's
-   Supabase playlist. Google Sheets are not used here.
-   ========================================================= */
-
-async function loadCurrentUserPlaylist(
-  userId,
-  token
-) {
-  const playlists =
-    await getPlaylists(
-      userId,
-      token
-    );
-
-  if (!playlists?.length) {
-    return {
-      playlist: null,
-      songs: [],
-    };
-  }
-
-  const savedPlaylistId =
-    localStorage.getItem(
-      "pf_active_playlist_id"
-    );
-
-  let playlist =
-    playlists.find(
-      (item) =>
-        String(item.id) ===
-        String(savedPlaylistId)
-    ) || playlists[0];
-
-  const songs =
-    await getPlaylistSongs(
-      playlist.id,
-      token
-    );
-
-  localStorage.setItem(
-    "pf_active_playlist_id",
-    playlist.id
-  );
-
-  return {
-    playlist,
-    songs: songs || [],
-  };
 }
 
 
@@ -1013,6 +924,69 @@ function ProfilePanel({
 
 
 /* =========================================================
+   LOAD SONGS FROM THE LOGGED-IN USER'S PLAYLISTS
+   ========================================================= */
+
+async function loadUserSongs(
+  userId,
+  token
+) {
+  const playlists =
+    await getPlaylists(
+      userId,
+      token
+    );
+
+  if (!Array.isArray(playlists) || !playlists.length) {
+    return [];
+  }
+
+  const results =
+    await Promise.all(
+      playlists.map(async (playlist) => {
+        const songs =
+          await getPlaylistSongs(
+            playlist.id,
+            token
+          );
+
+        return Array.isArray(songs)
+          ? songs
+          : [];
+      })
+    );
+
+  const seen = new Set();
+  const tracks = [];
+
+  for (const songs of results) {
+    for (const song of songs) {
+      const id =
+        String(song?.youtube_id || "").trim();
+
+      if (!id || seen.has(id)) {
+        continue;
+      }
+
+      seen.add(id);
+
+      tracks.push({
+        id,
+        title:
+          song?.song_name ||
+          "Unknown song",
+        artist:
+          song?.artist ||
+          "Unknown artist",
+      });
+    }
+  }
+
+  return tracks;
+}
+
+
+/* =========================================================
    PLAYLIST PANEL
    ========================================================= */
 
@@ -1021,6 +995,7 @@ function PlaylistPanel({
   token,
   currentTrack,
   onPlayPlaylist,
+  onLibraryChanged,
   onClose,
 }) {
   const [playlists, setPlaylists] = useState([]);
@@ -1064,10 +1039,6 @@ function PlaylistPanel({
 
   const openPlaylist = async (playlist) => {
     setSelected(playlist);
-    localStorage.setItem(
-      "pf_active_playlist_id",
-      playlist.id
-    );
     setMessage("");
 
     try {
@@ -1106,6 +1077,7 @@ function PlaylistPanel({
       );
 
       setSongs(updated || []);
+      await onLibraryChanged?.();
     } catch (e) {
       setMessage(e.message || "Song add नहीं हुआ।");
     } finally {
@@ -1173,6 +1145,7 @@ function PlaylistPanel({
 
       setSongs(updated || []);
       setOnlineUrl("");
+      await onLibraryChanged?.();
       setMessage(`"${song.title}" added.`);
     } catch (e) {
       setMessage(e.message || "Song add नहीं हुआ।");
@@ -1274,6 +1247,7 @@ function PlaylistPanel({
 
       setSongs(updated || []);
       setOnlineUrl("");
+      await onLibraryChanged?.();
 
       setMessage(
         `${data.songs.length} songs imported successfully.`
@@ -1321,6 +1295,7 @@ function PlaylistPanel({
       );
 
       setSongs(updated || []);
+      await onLibraryChanged?.();
     } catch (e) {
       setMessage(
         e.message || "Song delete नहीं हुआ।"
@@ -1374,6 +1349,7 @@ function PlaylistPanel({
       }
 
       await refresh();
+      await onLibraryChanged?.();
     } catch (e) {
       setMessage(
         e.message || "Playlist delete नहीं हुई।"
@@ -1672,7 +1648,7 @@ function PlaylistPanel({
 
                 <button
                   type="button"
-                  onClick={() => onPlayPlaylist(songs, selected.id)}
+                  onClick={() => onPlayPlaylist(songs)}
                   disabled={!songs.length}
                   style={panelStyles.playPlaylist}
                 >
@@ -2125,7 +2101,7 @@ function App() {
 
 
   /* =======================================================
-     LOAD SONGS
+     LOAD SONGS FROM THIS USER'S PLAYLISTS
      ======================================================= */
 
   const refreshSongs =
@@ -2136,57 +2112,44 @@ function App() {
       }
 
       try {
-
-        const result =
-          await loadCurrentUserPlaylist(
+        const songs =
+          await loadUserSongs(
             user.id,
             token
           );
 
-        const songs =
-          (result.songs || [])
-            .map((song) => ({
-              id: song.youtube_id,
-              title:
-                song.song_name ||
-                "अज्ञात गीत",
-              artist:
-                song.artist ||
-                "अज्ञात कलाकार",
-            }))
-            .filter(
-              (song) =>
-                song.id &&
-                song.title
-            );
-
         tracksRef.current =
           songs;
 
-        setTracks(songs);
+        setTracks(
+          songs
+        );
 
-        if (indexRef.current >= songs.length) {
-          indexRef.current = 0;
-          setIndex(0);
+        indexRef.current =
+          0;
+
+        setIndex(0);
+
+        if (!songs.length) {
+          setError(
+            "Abhi tumhari playlist me koi song nahi hai. Playlist me song add karo."
+          );
+
+          playerRef.current?.stopVideo?.();
+        } else {
+          setError("");
         }
 
-        setError("");
         setLoading(false);
 
       } catch (err) {
+        console.error(err);
 
-        console.error(
-          "User playlist load failed:",
-          err
-        );
-
-        // IMPORTANT: an empty/error playlist must NOT
-        // replace the whole homepage with an error screen.
-        tracksRef.current = [];
-        setTracks([]);
         setError(
-          "Playlist load नहीं हो सकी।"
+          err?.message ||
+          "Tumhari playlists se songs load nahi ho sake."
         );
+
         setLoading(false);
       }
     };
@@ -2213,7 +2176,7 @@ function App() {
         interval
       );
 
-  }, [user]);
+  }, [user, token]);
 
 
   /* =======================================================
@@ -2595,63 +2558,68 @@ function App() {
      ======================================================= */
 
   const playPlaylist =
-    (songs, playlistId = null) => {
+    (songs) => {
 
-      if (!songs?.length) {
-        tracksRef.current = [];
-        setTracks([]);
-        indexRef.current = 0;
-        setIndex(0);
-        setPlaylistOpen(false);
-        setQueueOpen(false);
+      if (
+        !songs?.length
+      ) {
         return;
       }
 
-      if (playlistId) {
-        localStorage.setItem(
-          "pf_active_playlist_id",
-          playlistId
-        );
-      }
 
       const mapped =
-        songs
-          .map((song) => ({
-            id: song.youtube_id,
+        songs.map(
+          (song) => ({
+            id:
+              song.youtube_id,
+
             title:
-              song.song_name ||
-              "अज्ञात गीत",
+              song.song_name,
+
             artist:
-              song.artist ||
-              "अज्ञात कलाकार",
-          }))
-          .filter((song) => song.id);
+              song.artist,
+          })
+        );
+
 
       tracksRef.current =
         mapped;
 
-      setTracks(mapped);
+      setTracks(
+        mapped
+      );
 
-      indexRef.current = 0;
+      indexRef.current =
+        0;
+
       setIndex(0);
-      setLiked(false);
-      setProgress(0);
-      setElapsed("0:00");
-      setDuration("0:00");
 
-      setPlaylistOpen(false);
-      setQueueOpen(false);
+      setPlaylistOpen(
+        false
+      );
 
-      setTimeout(() => {
-        if (
-          playerRef.current &&
-          mapped[0]?.id
-        ) {
-          playerRef.current.loadVideoById(
-            mapped[0].id
-          );
-        }
-      }, 100);
+      setQueueOpen(
+        false
+      );
+
+
+      setTimeout(
+        () => {
+
+          if (
+            playerRef.current
+          ) {
+
+            playerRef.current
+              .loadVideoById(
+                mapped[0].id
+              );
+
+          }
+
+        },
+        100
+      );
     };
 
 
@@ -2786,8 +2754,52 @@ function App() {
   }
 
 
+  /* =======================================================
+     ERROR
+     ======================================================= */
+
+  if (error) {
+
+    return (
+      <div
+        className="scene"
+        style={{
+          backgroundImage:
+            `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
+        }}
+      >
+
+        <div
+          style={{
+            minHeight:
+              "100vh",
+
+            display:
+              "flex",
+
+            alignItems:
+              "center",
+
+            justifyContent:
+              "center",
+
+            color:
+              "#f5dfb7",
+
+            fontSize:
+              18,
+          }}
+        >
+          {error}
+        </div>
+
+      </div>
+    );
+  }
+
+
   const currentTrack =
-    tracks[index] || null;
+    tracks[index];
 
 
   /* =======================================================
@@ -2811,11 +2823,40 @@ function App() {
 
         <header className="nav">
 
-          <div className="logo">
-            P's{" "}
-            <span>
-              favourites
-            </span>
+          <div className="brand-mark" aria-label="P's Favourites">
+            <div className="brand-icon">
+              <svg
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 34V12h11.5c5.5 0 8.5 3.1 8.5 7.7s-3 7.7-8.5 7.7H19"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M28 13.5c2.5 1.2 4.8 2.8 6.8 4.8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx="34.5"
+                  cy="30.5"
+                  r="2.2"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+
+            <div className="brand-copy">
+              <strong>P's</strong>
+              <span>favourites</span>
+            </div>
           </div>
 
 
@@ -2930,59 +2971,6 @@ function App() {
             </div>
 
 
-            <div className="video-shell">
-
-              {currentTrack ? (
-
-                <div id="youtube-player" />
-
-              ) : (
-
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    minHeight: 280,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "#080808",
-                    color: "#f5dfb7",
-                    textAlign: "center",
-                    padding: 24,
-                    boxSizing: "border-box",
-                  }}
-                >
-
-                  <div>
-
-                    <div
-                      style={{
-                        fontSize: 22,
-                        marginBottom: 8,
-                      }}
-                    >
-                      अभी playlist में कोई song नहीं है
-                    </div>
-
-                    <div
-                      style={{
-                        opacity: 0.7,
-                        fontSize: 14,
-                      }}
-                    >
-                      ऊपर <b>Playlists</b> खोलकर अपना पहला song add करो।
-                    </div>
-
-                  </div>
-
-                </div>
-
-              )}
-
-            </div>
-
-
             <div className="now-row">
 
               <div>
@@ -2995,7 +2983,7 @@ function App() {
                 <div className="song-title">
                   {
                     currentTrack?.title ||
-                    "अभी कोई गीत नहीं है"
+                    "अपनी पसंद से कोई गीत चुनें"
                   }
                 </div>
 
@@ -3003,7 +2991,7 @@ function App() {
                 <div className="artist">
                   {
                     currentTrack?.artist ||
-                    "Playlist में song add करो"
+                    "Playlist से गीत शुरू करें"
                   }
                 </div>
 
@@ -3017,11 +3005,12 @@ function App() {
                     ? "active"
                     : ""
                 }`}
-                onClick={() =>
-                  setLiked(
-                    !liked
-                  )
-                }
+                onClick={() => {
+                  if (currentTrack) {
+                    setLiked(!liked);
+                  }
+                }}
+                disabled={!currentTrack}
               >
                 {
                   liked
@@ -3035,11 +3024,7 @@ function App() {
 
             <div
               className="seek"
-              onClick={currentTrack ? seek : undefined}
-              style={{
-                opacity: currentTrack ? 1 : 0.45,
-                cursor: currentTrack ? "pointer" : "default",
-              }}
+              onClick={seek}
             >
 
               <div
@@ -3072,13 +3057,11 @@ function App() {
                 type="button"
                 className="control"
                 onClick={() =>
-                  currentTrack &&
                   changeTrack(
                     indexRef.current -
                       1
                   )
                 }
-                disabled={!currentTrack}
               >
                 ‹
               </button>
@@ -3090,7 +3073,6 @@ function App() {
                 onClick={
                   togglePlay
                 }
-                disabled={!currentTrack}
               >
                 {
                   playing
@@ -3104,13 +3086,11 @@ function App() {
                 type="button"
                 className="control"
                 onClick={() =>
-                  currentTrack &&
                   changeTrack(
                     indexRef.current +
                       1
                   )
                 }
-                disabled={!currentTrack}
               >
                 ›
               </button>
@@ -3166,6 +3146,41 @@ function App() {
             <div className="note">
               संगीत YouTube के आधिकारिक
               प्लेयर के माध्यम से चल रहा है।
+            </div>
+
+          </section>
+
+
+          {/* VIDEO CARD */}
+
+          <section className="video-card">
+
+            <div className="video-card-heading">
+
+              <div>
+                <div className="video-card-kicker">
+                  VIDEO
+                </div>
+
+                <div className="video-card-title">
+                  अभी चल रहा गीत
+                </div>
+              </div>
+
+              <span className="video-card-mark">
+                ▶
+              </span>
+
+            </div>
+
+            <div className="video-shell">
+
+              <div id="youtube-player" />
+
+            </div>
+
+            <div className="video-card-note">
+              संगीत YouTube के आधिकारिक प्लेयर के माध्यम से चल रहा है।
             </div>
 
           </section>
@@ -3313,6 +3328,9 @@ function App() {
             }
             onPlayPlaylist={
               playPlaylist
+            }
+            onLibraryChanged={
+              refreshSongs
             }
             onClose={() =>
               setPlaylistOpen(
