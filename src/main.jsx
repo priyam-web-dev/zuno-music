@@ -2131,10 +2131,7 @@ function App() {
         setIndex(0);
 
         if (!songs.length) {
-          setError(
-            "Abhi tumhari playlist me koi song nahi hai. Playlist me song add karo."
-          );
-
+          setError("");
           playerRef.current?.stopVideo?.();
         } else {
           setError("");
@@ -2754,52 +2751,12 @@ function App() {
   }
 
 
-  /* =======================================================
-     ERROR
-     ======================================================= */
-
-  if (error) {
-
-    return (
-      <div
-        className="scene"
-        style={{
-          backgroundImage:
-            `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
-        }}
-      >
-
-        <div
-          style={{
-            minHeight:
-              "100vh",
-
-            display:
-              "flex",
-
-            alignItems:
-              "center",
-
-            justifyContent:
-              "center",
-
-            color:
-              "#f5dfb7",
-
-            fontSize:
-              18,
-          }}
-        >
-          {error}
-        </div>
-
-      </div>
-    );
-  }
-
-
   const currentTrack =
-    tracks[index];
+    tracks[index] || {
+      id: null,
+      title: "Abhi koi song nahi hai",
+      artist: "Playlist me song add karo",
+    };
 
 
   /* =======================================================
