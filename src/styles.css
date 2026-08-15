@@ -1792,3 +1792,478 @@ body .footer,
     animation:none !important;
   }
 }
+
+/* =========================================================
+   P'S FAVOURITES — V4 PREMIUM GLASS UI
+   Final layout:
+   VIDEO
+      ↓
+     GAP
+      ↓
+   MUSIC PLAYER
+   Background is intentionally untouched.
+   ========================================================= */
+
+/* ---------- MAIN STAGE ---------- */
+
+.layout{
+  min-height:calc(100vh - 76px) !important;
+  position:relative !important;
+  z-index:2 !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+
+  gap:24px !important;
+
+  width:100% !important;
+  box-sizing:border-box !important;
+
+  padding:112px 0 92px !important;
+}
+
+/* Keep the hero as a quiet left-side visual anchor. */
+.hero{
+  position:absolute !important;
+  left:5.5vw !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+
+  width:350px !important;
+  z-index:5 !important;
+
+  pointer-events:none;
+}
+
+.hero h1{
+  font-size:clamp(54px,5.2vw,76px) !important;
+  line-height:1.02 !important;
+  letter-spacing:-2.2px !important;
+
+  color:#fff !important;
+
+  text-shadow:
+    0 3px 12px rgba(0,0,0,.58),
+    0 12px 32px rgba(0,0,0,.38) !important;
+}
+
+/* ---------- SHARED GLASS ---------- */
+
+.video-card,
+.player-card{
+  box-sizing:border-box !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.19),
+      rgba(255,255,255,.085)
+    ) !important;
+
+  border:1px solid rgba(255,255,255,.30) !important;
+
+  border-radius:24px !important;
+
+  color:#fff !important;
+
+  box-shadow:
+    0 24px 70px rgba(0,0,0,.30),
+    0 5px 18px rgba(0,0,0,.16),
+    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 0 0 1px rgba(255,255,255,.035) !important;
+
+  -webkit-backdrop-filter:blur(24px) saturate(125%) !important;
+  backdrop-filter:blur(24px) saturate(125%) !important;
+
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease !important;
+}
+
+.video-card:hover,
+.player-card:hover{
+  transform:translateY(-2px) !important;
+
+  border-color:rgba(255,255,255,.38) !important;
+
+  box-shadow:
+    0 28px 78px rgba(0,0,0,.34),
+    0 7px 20px rgba(0,0,0,.17),
+    inset 0 1px 0 rgba(255,255,255,.28) !important;
+}
+
+/* ---------- VIDEO ---------- */
+
+.video-card{
+  width:min(560px,calc(100vw - 40px)) !important;
+
+  padding:16px !important;
+
+  margin:0 !important;
+
+  z-index:10 !important;
+
+  border-radius:24px !important;
+
+  animation:glassIn .36s cubic-bezier(.22,1,.36,1) both !important;
+}
+
+.video-card-heading{
+  min-height:38px !important;
+
+  margin:0 4px 12px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+}
+
+.video-card-kicker{
+  color:rgba(255,255,255,.55) !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+
+.video-card-title{
+  margin-top:3px !important;
+
+  color:#fff !important;
+
+  font-family:"Playfair Display",serif !important;
+  font-size:21px !important;
+  font-weight:700 !important;
+  line-height:1.15 !important;
+}
+
+.video-card-mark{
+  width:36px !important;
+  height:36px !important;
+
+  flex-shrink:0 !important;
+
+  display:grid !important;
+  place-items:center !important;
+
+  border:1px solid rgba(255,255,255,.22) !important;
+  border-radius:50% !important;
+
+  background:rgba(0,0,0,.40) !important;
+
+  color:#fff !important;
+
+  box-shadow:0 7px 20px rgba(0,0,0,.22) !important;
+}
+
+.video-card .video-shell{
+  width:100% !important;
+  aspect-ratio:16/9 !important;
+  min-height:0 !important;
+
+  overflow:hidden !important;
+
+  border-radius:16px !important;
+
+  background:rgba(0,0,0,.72) !important;
+
+  border:1px solid rgba(255,255,255,.14) !important;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.26),
+    inset 0 1px rgba(255,255,255,.10) !important;
+
+  animation:none !important;
+}
+
+.video-card .video-shell iframe,
+.video-card #youtube-player{
+  width:100% !important;
+  height:100% !important;
+  display:block !important;
+}
+
+.video-card-note{
+  margin:9px 4px 1px !important;
+
+  color:rgba(255,255,255,.56) !important;
+
+  font-size:10px !important;
+  line-height:1.45 !important;
+}
+
+/* ---------- MUSIC PLAYER ---------- */
+
+.player-card{
+  width:min(560px,calc(100vw - 40px)) !important;
+
+  padding:18px 20px 16px !important;
+
+  margin:0 !important;
+
+  z-index:10 !important;
+
+  border-radius:24px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.17),
+      rgba(255,255,255,.075)
+    ) !important;
+
+  animation:glassIn .36s .06s cubic-bezier(.22,1,.36,1) both !important;
+}
+
+.player-card::before{
+  border-radius:24px !important;
+  opacity:.025 !important;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,.22) 0,
+    rgba(255,255,255,.22) 1px,
+    transparent 1px,
+    transparent 6px
+  ) !important;
+}
+
+.player-heading{
+  margin-bottom:16px !important;
+  color:rgba(255,255,255,.72) !important;
+}
+
+.small-mark{
+  color:#fff !important;
+  animation:none !important;
+}
+
+.song-title{
+  max-width:430px !important;
+
+  color:#fff !important;
+
+  font-size:27px !important;
+  line-height:1.16 !important;
+
+  text-shadow:0 2px 12px rgba(0,0,0,.24) !important;
+}
+
+.artist{
+  color:rgba(255,255,255,.62) !important;
+}
+
+.heart{
+  border-color:rgba(255,255,255,.32) !important;
+  background:rgba(255,255,255,.09) !important;
+  color:#fff !important;
+}
+
+.heart:hover{
+  border-color:rgba(255,255,255,.60) !important;
+  background:rgba(255,255,255,.17) !important;
+  color:#fff !important;
+}
+
+.seek{
+  height:5px !important;
+  background:rgba(255,255,255,.20) !important;
+}
+
+.seek-fill{
+  background:#fff !important;
+}
+
+.time{
+  color:rgba(255,255,255,.52) !important;
+}
+
+.controls{
+  gap:26px !important;
+  padding:17px 0 16px !important;
+}
+
+.control{
+  color:rgba(255,255,255,.76) !important;
+}
+
+.control:hover{
+  color:#fff !important;
+  background:rgba(255,255,255,.08) !important;
+}
+
+.control.play{
+  width:66px !important;
+  height:66px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.98),
+      rgba(220,220,220,.84)
+    ) !important;
+
+  color:#111 !important;
+
+  border:1px solid rgba(255,255,255,.78) !important;
+
+  box-shadow:
+    0 10px 28px rgba(0,0,0,.27),
+    inset 0 1px rgba(255,255,255,1) !important;
+}
+
+.control.play:hover{
+  background:#fff !important;
+  color:#111 !important;
+  transform:scale(1.035) !important;
+}
+
+.utility{
+  animation:none !important;
+}
+
+.utility input{
+  accent-color:#fff !important;
+}
+
+.utility button{
+  color:#fff !important;
+  background:rgba(255,255,255,.09) !important;
+  border:1px solid rgba(255,255,255,.25) !important;
+}
+
+.note{
+  color:rgba(255,255,255,.48) !important;
+}
+
+/* ---------- NAVBAR GLASS ---------- */
+
+header,
+.navbar,
+nav{
+  -webkit-backdrop-filter:blur(16px) !important;
+  backdrop-filter:blur(16px) !important;
+}
+
+/* ---------- QUICKER, CLEANER MOTION ---------- */
+
+@keyframes glassIn{
+  from{
+    opacity:0;
+    transform:translateY(8px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.video-card,
+.player-card,
+.control,
+.heart{
+  will-change:transform;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .video-card,
+  .player-card,
+  .hero,
+  .control,
+  .heart{
+    animation:none !important;
+    transition:none !important;
+  }
+}
+
+/* ---------- TABLET ---------- */
+
+@media(max-width:1050px){
+  .hero{
+    left:4vw !important;
+    width:280px !important;
+  }
+
+  .hero h1{
+    font-size:clamp(48px,6vw,68px) !important;
+  }
+
+  .layout{
+    padding-top:105px !important;
+  }
+}
+
+/* ---------- MOBILE ---------- */
+
+@media(max-width:700px){
+  .layout{
+    gap:18px !important;
+    padding:96px 18px 76px !important;
+  }
+
+  .hero{
+    position:relative !important;
+    left:auto !important;
+    top:auto !important;
+    transform:none !important;
+
+    width:100% !important;
+
+    margin:0 auto 4px !important;
+
+    text-align:center !important;
+    pointer-events:none !important;
+  }
+
+  .hero h1{
+    font-size:48px !important;
+    line-height:1.02 !important;
+  }
+
+  .video-card,
+  .player-card{
+    width:100% !important;
+    max-width:560px !important;
+    border-radius:20px !important;
+  }
+
+  .video-card{
+    padding:12px !important;
+  }
+
+  .video-card-heading{
+    margin:0 3px 9px !important;
+  }
+
+  .video-card-title{
+    font-size:18px !important;
+  }
+
+  .video-card .video-shell{
+    border-radius:12px !important;
+  }
+
+  .player-card{
+    padding:15px 16px 14px !important;
+  }
+
+  .song-title{
+    font-size:23px !important;
+  }
+}
+
+@media(max-width:420px){
+  .layout{
+    padding-left:12px !important;
+    padding-right:12px !important;
+  }
+
+  .hero h1{
+    font-size:42px !important;
+  }
+
+  .video-card,
+  .player-card{
+    border-radius:18px !important;
+  }
+}
