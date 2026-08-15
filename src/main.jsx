@@ -2754,52 +2754,11 @@ function App() {
   }
 
 
-  /* =======================================================
-     ERROR
-     ======================================================= */
-
-  if (error) {
-
-    return (
-      <div
-        className="scene"
-        style={{
-          backgroundImage:
-            `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
-        }}
-      >
-
-        <div
-          style={{
-            minHeight:
-              "100vh",
-
-            display:
-              "flex",
-
-            alignItems:
-              "center",
-
-            justifyContent:
-              "center",
-
-            color:
-              "#f5dfb7",
-
-            fontSize:
-              18,
-          }}
-        >
-          {error}
-        </div>
-
-      </div>
-    );
-  }
-
-
   const currentTrack =
-    tracks[index];
+    tracks[index] || {
+      title: "",
+      artist: "",
+    };
 
 
   /* =======================================================
@@ -2944,7 +2903,35 @@ function App() {
 
             <div className="video-shell">
 
-              <div id="youtube-player" />
+              {tracks.length ? (
+                <div id="youtube-player" />
+              ) : (
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    minHeight: "250px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    padding: "30px",
+                    color: "#f2dfba",
+                    background: "rgba(8, 6, 4, 0.88)",
+                    fontFamily: '"Tiro Devanagari Hindi", serif',
+                    fontSize: "16px",
+                    lineHeight: 1.8,
+                  }}
+                >
+                  {error || (
+                    <>
+                      Abhi tumhari playlist me koi song nahi hai.
+                      <br />
+                      Playlist me song add karo, phir yahin play hoga.
+                    </>
+                  )}
+                </div>
+              )}
 
             </div>
 
