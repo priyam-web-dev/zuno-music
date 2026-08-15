@@ -35,28 +35,29 @@ const AUTH_EMAIL_DOMAIN =
 const BACKGROUNDS = [
   {
     id: 1,
-    name: "शाम की गली",
-    value: "/assets/bg1.png",
+    name: "गाँव",
+    value: "/assets/village-background.png",
   },
+
   {
     id: 2,
     name: "सूरज ढलना",
-    value: "/assets/bg2.png",
+    value:
+      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2400&q=90",
   },
+
   {
     id: 3,
-    name: "सूर्यनगर स्टेशन",
-    value: "/assets/bg3.png",
+    name: "पहाड़",
+    value:
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=90",
   },
+
   {
     id: 4,
-    name: "पहाड़ी घाटी",
-    value: "/assets/bg4.png",
-  },
-  {
-    id: 5,
-    name: "गाँव",
-    value: "/assets/bg5.png",
+    name: "शहर",
+    value:
+      "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=90",
   },
 ];
 
@@ -686,7 +687,7 @@ function ProfilePanel({
   ] = useState(
     Number(
       profile?.background_id
-    ) || 5
+    ) || 1
   );
 
   const [busy, setBusy] =
@@ -1826,7 +1827,7 @@ function App() {
                   "Priyam",
 
                 background_id:
-                  5,
+                  1,
               },
               accessToken
             );
@@ -1835,41 +1836,6 @@ function App() {
             created?.[0];
         }
 
-
-
-        // Old background IDs belonged to the removed background set.
-        // Keep the new village (bg5) as the safe primary background.
-        if (
-          existing &&
-          Number(existing.background_id) >= 1 &&
-          Number(existing.background_id) <= 4
-        ) {
-          try {
-            const migrated = await saveProfile(
-              {
-                id: accountUser.id,
-                username: existing.username,
-                display_name: existing.display_name,
-                background_id: 5,
-              },
-              accessToken
-            );
-
-            existing = migrated?.[0] || {
-              ...existing,
-              background_id: 5,
-            };
-          } catch (migrationError) {
-            console.warn(
-              "Background migration failed:",
-              migrationError
-            );
-            existing = {
-              ...existing,
-              background_id: 5,
-            };
-          }
-        }
 
         setProfile(
           existing || {
@@ -1889,7 +1855,7 @@ function App() {
               "Priyam",
 
             background_id:
-              5,
+              1,
           }
         );
 
@@ -1916,7 +1882,7 @@ function App() {
             "Priyam",
 
           background_id:
-            5,
+            1,
         });
       }
     };
@@ -2738,10 +2704,10 @@ function App() {
       (
         Number(
           profile.background_id
-        ) || 5
+        ) || 1
       ) - 1
     ] ||
-    BACKGROUNDS[4];
+    BACKGROUNDS[0];
 
 
   /* =======================================================
