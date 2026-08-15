@@ -2823,40 +2823,11 @@ function App() {
 
         <header className="nav">
 
-          <div className="brand-mark" aria-label="P's Favourites">
-            <div className="brand-icon">
-              <svg
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  d="M14 34V12h11.5c5.5 0 8.5 3.1 8.5 7.7s-3 7.7-8.5 7.7H19"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M28 13.5c2.5 1.2 4.8 2.8 6.8 4.8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="34.5"
-                  cy="30.5"
-                  r="2.2"
-                  fill="currentColor"
-                />
-              </svg>
-            </div>
-
-            <div className="brand-copy">
-              <strong>P's</strong>
-              <span>favourites</span>
-            </div>
+          <div className="logo">
+            P's{" "}
+            <span>
+              favourites
+            </span>
           </div>
 
 
@@ -2936,8 +2907,11 @@ function App() {
                 profile.display_name ||
                 "Priyam"
               }
-              {" "}की
+
+              की
+
               <br />
+
               पसंद
             </h1>
 
@@ -2949,43 +2923,6 @@ function App() {
             </p>
 
           </section>
-
-
-          {/* VIDEO CARD */}
-
-          <section className="video-card">
-
-            <div className="video-card-heading">
-
-              <div>
-                <div className="video-card-kicker">
-                  VIDEO
-                </div>
-
-                <div className="video-card-title">
-                  अभी चल रहा गीत
-                </div>
-              </div>
-
-              <span className="video-card-mark">
-                ▶
-              </span>
-
-            </div>
-
-            <div className="video-shell">
-
-              <div id="youtube-player" />
-
-            </div>
-
-            <div className="video-card-note">
-              संगीत YouTube के आधिकारिक प्लेयर के माध्यम से चल रहा है।
-            </div>
-
-          </section>
-
-
 
 
           {/* PLAYER */}
@@ -3005,6 +2942,13 @@ function App() {
             </div>
 
 
+            <div className="video-shell">
+
+              <div id="youtube-player" />
+
+            </div>
+
+
             <div className="now-row">
 
               <div>
@@ -3016,16 +2960,14 @@ function App() {
 
                 <div className="song-title">
                   {
-                    currentTrack?.title ||
-                    "अपनी पसंद से कोई गीत चुनें"
+                    currentTrack.title
                   }
                 </div>
 
 
                 <div className="artist">
                   {
-                    currentTrack?.artist ||
-                    "Playlist से गीत शुरू करें"
+                    currentTrack.artist
                   }
                 </div>
 
@@ -3039,12 +2981,11 @@ function App() {
                     ? "active"
                     : ""
                 }`}
-                onClick={() => {
-                  if (currentTrack) {
-                    setLiked(!liked);
-                  }
-                }}
-                disabled={!currentTrack}
+                onClick={() =>
+                  setLiked(
+                    !liked
+                  )
+                }
               >
                 {
                   liked
@@ -3183,7 +3124,6 @@ function App() {
             </div>
 
           </section>
-
 
         </main>
 
