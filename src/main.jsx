@@ -35,29 +35,28 @@ const AUTH_EMAIL_DOMAIN =
 const BACKGROUNDS = [
   {
     id: 1,
-    name: "गाँव",
-    value: "/assets/village-background.png",
+    name: "शाम की गली",
+    value: "/assets/bg1.png",
   },
-
   {
     id: 2,
     name: "सूरज ढलना",
-    value:
-      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2400&q=90",
+    value: "/assets/bg2.png",
   },
-
   {
     id: 3,
-    name: "पहाड़",
-    value:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=90",
+    name: "सूर्यनगर स्टेशन",
+    value: "/assets/bg3.png",
   },
-
   {
     id: 4,
-    name: "शहर",
-    value:
-      "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=90",
+    name: "पहाड़ी घाटी",
+    value: "/assets/bg4.png",
+  },
+  {
+    id: 5,
+    name: "गाँव",
+    value: "/assets/bg5.png",
   },
 ];
 
@@ -687,7 +686,7 @@ function ProfilePanel({
   ] = useState(
     Number(
       profile?.background_id
-    ) || 1
+    ) || 5
   );
 
   const [busy, setBusy] =
@@ -1827,7 +1826,7 @@ function App() {
                   "Priyam",
 
                 background_id:
-                  1,
+                  5,
               },
               accessToken
             );
@@ -1836,6 +1835,41 @@ function App() {
             created?.[0];
         }
 
+
+
+        // Old background IDs belonged to the removed background set.
+        // Keep the new village (bg5) as the safe primary background.
+        if (
+          existing &&
+          Number(existing.background_id) >= 1 &&
+          Number(existing.background_id) <= 4
+        ) {
+          try {
+            const migrated = await saveProfile(
+              {
+                id: accountUser.id,
+                username: existing.username,
+                display_name: existing.display_name,
+                background_id: 5,
+              },
+              accessToken
+            );
+
+            existing = migrated?.[0] || {
+              ...existing,
+              background_id: 5,
+            };
+          } catch (migrationError) {
+            console.warn(
+              "Background migration failed:",
+              migrationError
+            );
+            existing = {
+              ...existing,
+              background_id: 5,
+            };
+          }
+        }
 
         setProfile(
           existing || {
@@ -1855,7 +1889,7 @@ function App() {
               "Priyam",
 
             background_id:
-              1,
+              5,
           }
         );
 
@@ -1882,7 +1916,7 @@ function App() {
             "Priyam",
 
           background_id:
-            1,
+            5,
         });
       }
     };
@@ -2131,8 +2165,10 @@ function App() {
         setIndex(0);
 
         if (!songs.length) {
-          // Empty playlist is a normal UI state, not a full-screen error.
-          setError("");
+          setError(
+            "Abhi tumhari playlist me koi song nahi hai. Playlist me song add karo."
+          );
+
           playerRef.current?.stopVideo?.();
         } else {
           setError("");
@@ -2702,10 +2738,10 @@ function App() {
       (
         Number(
           profile.background_id
-        ) || 1
+        ) || 5
       ) - 1
     ] ||
-    BACKGROUNDS[0];
+    BACKGROUNDS[4];
 
 
   /* =======================================================
@@ -2752,14 +2788,52 @@ function App() {
   }
 
 
-  // IMPORTANT: an empty playlist is a normal first-login state.
-  // Keep the complete homepage visible; the player itself shows the add-song instruction.
+  /* =======================================================
+     ERROR
+     ======================================================= */
+
+  if (error) {
+
+    return (
+      <div
+        className="scene"
+        style={{
+          backgroundImage:
+            `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
+        }}
+      >
+
+        <div
+          style={{
+            minHeight:
+              "100vh",
+
+            display:
+              "flex",
+
+            alignItems:
+              "center",
+
+            justifyContent:
+              "center",
+
+            color:
+              "#f5dfb7",
+
+            fontSize:
+              18,
+          }}
+        >
+          {error}
+        </div>
+
+      </div>
+    );
+  }
+
+
   const currentTrack =
-    tracks[index] || {
-      id: null,
-      title: "Playlist me song add karo",
-      artist: "Abhi koi song select nahi hai",
-    };
+    tracks[index];
 
 
   /* =======================================================
@@ -2783,11 +2857,40 @@ function App() {
 
         <header className="nav">
 
-          <div className="logo">
-            P's{" "}
-            <span>
-              favourites
-            </span>
+          <div className="brand-mark" aria-label="P's Favourites">
+            <div className="brand-icon">
+              <svg
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 34V12h11.5c5.5 0 8.5 3.1 8.5 7.7s-3 7.7-8.5 7.7H19"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M28 13.5c2.5 1.2 4.8 2.8 6.8 4.8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx="34.5"
+                  cy="30.5"
+                  r="2.2"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+
+            <div className="brand-copy">
+              <strong>P's</strong>
+              <span>favourites</span>
+            </div>
           </div>
 
 
@@ -2867,11 +2970,8 @@ function App() {
                 profile.display_name ||
                 "Priyam"
               }
-
-              की
-
+              {" "}की
               <br />
-
               पसंद
             </h1>
 
@@ -2883,6 +2983,43 @@ function App() {
             </p>
 
           </section>
+
+
+          {/* VIDEO CARD */}
+
+          <section className="video-card">
+
+            <div className="video-card-heading">
+
+              <div>
+                <div className="video-card-kicker">
+                  VIDEO
+                </div>
+
+                <div className="video-card-title">
+                  अभी चल रहा गीत
+                </div>
+              </div>
+
+              <span className="video-card-mark">
+                ▶
+              </span>
+
+            </div>
+
+            <div className="video-shell">
+
+              <div id="youtube-player" />
+
+            </div>
+
+            <div className="video-card-note">
+              संगीत YouTube के आधिकारिक प्लेयर के माध्यम से चल रहा है।
+            </div>
+
+          </section>
+
+
 
 
           {/* PLAYER */}
@@ -2902,58 +3039,6 @@ function App() {
             </div>
 
 
-            <div className="video-shell">
-
-              {currentTrack.id ? (
-
-                <div id="youtube-player" />
-
-              ) : (
-
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    minHeight: 260,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    textAlign: "center",
-                    padding: "24px",
-                    boxSizing: "border-box",
-                  }}
-                >
-
-                  <div>
-
-                    <div
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 600,
-                        marginBottom: 8,
-                      }}
-                    >
-                      Abhi yahan koi song nahi hai
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 13,
-                        opacity: 0.72,
-                      }}
-                    >
-                      Playlist me song add karo, phir yahin play hoga.
-                    </div>
-
-                  </div>
-
-                </div>
-
-              )}
-
-            </div>
-
-
             <div className="now-row">
 
               <div>
@@ -2965,14 +3050,16 @@ function App() {
 
                 <div className="song-title">
                   {
-                    currentTrack.title
+                    currentTrack?.title ||
+                    "अपनी पसंद से कोई गीत चुनें"
                   }
                 </div>
 
 
                 <div className="artist">
                   {
-                    currentTrack.artist
+                    currentTrack?.artist ||
+                    "Playlist से गीत शुरू करें"
                   }
                 </div>
 
@@ -2986,11 +3073,12 @@ function App() {
                     ? "active"
                     : ""
                 }`}
-                onClick={() =>
-                  setLiked(
-                    !liked
-                  )
-                }
+                onClick={() => {
+                  if (currentTrack) {
+                    setLiked(!liked);
+                  }
+                }}
+                disabled={!currentTrack}
               >
                 {
                   liked
@@ -3129,6 +3217,7 @@ function App() {
             </div>
 
           </section>
+
 
         </main>
 
