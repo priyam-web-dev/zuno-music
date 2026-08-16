@@ -2693,3 +2693,93 @@ nav{
     font-size:9px !important;
   }
 }
+
+
+/* =========================================================
+   FINAL STACKING FIX
+   Keep the "More Songs / Queue" list ABOVE the page,
+   never underneath the floating music pill.
+   ========================================================= */
+
+/* The queue needs its own full-screen stacking layer. */
+.queue-overlay{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:999998 !important;
+
+  display:grid !important;
+  place-items:center !important;
+
+  padding:24px !important;
+  box-sizing:border-box !important;
+
+  background:rgba(0,0,0,.48) !important;
+  backdrop-filter:blur(8px) saturate(115%) !important;
+  -webkit-backdrop-filter:blur(8px) saturate(115%) !important;
+}
+
+/* The actual song list sits inside the overlay, not behind the player. */
+.queue-overlay .queue{
+  position:relative !important;
+  top:auto !important;
+  left:auto !important;
+
+  width:min(560px,92vw) !important;
+  max-height:min(680px,82vh) !important;
+
+  margin:0 !important;
+
+  z-index:999999 !important;
+
+  transform:scale(.96) !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+.queue-overlay .queue.open{
+  transform:scale(1) !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+}
+
+/* The floating music pill remains above the normal page,
+   but cannot cover the queue because the queue overlay is a
+   separate higher stacking layer. */
+.player-card{
+  position:relative !important;
+  z-index:20 !important;
+}
+
+/* Prevent the queue from visually inheriting the player's
+   compact pill dimensions. */
+.queue-overlay .queue,
+.queue-overlay .queue.open{
+  height:auto !important;
+  min-height:0 !important;
+  border-radius:18px !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+
+/* Keep the queue title and rows comfortably visible. */
+.queue-overlay .queue-title{
+  position:sticky !important;
+  top:0 !important;
+  z-index:5 !important;
+  background:#fff8e8 !important;
+}
+
+/* Mobile */
+@media(max-width:600px){
+  .queue-overlay{
+    padding:14px !important;
+  }
+
+  .queue-overlay .queue{
+    width:94vw !important;
+    max-height:84vh !important;
+    border-radius:16px !important;
+  }
+}
