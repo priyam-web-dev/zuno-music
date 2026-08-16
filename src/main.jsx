@@ -2956,35 +2956,6 @@ function App() {
         <main className="layout">
 
 
-          {/* HERO */}
-
-          <section className="hero">
-
-            <div className="eyebrow">
-              मेरी पसंद · मेरी धुनें
-            </div>
-
-
-            <h1>
-              {
-                profile.display_name ||
-                "Priyam"
-              }
-              {" "}की
-              <br />
-              पसंद
-            </h1>
-
-
-            <p>
-              हर गीत की अपनी एक कहानी होती है।
-              ये वही धुनें हैं जिन्हें मैं बार-बार
-              सुनना पसंद करता हूँ।
-            </p>
-
-          </section>
-
-
           {/* VIDEO CARD */}
 
           <section className="video-card">
@@ -3414,21 +3385,6 @@ function App() {
 
       </div>
 
-
-      {/* FOOTER */}
-
-      <footer className="footer">
-
-        This website is owned by{" "}
-
-        <strong>
-          {
-            profile.display_name ||
-            "Priyam Mishra"
-          }
-        </strong>
-
-      </footer>
 
     </div>
   );
