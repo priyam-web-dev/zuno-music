@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://p-fvrts.vercel.app/sitemap.xml
