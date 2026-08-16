@@ -2131,10 +2131,8 @@ function App() {
         setIndex(0);
 
         if (!songs.length) {
-          setError(
-            "Abhi tumhari playlist me koi song nahi hai. Playlist me song add karo."
-          );
-
+          // Empty playlist is a normal UI state, not a full-screen error.
+          setError("");
           playerRef.current?.stopVideo?.();
         } else {
           setError("");
@@ -2754,10 +2752,13 @@ function App() {
   }
 
 
+  // IMPORTANT: an empty playlist is a normal first-login state.
+  // Keep the complete homepage visible; the player itself shows the add-song instruction.
   const currentTrack =
     tracks[index] || {
-      title: "",
-      artist: "",
+      id: null,
+      title: "Playlist me song add karo",
+      artist: "Abhi koi song select nahi hai",
     };
 
 
@@ -2903,34 +2904,51 @@ function App() {
 
             <div className="video-shell">
 
-              {tracks.length ? (
+              {currentTrack.id ? (
+
                 <div id="youtube-player" />
+
               ) : (
+
                 <div
                   style={{
                     width: "100%",
                     height: "100%",
-                    minHeight: "250px",
+                    minHeight: 260,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     textAlign: "center",
-                    padding: "30px",
-                    color: "#f2dfba",
-                    background: "rgba(8, 6, 4, 0.88)",
-                    fontFamily: '"Tiro Devanagari Hindi", serif',
-                    fontSize: "16px",
-                    lineHeight: 1.8,
+                    padding: "24px",
+                    boxSizing: "border-box",
                   }}
                 >
-                  {error || (
-                    <>
-                      Abhi tumhari playlist me koi song nahi hai.
-                      <br />
+
+                  <div>
+
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 600,
+                        marginBottom: 8,
+                      }}
+                    >
+                      Abhi yahan koi song nahi hai
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 13,
+                        opacity: 0.72,
+                      }}
+                    >
                       Playlist me song add karo, phir yahin play hoga.
-                    </>
-                  )}
+                    </div>
+
+                  </div>
+
                 </div>
+
               )}
 
             </div>
