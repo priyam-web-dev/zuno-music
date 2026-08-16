@@ -2165,10 +2165,10 @@ function App() {
         setIndex(0);
 
         if (!songs.length) {
-          setError(
-            "Abhi tumhari playlist me koi song nahi hai. Playlist me song add karo."
-          );
-
+          // An empty playlist is a normal state for a new account.
+          // Keep the complete website UI visible and show the instruction
+          // only inside the video player area.
+          setError("");
           playerRef.current?.stopVideo?.();
         } else {
           setError("");
@@ -3009,7 +3009,44 @@ function App() {
 
             <div className="video-shell">
 
-              <div id="youtube-player" />
+              {currentTrack ? (
+                <div id="youtube-player" />
+              ) : (
+                <div
+                  style={{
+                    minHeight: "100%",
+                    height: 300,
+                    display: "grid",
+                    placeItems: "center",
+                    textAlign: "center",
+                    padding: "24px",
+                    boxSizing: "border-box",
+                    color: "rgba(255,255,255,.82)",
+                    background: "rgba(0,0,0,.18)",
+                  }}
+                >
+                  <div>
+                    <div
+                      style={{
+                        fontSize: 17,
+                        fontWeight: 700,
+                        marginBottom: 7,
+                      }}
+                    >
+                      Abhi tumhari playlist mein koi song nahi hai
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        opacity: .7,
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      Playlist mein song add karo, phir yahan tumhara video chalega.
+                    </div>
+                  </div>
+                </div>
+              )}
 
             </div>
 
