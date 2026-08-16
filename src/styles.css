@@ -1,4 +1,3 @@
-/* BACKGROUND SOURCE: React profile selection. Primary/default image is /assets/bg5.png (village). */
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Tiro+Devanagari+Hindi:wght@400;700&display=swap");
 
 :root{
@@ -43,7 +42,7 @@ body{
       rgba(5,8,8,.02) 48%,
       rgba(5,8,8,.14)
     ),
-    url("/assets/bg5.png") center center / cover fixed no-repeat;
+    url("/assets/village-background.png") center center / cover fixed no-repeat;
 }
 
 button,
@@ -62,7 +61,7 @@ input{
       rgba(5,8,8,.02) 48%,
       rgba(5,8,8,.14)
     ),
-    url("/assets/bg5.png") center center / cover fixed no-repeat;
+    url("/assets/village-background.png") center center / cover fixed no-repeat;
 
   animation:sceneReveal 1s ease both;
 }
@@ -2268,53 +2267,36 @@ nav{
     border-radius:18px !important;
   }
 }
+
 /* =========================================================
-   P'S FAVOURITES — COMPACT PILL MUSIC CONTROL
-   DO NOT CHANGE BACKGROUND / VIDEO / NAVBAR
+   V5 — MINIMAL PILL MUSIC CONTROL
+   Small floating control plate; video remains separate above.
    ========================================================= */
 
 .player-card{
-  width:min(560px, calc(100vw - 36px)) !important;
-  height:76px !important;
+  width:min(560px,calc(100vw - 36px)) !important;
   min-height:76px !important;
-
+  height:76px !important;
   box-sizing:border-box !important;
-
-  margin:0 auto !important;
   padding:10px 14px !important;
-
+  margin:0 auto !important;
   display:flex !important;
   align-items:center !important;
-
   gap:12px !important;
-
   border-radius:999px !important;
   overflow:hidden !important;
-
   background:rgba(18,24,31,.46) !important;
-
   border:1px solid rgba(255,255,255,.20) !important;
-
   box-shadow:
     0 14px 36px rgba(0,0,0,.24),
     inset 0 1px rgba(255,255,255,.14) !important;
-
-  -webkit-backdrop-filter:
-    blur(22px) saturate(135%) !important;
-
-  backdrop-filter:
-    blur(22px) saturate(135%) !important;
+  -webkit-backdrop-filter:blur(22px) saturate(135%) !important;
+  backdrop-filter:blur(22px) saturate(135%) !important;
 }
-
-
-/* Remove old large-player decorations */
 
 .player-card::before{
   display:none !important;
 }
-
-
-/* Hide unnecessary large-player sections */
 
 .player-heading,
 .player-card .seek,
@@ -2323,21 +2305,12 @@ nav{
   display:none !important;
 }
 
-
-/* =========================================================
-   CURRENT SONG
-   ========================================================= */
-
 .now-row{
   flex:1 1 auto !important;
-
   min-width:0 !important;
-
   display:flex !important;
   align-items:center !important;
-
   gap:10px !important;
-
   margin:0 !important;
 }
 
@@ -2346,186 +2319,105 @@ nav{
   flex:1 1 auto !important;
 }
 
-
-/* Hide "abhi chal raha..." kicker */
-
 .kicker{
   display:none !important;
 }
 
-
-/* Song title */
-
 .song-title{
   max-width:100% !important;
-
   overflow:hidden !important;
   text-overflow:ellipsis !important;
   white-space:nowrap !important;
-
   font-family:"DM Sans",sans-serif !important;
-
   font-size:13px !important;
   line-height:1.2 !important;
-
   font-weight:700 !important;
-
   letter-spacing:-.1px !important;
-
   text-shadow:none !important;
 }
 
-
-/* Artist */
-
 .artist{
   margin-top:2px !important;
-
   overflow:hidden !important;
   text-overflow:ellipsis !important;
   white-space:nowrap !important;
-
   font-size:10px !important;
   line-height:1.15 !important;
-
   opacity:.58 !important;
 }
 
-
-/* =========================================================
-   HEART
-   ========================================================= */
-
 .heart{
   flex:0 0 32px !important;
-
   width:32px !important;
   height:32px !important;
-
   padding:0 !important;
-
   border-radius:50% !important;
-
   font-size:17px !important;
-
   background:rgba(255,255,255,.08) !important;
 }
 
-
-/* =========================================================
-   CONTROLS
-   ========================================================= */
-
 .controls{
   flex:0 0 auto !important;
-
   display:flex !important;
   align-items:center !important;
-
   gap:3px !important;
-
   padding:0 !important;
   margin:0 !important;
 }
 
-
-/* Previous / next */
-
 .control{
   width:30px !important;
   height:30px !important;
-
   min-width:30px !important;
-
   padding:0 !important;
-
   display:grid !important;
   place-items:center !important;
-
   border-radius:50% !important;
-
   font-size:17px !important;
   line-height:1 !important;
-
   background:transparent !important;
 }
-
-
-/* Main play button */
 
 .control.play{
   width:44px !important;
   height:44px !important;
-
   min-width:44px !important;
-
   border-radius:50% !important;
-
   font-size:15px !important;
-
   box-shadow:
     0 5px 15px rgba(0,0,0,.25),
     inset 0 1px rgba(255,255,255,.9) !important;
 }
 
-
-/* =========================================================
-   RIGHT SIDE — PLAYLIST BUTTON
-   ========================================================= */
-
 .utility{
   flex:0 0 auto !important;
-
   width:auto !important;
-
   display:flex !important;
   align-items:center !important;
-
   gap:7px !important;
-
   margin:0 !important;
 }
-
-
-/* Hide volume controls */
 
 .volume-icon,
 .utility input{
   display:none !important;
 }
 
-
-/* "आगे की सूची" button */
-
 .utility button{
   height:32px !important;
-
   padding:0 11px !important;
-
   border-radius:999px !important;
-
   font-size:10px !important;
-
   white-space:nowrap !important;
 }
 
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
 @media(max-width:700px){
-
   .player-card{
     width:calc(100vw - 28px) !important;
-
-    height:68px !important;
     min-height:68px !important;
-
+    height:68px !important;
     padding:8px 10px !important;
-
     gap:7px !important;
-
     border-radius:999px !important;
   }
 
@@ -2538,9 +2430,9 @@ nav{
   }
 
   .heart{
-    width:29px !important;
-    height:29px !important;
-    min-width:29px !important;
+    flex-basis:28px !important;
+    width:28px !important;
+    height:28px !important;
     font-size:15px !important;
   }
 
@@ -2548,148 +2440,239 @@ nav{
     width:27px !important;
     height:27px !important;
     min-width:27px !important;
-
     font-size:15px !important;
   }
 
   .control.play{
-    width:40px !important;
-    height:40px !important;
-    min-width:40px !important;
+    width:38px !important;
+    height:38px !important;
+    min-width:38px !important;
+    font-size:13px !important;
   }
 
   .utility button{
-    height:29px !important;
-    padding:0 9px !important;
+    padding:0 8px !important;
     font-size:9px !important;
   }
 }
 
-/* =========================================================
-   FINAL PLAYER / VIDEO CLEANUP
-   - Remove text above and below the YouTube video
-   - Keep the separate video card
-   - Keep the music controls as a larger pill
-   ========================================================= */
-
-.video-card-heading,
-.video-card-note{
-  display:none !important;
-}
-
-.video-card{
-  padding:16px !important;
-}
-
-.video-card .video-shell{
-  border-radius:12px !important;
-}
-
-/* Larger pill-shaped music control */
-.player-card{
-  width:min(580px, calc(100vw - 36px)) !important;
-  height:78px !important;
-  min-height:78px !important;
-
-  padding:10px 14px !important;
-
-  display:flex !important;
-  align-items:center !important;
-
-  border-radius:999px !important;
-  overflow:hidden !important;
-}
-
-.now-row{
-  flex:1 1 auto !important;
-  min-width:0 !important;
-}
-
-.song-title{
-  font-size:13px !important;
-}
-
-.artist{
-  font-size:10px !important;
-}
-
-.heart{
-  width:34px !important;
-  height:34px !important;
-  min-width:34px !important;
-  font-size:18px !important;
-}
-
-.control{
-  width:32px !important;
-  height:32px !important;
-  min-width:32px !important;
-  font-size:18px !important;
-}
-
-.control.play{
-  width:46px !important;
-  height:46px !important;
-  min-width:46px !important;
-  font-size:16px !important;
-}
-
-.utility{
-  flex:0 0 auto !important;
-}
-
-.utility button{
-  height:34px !important;
-  padding:0 12px !important;
-  border-radius:999px !important;
-  font-size:10px !important;
-}
-
-@media(max-width:700px){
-  .video-card{
-    padding:12px !important;
-  }
-
+@media(max-width:430px){
   .player-card{
-    width:calc(100vw - 28px) !important;
-    height:70px !important;
-    min-height:70px !important;
-    padding:8px 10px !important;
-    gap:7px !important;
-    border-radius:999px !important;
-  }
-
-  .song-title{
-    font-size:12px !important;
-  }
-
-  .artist{
-    font-size:9px !important;
+    gap:5px !important;
   }
 
   .heart{
-    width:29px !important;
-    height:29px !important;
-    min-width:29px !important;
-    font-size:15px !important;
-  }
-
-  .control{
-    width:28px !important;
-    height:28px !important;
-    min-width:28px !important;
-    font-size:15px !important;
-  }
-
-  .control.play{
-    width:40px !important;
-    height:40px !important;
-    min-width:40px !important;
+    display:none !important;
   }
 
   .utility button{
-    height:29px !important;
-    padding:0 9px !important;
-    font-size:9px !important;
+    display:none !important;
+  }
+
+  .song-title{
+    font-size:11px !important;
+  }
+}
+
+
+/* =========================================================
+   P'S FAVOURITES — AMBIENT MOTION + MUSIC VISUALIZER
+   Subtle only: no background replacement, no layout changes.
+   ========================================================= */
+
+/* Slow atmospheric light moving over the existing village image. */
+.scene::after{
+  content:"";
+  position:fixed;
+  inset:-18%;
+  pointer-events:none;
+  z-index:1;
+  opacity:.16;
+  background:
+    radial-gradient(
+      ellipse 32% 28% at 18% 32%,
+      rgba(255,236,190,.28),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 28% 24% at 82% 68%,
+      rgba(176,210,201,.18),
+      transparent 72%
+    );
+  filter:blur(22px);
+  animation:ambientLightDrift 22s ease-in-out infinite alternate;
+}
+
+/* Floating dust / light particles. */
+.ambient-particles{
+  position:fixed;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.ambient-particles span{
+  position:absolute;
+  left:var(--x);
+  top:calc(100% + 20px);
+  width:var(--size);
+  height:var(--size);
+  border-radius:50%;
+  background:rgba(255,245,215,var(--alpha));
+  box-shadow:0 0 9px rgba(255,238,190,.18);
+  animation:particleFloat var(--duration) linear var(--delay) infinite;
+}
+
+.ambient-particles span:nth-child(1){--x:8%;--size:2px;--alpha:.26;--duration:18s;--delay:-8s}
+.ambient-particles span:nth-child(2){--x:17%;--size:1px;--alpha:.34;--duration:23s;--delay:-15s}
+.ambient-particles span:nth-child(3){--x:27%;--size:2px;--alpha:.18;--duration:20s;--delay:-4s}
+.ambient-particles span:nth-child(4){--x:39%;--size:1px;--alpha:.30;--duration:25s;--delay:-19s}
+.ambient-particles span:nth-child(5){--x:48%;--size:2px;--alpha:.20;--duration:21s;--delay:-11s}
+.ambient-particles span:nth-child(6){--x:58%;--size:1px;--alpha:.32;--duration:24s;--delay:-6s}
+.ambient-particles span:nth-child(7){--x:66%;--size:2px;--alpha:.20;--duration:19s;--delay:-13s}
+.ambient-particles span:nth-child(8){--x:73%;--size:1px;--alpha:.30;--duration:26s;--delay:-21s}
+.ambient-particles span:nth-child(9){--x:81%;--size:2px;--alpha:.18;--duration:22s;--delay:-9s}
+.ambient-particles span:nth-child(10){--x:88%;--size:1px;--alpha:.34;--duration:20s;--delay:-17s}
+.ambient-particles span:nth-child(11){--x:93%;--size:2px;--alpha:.16;--duration:27s;--delay:-3s}
+.ambient-particles span:nth-child(12){--x:32%;--size:1px;--alpha:.24;--duration:29s;--delay:-23s}
+
+/* Music player reacts to the existing React playing state. */
+.player-card{
+  position:relative !important;
+  overflow:hidden !important;
+}
+
+.player-card.is-playing{
+  box-shadow:
+    0 18px 48px rgba(0,0,0,.27),
+    0 0 0 1px rgba(255,255,255,.06),
+    0 0 30px rgba(255,245,215,.10),
+    inset 0 1px rgba(255,255,255,.16) !important;
+}
+
+.player-card.is-playing::after{
+  content:"";
+  position:absolute;
+  inset:-60%;
+  pointer-events:none;
+  z-index:0;
+  background:radial-gradient(circle, rgba(255,255,255,.11), transparent 62%);
+  animation:playerBreath 2.8s ease-in-out infinite;
+}
+
+/* Tiny visualizer sits behind the controls so the pill stays clean. */
+.music-visualizer{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:76px;
+  height:28px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  pointer-events:none;
+  z-index:1;
+  opacity:0;
+  transition:opacity .35s ease;
+}
+
+.music-visualizer span{
+  width:2px;
+  height:6px;
+  border-radius:999px;
+  background:rgba(255,255,255,.28);
+  transform-origin:center;
+}
+
+.player-card.is-playing .music-visualizer{
+  opacity:1;
+}
+
+.player-card.is-playing .music-visualizer span{
+  animation:visualizerPulse .72s ease-in-out infinite alternate;
+}
+
+.music-visualizer span:nth-child(1){animation-delay:-.52s}
+.music-visualizer span:nth-child(2){animation-delay:-.20s}
+.music-visualizer span:nth-child(3){animation-delay:-.67s}
+.music-visualizer span:nth-child(4){animation-delay:-.35s}
+.music-visualizer span:nth-child(5){animation-delay:-.08s}
+.music-visualizer span:nth-child(6){animation-delay:-.46s}
+.music-visualizer span:nth-child(7){animation-delay:-.27s}
+.music-visualizer span:nth-child(8){animation-delay:-.59s}
+
+/* Keep every actual player control above the decorative visualizer. */
+.player-card > *:not(.music-visualizer){
+  position:relative;
+  z-index:2;
+}
+
+@keyframes ambientLightDrift{
+  0%{
+    transform:translate3d(-5%, -2%, 0) scale(1);
+  }
+  50%{
+    transform:translate3d(3%, 2%, 0) scale(1.035);
+  }
+  100%{
+    transform:translate3d(7%, -1%, 0) scale(1.06);
+  }
+}
+
+@keyframes particleFloat{
+  0%{
+    transform:translate3d(0, 0, 0) scale(.7);
+    opacity:0;
+  }
+  12%{
+    opacity:1;
+  }
+  50%{
+    transform:translate3d(18px, -48vh, 0) scale(1);
+  }
+  88%{
+    opacity:.7;
+  }
+  100%{
+    transform:translate3d(-12px, -108vh, 0) scale(.55);
+    opacity:0;
+  }
+}
+
+@keyframes playerBreath{
+  0%,100%{
+    transform:scale(.88);
+    opacity:.25;
+  }
+  50%{
+    transform:scale(1.08);
+    opacity:.62;
+  }
+}
+
+@keyframes visualizerPulse{
+  0%{
+    height:5px;
+    opacity:.35;
+  }
+  100%{
+    height:22px;
+    opacity:.9;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .scene::after,
+  .ambient-particles span,
+  .player-card.is-playing::after,
+  .player-card.is-playing .music-visualizer span{
+    animation:none !important;
+  }
+
+  .music-visualizer{
+    opacity:.35;
   }
 }
