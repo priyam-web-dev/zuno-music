@@ -2844,6 +2844,185 @@ function App() {
 
     <div className="site">
 
+
+        {/* ANIMATION STYLES */}
+        <style>{`
+          .ambient-effects{
+            position:absolute;
+            inset:0;
+            z-index:0;
+            pointer-events:none;
+            overflow:hidden;
+          }
+
+          .ambient-glow{
+            position:absolute;
+            width:42vw;
+            height:42vw;
+            min-width:320px;
+            min-height:320px;
+            border-radius:50%;
+            filter:blur(70px);
+            opacity:.16;
+            mix-blend-mode:screen;
+            will-change:transform;
+          }
+
+          .ambient-glow-one{
+            top:-18%;
+            left:-12%;
+            background:radial-gradient(circle,rgba(255,196,116,.72) 0%,rgba(255,196,116,0) 68%);
+            animation:pfAmbientGlowOne 20s ease-in-out infinite alternate;
+          }
+
+          .ambient-glow-two{
+            right:-16%;
+            bottom:-20%;
+            background:radial-gradient(circle,rgba(132,183,255,.48) 0%,rgba(132,183,255,0) 68%);
+            animation:pfAmbientGlowTwo 24s ease-in-out infinite alternate;
+          }
+
+          .ambient-vignette{
+            position:absolute;
+            inset:0;
+            background:radial-gradient(circle at 50% 48%,transparent 34%,rgba(4,7,7,.18) 100%);
+          }
+
+          .ambient-particles{
+            position:absolute;
+            inset:0;
+          }
+
+          .ambient-particle{
+            position:absolute;
+            left:var(--particle-x);
+            top:var(--particle-y);
+            width:var(--particle-size);
+            height:var(--particle-size);
+            border-radius:50%;
+            background:rgba(255,235,196,.72);
+            box-shadow:0 0 10px rgba(255,220,164,.32);
+            opacity:0;
+            animation:pfParticleFloat var(--particle-duration) ease-in-out var(--particle-delay) infinite;
+          }
+
+          .music-visualizer{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:3px;
+            width:58px;
+            height:30px;
+            margin:0 2px;
+            opacity:.48;
+            transition:opacity .35s ease,transform .35s ease;
+            flex-shrink:0;
+          }
+
+          .music-visualizer.is-playing{
+            opacity:.95;
+            transform:translateY(-1px);
+          }
+
+          .music-visualizer.is-idle{
+            opacity:.24;
+          }
+
+          .visualizer-bar{
+            display:block;
+            width:3px;
+            height:var(--bar-height);
+            max-height:24px;
+            border-radius:999px;
+            background:currentColor;
+            transform:scaleY(.22);
+            transform-origin:center;
+            transition:transform .35s ease;
+          }
+
+          .music-visualizer.is-playing .visualizer-bar{
+            animation:pfVisualizer .72s ease-in-out var(--bar-delay) infinite alternate;
+          }
+
+          @keyframes pfAmbientGlowOne{
+            0%{transform:translate3d(-3%,0,0) scale(.96);}
+            50%{transform:translate3d(12%,9%,0) scale(1.08);}
+            100%{transform:translate3d(4%,18%,0) scale(1);}
+          }
+
+          @keyframes pfAmbientGlowTwo{
+            0%{transform:translate3d(4%,5%,0) scale(1);}
+            50%{transform:translate3d(-10%,-8%,0) scale(1.08);}
+            100%{transform:translate3d(-3%,-16%,0) scale(.96);}
+          }
+
+          @keyframes pfParticleFloat{
+            0%{
+              opacity:0;
+              transform:translate3d(0,12px,0) scale(.72);
+            }
+            18%{opacity:.28;}
+            50%{
+              opacity:.55;
+              transform:translate3d(12px,-24px,0) scale(1);
+            }
+            82%{opacity:.2;}
+            100%{
+              opacity:0;
+              transform:translate3d(-8px,-52px,0) scale(.65);
+            }
+          }
+
+          @keyframes pfVisualizer{
+            0%{transform:scaleY(.18);}
+            25%{transform:scaleY(.58);}
+            50%{transform:scaleY(1);}
+            75%{transform:scaleY(.42);}
+            100%{transform:scaleY(.82);}
+          }
+
+
+          .site .scene > *:not(.ambient-effects){
+            position:relative;
+            z-index:1;
+          }
+
+          @media (max-width:700px){
+            .ambient-glow{
+              filter:blur(55px);
+              opacity:.12;
+            }
+
+            .music-visualizer{
+              width:44px;
+              gap:2px;
+            }
+
+            .visualizer-bar{
+              width:2.5px;
+              max-height:20px;
+            }
+
+            .ambient-particle:nth-child(n+13){
+              display:none;
+            }
+          }
+
+          @media (prefers-reduced-motion:reduce){
+            .ambient-glow-one,
+            .ambient-glow-two,
+            .ambient-particle,
+            .music-visualizer.is-playing .visualizer-bar{
+              animation:none !important;
+            }
+
+            .ambient-particle{
+              opacity:.12;
+              transform:none;
+            }
+          }
+        `}</style>
+
       <div
         className="scene"
         style={{
@@ -2852,6 +3031,27 @@ function App() {
         }}
       >
 
+        {/* AMBIENT BACKGROUND ANIMATION */}
+        <div className="ambient-effects" aria-hidden="true">
+          <div className="ambient-glow ambient-glow-one" />
+          <div className="ambient-glow ambient-glow-two" />
+          <div className="ambient-vignette" />
+          <div className="ambient-particles">
+            {Array.from({ length: 18 }).map((_, particleIndex) => (
+              <span
+                key={particleIndex}
+                className="ambient-particle"
+                style={{
+                  "--particle-x": `${6 + ((particleIndex * 37) % 88)}%`,
+                  "--particle-y": `${12 + ((particleIndex * 19) % 76)}%`,
+                  "--particle-delay": `${(particleIndex * 0.73) % 8}s`,
+                  "--particle-duration": `${8 + ((particleIndex * 1.7) % 7)}s`,
+                  "--particle-size": `${2 + (particleIndex % 3)}px`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* NAV */}
 
@@ -3128,6 +3328,25 @@ function App() {
 
 
             <div className="controls">
+
+              {/* MUSIC-REACTIVE VISUALIZER */}
+              <div
+                className={`music-visualizer ${
+                  playing ? "is-playing" : ""
+                } ${!currentTrack ? "is-idle" : ""}`}
+                aria-hidden="true"
+              >
+                {Array.from({ length: 9 }).map((_, barIndex) => (
+                  <span
+                    key={barIndex}
+                    className="visualizer-bar"
+                    style={{
+                      "--bar-delay": `${barIndex * 0.08}s`,
+                      "--bar-height": `${8 + ((barIndex * 11) % 17)}px`,
+                    }}
+                  />
+                ))}
+              </div>
 
               <button
                 type="button"
