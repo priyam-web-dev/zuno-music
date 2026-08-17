@@ -3568,3 +3568,364 @@ nav{
     font-size:9px !important;
   }
 }
+/* =========================================================
+   ZUNO — FINAL MUSIC PLAYER
+   Reference-style wide pill
+   Functionality remains unchanged
+   ========================================================= */
+
+.player-card{
+  position:fixed !important;
+
+  left:50% !important;
+  bottom:28px !important;
+  transform:translateX(-50%) !important;
+
+  width:min(620px, calc(100vw - 48px)) !important;
+  height:92px !important;
+  min-height:92px !important;
+
+  padding:10px 14px !important;
+
+  display:flex !important;
+  align-items:center !important;
+
+  gap:12px !important;
+
+  border-radius:999px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(55,30,22,.88),
+      rgba(105,42,29,.88)
+    ) !important;
+
+  border:1px solid rgba(255,255,255,.18) !important;
+
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.14) !important;
+
+  backdrop-filter:blur(18px) saturate(120%) !important;
+  -webkit-backdrop-filter:blur(18px) saturate(120%) !important;
+
+  z-index:9999 !important;
+
+  overflow:hidden !important;
+}
+
+
+/* =========================================================
+   ALBUM ART
+   ========================================================= */
+
+.player-card .album-art,
+.player-card img{
+  width:68px !important;
+  height:68px !important;
+
+  min-width:68px !important;
+  min-height:68px !important;
+
+  border-radius:50% !important;
+
+  object-fit:cover !important;
+
+  flex-shrink:0 !important;
+
+  box-shadow:
+    0 4px 14px rgba(0,0,0,.3) !important;
+}
+
+
+/* =========================================================
+   SONG INFORMATION
+   ========================================================= */
+
+.player-card .song-info{
+  flex:1 !important;
+  min-width:0 !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+
+  justify-content:center !important;
+}
+
+.player-card .song-title{
+  font-size:15px !important;
+  line-height:1.25 !important;
+
+  font-weight:700 !important;
+
+  color:#fff !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+
+  margin:0 !important;
+}
+
+.player-card .artist{
+  font-size:11px !important;
+  line-height:1.3 !important;
+
+  color:rgba(255,255,255,.68) !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+
+  margin-top:3px !important;
+}
+
+
+/* =========================================================
+   PROGRESS AREA
+   ========================================================= */
+
+.player-card .progress{
+  width:100% !important;
+
+  margin-top:9px !important;
+
+  height:4px !important;
+
+  border-radius:999px !important;
+
+  background:rgba(255,255,255,.24) !important;
+
+  overflow:hidden !important;
+}
+
+.player-card .progress-bar{
+  height:100% !important;
+
+  border-radius:999px !important;
+
+  background:#fff !important;
+}
+
+
+/* TIME
+   ========================================================= */
+
+.player-card .time{
+  font-size:9px !important;
+
+  color:rgba(255,255,255,.65) !important;
+
+  margin-top:4px !important;
+}
+
+
+/* =========================================================
+   CONTROL SECTION
+   ========================================================= */
+
+.player-card .controls{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  gap:5px !important;
+
+  flex-shrink:0 !important;
+}
+
+.player-card .control{
+  width:34px !important;
+  height:34px !important;
+
+  min-width:34px !important;
+  min-height:34px !important;
+
+  border-radius:50% !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  border:none !important;
+
+  background:transparent !important;
+
+  color:#fff !important;
+
+  font-size:15px !important;
+
+  cursor:pointer !important;
+}
+
+.player-card .control:hover{
+  background:rgba(255,255,255,.10) !important;
+}
+
+
+/* =========================================================
+   MAIN PLAY BUTTON
+   ========================================================= */
+
+.player-card .control.play{
+  width:52px !important;
+  height:52px !important;
+
+  min-width:52px !important;
+  min-height:52px !important;
+
+  border-radius:50% !important;
+
+  background:#fff !important;
+
+  color:#241711 !important;
+
+  font-size:18px !important;
+
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.25) !important;
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease !important;
+}
+
+.player-card .control.play:hover{
+  transform:scale(1.05) !important;
+
+  box-shadow:
+    0 8px 22px rgba(0,0,0,.30) !important;
+}
+
+
+/* =========================================================
+   HEART
+   ========================================================= */
+
+.player-card .heart{
+  width:38px !important;
+  height:38px !important;
+
+  min-width:38px !important;
+
+  border-radius:50% !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  background:transparent !important;
+
+  border:1px solid rgba(255,255,255,.20) !important;
+
+  color:#fff !important;
+
+  font-size:18px !important;
+}
+
+
+/* =========================================================
+   RIGHT PLAYLIST BUTTON
+   ========================================================= */
+
+.player-card .utility{
+  flex-shrink:0 !important;
+}
+
+.player-card .utility button{
+  height:36px !important;
+
+  padding:0 14px !important;
+
+  border-radius:999px !important;
+
+  border:1px solid rgba(255,255,255,.22) !important;
+
+  background:rgba(255,255,255,.06) !important;
+
+  color:#fff !important;
+
+  font-size:10px !important;
+
+  white-space:nowrap !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:700px){
+
+  .player-card{
+    width:calc(100vw - 24px) !important;
+
+    height:76px !important;
+    min-height:76px !important;
+
+    bottom:14px !important;
+
+    padding:8px 10px !important;
+
+    gap:8px !important;
+  }
+
+  .player-card .album-art,
+  .player-card img{
+    width:56px !important;
+    height:56px !important;
+
+    min-width:56px !important;
+    min-height:56px !important;
+  }
+
+  .player-card .song-title{
+    font-size:12px !important;
+  }
+
+  .player-card .artist{
+    font-size:9px !important;
+  }
+
+  .player-card .progress{
+    margin-top:6px !important;
+  }
+
+  .player-card .control{
+    width:29px !important;
+    height:29px !important;
+
+    min-width:29px !important;
+    min-height:29px !important;
+
+    font-size:13px !important;
+  }
+
+  .player-card .control.play{
+    width:43px !important;
+    height:43px !important;
+
+    min-width:43px !important;
+    min-height:43px !important;
+
+    font-size:15px !important;
+  }
+
+  .player-card .heart{
+    width:30px !important;
+    height:30px !important;
+
+    min-width:30px !important;
+
+    font-size:15px !important;
+  }
+
+  .player-card .utility button{
+    height:30px !important;
+
+    padding:0 9px !important;
+
+    font-size:8px !important;
+  }
+}
