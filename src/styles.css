@@ -3432,8 +3432,8 @@ nav{
 /* ---------- MEDIUM PILL MUSIC PLAYER ---------- */
 
 .player-card{
-  width:min(520px, calc(100vw - 40px)) !important;
-  height:72px !important;
+  width:min(600px, calc(100vw - 40px)) !important;
+  height:80px !important;
   min-height:72px !important;
 
   padding:9px 13px !important;
