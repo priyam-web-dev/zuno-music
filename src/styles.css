@@ -4231,3 +4231,377 @@ nav{
     font-size:8px !important;
   }
 }
+/* =========================================================
+   ZUNO — COMPACT ROUNDED QUEUE
+   ========================================================= */
+
+.queue-overlay{
+  position:fixed !important;
+  inset:0 !important;
+
+  z-index:99998 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  background:rgba(0,0,0,.58) !important;
+
+  backdrop-filter:blur(12px) !important;
+  -webkit-backdrop-filter:blur(12px) !important;
+}
+
+
+/* MAIN QUEUE */
+
+.queue{
+  position:fixed !important;
+
+  top:50% !important;
+  left:50% !important;
+
+  width:min(430px,88vw) !important;
+  max-height:min(620px,76vh) !important;
+
+  transform:
+    translate(-50%,-50%)
+    scale(.96) !important;
+
+  box-sizing:border-box !important;
+
+  padding:16px !important;
+
+  display:flex !important;
+  flex-direction:column !important;
+
+  gap:7px !important;
+
+  overflow-y:auto !important;
+
+  /* kill old cream */
+  background:rgba(18,18,18,.78) !important;
+  background-image:none !important;
+
+  border:1px solid rgba(255,255,255,.16) !important;
+
+  border-radius:24px !important;
+
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.48),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+
+  backdrop-filter:blur(28px) saturate(120%) !important;
+  -webkit-backdrop-filter:blur(28px) saturate(120%) !important;
+
+  color:#fff !important;
+
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+
+  transition:
+    opacity .22s ease,
+    transform .28s cubic-bezier(.22,1,.36,1),
+    visibility .22s ease !important;
+}
+
+
+.queue.open{
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+
+  transform:
+    translate(-50%,-50%)
+    scale(1) !important;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.queue-title{
+  position:sticky !important;
+
+  top:0 !important;
+
+  z-index:5 !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:space-between !important;
+
+  min-height:42px !important;
+
+  margin:0 0 4px !important;
+  padding:2px 2px 12px !important;
+
+  background:rgba(18,18,18,.88) !important;
+  background-image:none !important;
+
+  border-bottom:1px solid rgba(255,255,255,.10) !important;
+
+  color:#fff !important;
+
+  font-family:"DM Sans",sans-serif !important;
+
+  font-size:18px !important;
+  font-weight:700 !important;
+}
+
+
+/* CLOSE BUTTON */
+
+.queue-title button{
+  width:32px !important;
+  height:32px !important;
+
+  min-width:32px !important;
+
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  border-radius:50% !important;
+
+  border:1px solid rgba(255,255,255,.18) !important;
+
+  background:rgba(255,255,255,.07) !important;
+
+  color:#fff !important;
+
+  font-size:20px !important;
+  line-height:1 !important;
+
+  cursor:pointer !important;
+
+  transition:
+    background .18s ease,
+    transform .18s ease !important;
+}
+
+.queue-title button:hover{
+  background:rgba(255,255,255,.14) !important;
+  transform:rotate(90deg) !important;
+}
+
+
+/* =========================================================
+   COMPACT SONG TILE
+   ========================================================= */
+
+.queue .track{
+  width:100% !important;
+
+  min-height:58px !important;
+
+  box-sizing:border-box !important;
+
+  display:flex !important;
+  align-items:center !important;
+
+  gap:11px !important;
+
+  padding:8px 12px !important;
+  margin:0 !important;
+
+  border:1px solid rgba(255,255,255,.07) !important;
+
+  border-left:1px solid rgba(255,255,255,.07) !important;
+
+  border-radius:15px !important;
+
+  background:rgba(255,255,255,.055) !important;
+  background-image:none !important;
+
+  color:#fff !important;
+
+  cursor:pointer !important;
+
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    transform .18s ease !important;
+}
+
+
+/* hover */
+
+.queue .track:hover{
+  padding-left:12px !important;
+
+  background:rgba(255,255,255,.10) !important;
+
+  border-color:rgba(255,255,255,.14) !important;
+
+  transform:translateY(-1px) !important;
+}
+
+
+/* active song */
+
+.queue .track.active{
+  border-left:1px solid rgba(255,255,255,.22) !important;
+
+  background:rgba(255,255,255,.13) !important;
+
+  border-color:rgba(255,255,255,.18) !important;
+
+  box-shadow:
+    inset 3px 0 0 rgba(255,255,255,.65) !important;
+}
+
+
+/* =========================================================
+   NUMBER
+   ========================================================= */
+
+.queue .track-no{
+  display:flex !important;
+
+  width:28px !important;
+  height:28px !important;
+
+  min-width:28px !important;
+
+  align-items:center !important;
+  justify-content:center !important;
+
+  border-radius:9px !important;
+
+  background:rgba(255,255,255,.07) !important;
+
+  color:rgba(255,255,255,.58) !important;
+
+  font-family:"DM Sans",sans-serif !important;
+
+  font-size:10px !important;
+  font-weight:700 !important;
+}
+
+
+/* active number */
+
+.queue .track.active .track-no{
+  background:rgba(255,255,255,.16) !important;
+  color:#fff !important;
+}
+
+
+/* =========================================================
+   SONG NAME
+   ========================================================= */
+
+.queue .track-name{
+  flex:1 !important;
+
+  min-width:0 !important;
+
+  overflow:hidden !important;
+
+  color:#fff !important;
+
+  font-family:"DM Sans",sans-serif !important;
+
+  font-size:13px !important;
+  font-weight:700 !important;
+
+  line-height:1.2 !important;
+
+  white-space:nowrap !important;
+
+  text-overflow:ellipsis !important;
+}
+
+
+.queue .track-name small{
+  display:block !important;
+
+  margin-top:4px !important;
+
+  color:rgba(255,255,255,.45) !important;
+
+  font-family:"DM Sans",sans-serif !important;
+
+  font-size:9px !important;
+  font-weight:400 !important;
+
+  white-space:nowrap !important;
+}
+
+
+/* right arrow / playing icon */
+
+.queue .track > span:last-child{
+  width:26px !important;
+
+  min-width:26px !important;
+
+  text-align:center !important;
+
+  color:rgba(255,255,255,.55) !important;
+
+  font-size:16px !important;
+}
+
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+.queue::-webkit-scrollbar{
+  width:5px !important;
+}
+
+.queue::-webkit-scrollbar-track{
+  background:transparent !important;
+}
+
+.queue::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.18) !important;
+
+  border-radius:999px !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:600px){
+
+  .queue{
+    width:calc(100vw - 24px) !important;
+
+    max-height:78vh !important;
+
+    padding:12px !important;
+
+    border-radius:21px !important;
+  }
+
+  .queue-title{
+    font-size:16px !important;
+
+    padding-bottom:10px !important;
+  }
+
+  .queue .track{
+    min-height:54px !important;
+
+    padding:7px 9px !important;
+
+    border-radius:13px !important;
+  }
+
+  .queue .track-no{
+    width:26px !important;
+    height:26px !important;
+    min-width:26px !important;
+  }
+
+  .queue .track-name{
+    font-size:12px !important;
+  }
+}
