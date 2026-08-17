@@ -3859,17 +3859,28 @@ nav{
 @media(max-width:700px){
 
   .player-card{
-    width:calc(100vw - 24px) !important;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(15,15,15,.62),
+      rgba(25,25,25,.42),
+      rgba(15,15,15,.58)
+    ) !important;
 
-    height:76px !important;
-    min-height:76px !important;
+  border:1px solid rgba(255,255,255,.15) !important;
 
-    bottom:14px !important;
+  backdrop-filter:
+    blur(20px)
+    saturate(120%) !important;
 
-    padding:8px 10px !important;
+  -webkit-backdrop-filter:
+    blur(20px)
+    saturate(120%) !important;
 
-    gap:8px !important;
-  }
+  box-shadow:
+    0 16px 40px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+}
 
   .player-card .album-art,
   .player-card img{
