@@ -3929,3 +3929,305 @@ nav{
     font-size:8px !important;
   }
 }
+/* =========================================================
+   ZUNO — FINAL BLENDED PLAYER
+   KILL ALL OLD ORANGE / CREAM PLAYER STYLING
+   ========================================================= */
+
+.player-card,
+.player-card:hover,
+.player-card:focus,
+.player-card:active{
+  position:fixed !important;
+
+  left:50% !important;
+  bottom:28px !important;
+
+  transform:translateX(-50%) !important;
+
+  width:min(560px, calc(100vw - 36px)) !important;
+  height:76px !important;
+  min-height:76px !important;
+
+  box-sizing:border-box !important;
+
+  margin:0 !important;
+  padding:10px 14px !important;
+
+  display:flex !important;
+  align-items:center !important;
+
+  gap:12px !important;
+
+  border-radius:999px !important;
+
+  /* NO ORANGE */
+  background:rgba(10,12,14,.42) !important;
+  background-image:none !important;
+
+  border:1px solid rgba(255,255,255,.17) !important;
+
+  color:#fff !important;
+
+  box-shadow:
+    0 16px 40px rgba(0,0,0,.30),
+    inset 0 1px 0 rgba(255,255,255,.10) !important;
+
+  backdrop-filter:
+    blur(24px)
+    saturate(115%) !important;
+
+  -webkit-backdrop-filter:
+    blur(24px)
+    saturate(115%) !important;
+
+  overflow:hidden !important;
+
+  z-index:99999 !important;
+}
+
+
+/* REMOVE OLD TEXTURE / ORANGE OVERLAY */
+
+.player-card::before,
+.player-card::after{
+  content:none !important;
+
+  display:none !important;
+
+  background:none !important;
+}
+
+
+/* =========================================================
+   SONG INFO
+   ========================================================= */
+
+.player-card .now-row{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+
+  display:flex !important;
+  align-items:center !important;
+
+  gap:10px !important;
+
+  margin:0 !important;
+}
+
+
+.player-card .now-row > div:first-child{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+}
+
+
+.player-card .song-title{
+  color:#fff !important;
+
+  font-size:13px !important;
+  font-weight:700 !important;
+
+  line-height:1.2 !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+
+  text-shadow:none !important;
+}
+
+
+.player-card .artist{
+  color:rgba(255,255,255,.58) !important;
+
+  font-size:10px !important;
+
+  margin-top:2px !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+
+/* =========================================================
+   ALBUM ART
+   ========================================================= */
+
+.player-card img{
+  border-radius:50% !important;
+
+  object-fit:cover !important;
+
+  flex-shrink:0 !important;
+}
+
+
+/* =========================================================
+   HEART
+   ========================================================= */
+
+.player-card .heart{
+  background:rgba(255,255,255,.06) !important;
+
+  border:1px solid rgba(255,255,255,.20) !important;
+
+  color:#fff !important;
+
+  box-shadow:none !important;
+}
+
+
+/* =========================================================
+   CONTROLS
+   ========================================================= */
+
+.player-card .controls{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  gap:4px !important;
+
+  flex-shrink:0 !important;
+}
+
+
+.player-card .control{
+  background:transparent !important;
+
+  border:none !important;
+
+  color:#fff !important;
+
+  box-shadow:none !important;
+}
+
+
+/* =========================================================
+   PLAY BUTTON
+   ========================================================= */
+
+.player-card .control.play{
+  width:48px !important;
+  height:48px !important;
+
+  min-width:48px !important;
+  min-height:48px !important;
+
+  border-radius:50% !important;
+
+  background:#fff !important;
+
+  background-image:none !important;
+
+  color:#151515 !important;
+
+  border:none !important;
+
+  box-shadow:
+    0 5px 18px rgba(0,0,0,.25) !important;
+
+  font-size:17px !important;
+}
+
+
+.player-card .control.play:hover{
+  background:#fff !important;
+
+  transform:scale(1.04) !important;
+}
+
+
+/* =========================================================
+   RIGHT BUTTON
+   ========================================================= */
+
+.player-card .utility{
+  display:flex !important;
+
+  align-items:center !important;
+
+  flex-shrink:0 !important;
+}
+
+
+.player-card .utility button{
+  height:34px !important;
+
+  padding:0 13px !important;
+
+  border-radius:999px !important;
+
+  background:rgba(255,255,255,.06) !important;
+
+  background-image:none !important;
+
+  border:1px solid rgba(255,255,255,.20) !important;
+
+  color:#fff !important;
+
+  box-shadow:none !important;
+
+  font-size:10px !important;
+}
+
+
+/* =========================================================
+   REMOVE OLD PLAYER SECTIONS
+   ========================================================= */
+
+.player-card .player-heading,
+.player-card .seek,
+.player-card .time,
+.player-card .note{
+  display:none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media(max-width:700px){
+
+  .player-card{
+    width:calc(100vw - 24px) !important;
+
+    height:70px !important;
+    min-height:70px !important;
+
+    bottom:14px !important;
+
+    padding:8px 10px !important;
+
+    gap:8px !important;
+  }
+
+  .player-card .control.play{
+    width:42px !important;
+    height:42px !important;
+
+    min-width:42px !important;
+    min-height:42px !important;
+
+    font-size:15px !important;
+  }
+
+  .player-card .song-title{
+    font-size:12px !important;
+  }
+
+  .player-card .artist{
+    font-size:9px !important;
+  }
+
+  .player-card .utility button{
+    height:30px !important;
+
+    padding:0 9px !important;
+
+    font-size:8px !important;
+  }
+}
