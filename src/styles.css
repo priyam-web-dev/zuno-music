@@ -3859,26 +3859,15 @@ nav{
 @media(max-width:700px){
 
   .player-card{
-  background:
-    linear-gradient(
-      90deg,
-      rgba(15,15,15,.62),
-      rgba(25,25,25,.42),
-      rgba(15,15,15,.58)
-    ) !important;
+  background:rgba(18,18,18,.48) !important;
 
-  border:1px solid rgba(255,255,255,.15) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
 
-  backdrop-filter:
-    blur(20px)
-    saturate(120%) !important;
-
-  -webkit-backdrop-filter:
-    blur(20px)
-    saturate(120%) !important;
+  backdrop-filter:blur(22px) saturate(115%) !important;
+  -webkit-backdrop-filter:blur(22px) saturate(115%) !important;
 
   box-shadow:
-    0 16px 40px rgba(0,0,0,.30),
+    0 12px 35px rgba(0,0,0,.28),
     inset 0 1px 0 rgba(255,255,255,.10) !important;
 }
 
