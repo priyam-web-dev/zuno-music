@@ -58,6 +58,31 @@ const BACKGROUNDS = [
     name: "गाँव",
     value: "/assets/bg5.png",
   },
+  {
+    id: 6,
+    name: "रंगीन बाज़ार",
+    value: "/assets/bg6.png",
+  },
+  {
+    id: 7,
+    name: "पुरानी हवेली",
+    value: "/assets/bg7.png",
+  },
+  {
+    id: 8,
+    name: "शहर की शाम",
+    value: "/assets/bg8.png",
+  },
+  {
+    id: 9,
+    name: "देसी गली",
+    value: "/assets/bg9.png",
+  },
+  {
+    id: 10,
+    name: "सुनहरी शाम",
+    value: "/assets/bg10.png",
+  },
 ];
 
 
