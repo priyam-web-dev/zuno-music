@@ -4876,3 +4876,98 @@ nav{
     font-size:clamp(42px,14vw,68px) !important;
   }
 }
+
+/* =========================================================
+   FINAL PLAYER ONLY — WIDER PILL + VOLUME CONTROL
+   Video player remains hidden. Nothing else is changed.
+   ========================================================= */
+
+.player-card{
+  width:min(720px, calc(100vw - 36px)) !important;
+  height:78px !important;
+  min-height:78px !important;
+}
+
+/* Keep the existing song info / heart / visualizer / controls untouched. */
+.player-card .utility{
+  display:flex !important;
+  align-items:center !important;
+  gap:9px !important;
+  flex:0 0 auto !important;
+  min-width:0 !important;
+}
+
+/* Visible volume section now that the video card is gone. */
+.player-card .volume-icon{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:25px !important;
+  height:25px !important;
+  flex:0 0 25px !important;
+  color:#fff !important;
+  font-family:Arial,sans-serif !important;
+  font-size:18px !important;
+  opacity:.82 !important;
+}
+
+/* Make the range actually visible inside the pill. */
+.player-card .utility input[type="range"]{
+  display:block !important;
+  width:92px !important;
+  min-width:92px !important;
+  max-width:92px !important;
+  height:4px !important;
+  margin:0 !important;
+  padding:0 !important;
+  flex:0 0 92px !important;
+  accent-color:#fff !important;
+  cursor:pointer !important;
+  opacity:.88 !important;
+}
+
+/* Keep the queue button exactly as the existing pill button, only give
+   the volume area enough room beside it. */
+.player-card .utility button{
+  flex:0 0 auto !important;
+  white-space:nowrap !important;
+}
+
+/* Desktop spacing for the wider pill. */
+@media(min-width:701px){
+  .player-card{
+    padding-left:16px !important;
+    padding-right:16px !important;
+    gap:14px !important;
+  }
+
+  .player-card .controls{
+    gap:5px !important;
+  }
+}
+
+/* Mobile: wider within the screen, but keep the volume control compact. */
+@media(max-width:700px){
+  .player-card{
+    width:calc(100vw - 24px) !important;
+    height:70px !important;
+    min-height:70px !important;
+  }
+
+  .player-card .utility{
+    gap:6px !important;
+  }
+
+  .player-card .volume-icon{
+    width:20px !important;
+    min-width:20px !important;
+    font-size:16px !important;
+  }
+
+  .player-card .utility input[type="range"]{
+    width:58px !important;
+    min-width:58px !important;
+    max-width:58px !important;
+    flex-basis:58px !important;
+  }
+}
