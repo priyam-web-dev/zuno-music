@@ -3232,31 +3232,12 @@ function App() {
 
 
             <div className="now-row">
-
-              <div>
-
-                <div className="kicker">
-                  अभी बज रहा है
-                </div>
-
-
-                <div className="song-title">
-                  {
-                    currentTrack?.title ||
-                    "अपनी पसंद से कोई गीत चुनें"
-                  }
-                </div>
-
-
-                <div className="artist">
-                  {
-                    currentTrack?.artist ||
-                    "Playlist से गीत शुरू करें"
-                  }
-                </div>
-
+              <div className="player-song-label">
+                {
+                  currentTrack?.title ||
+                  "अपनी पसंद से कोई गीत चुनें"
+                }
               </div>
-
 
               <button
                 type="button"
@@ -3278,7 +3259,6 @@ function App() {
                     : "♡"
                 }
               </button>
-
             </div>
 
 
