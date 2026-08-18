@@ -4735,3 +4735,133 @@ nav{
   }
 }
 
+
+
+/* =========================================================
+   ABSOLUTE FINAL OVERRIDE — ZUNO + PERSONAL GREETING
+   ========================================================= */
+
+/* Keep the real ZUNO wordmark. No legacy logo pseudo-elements. */
+.nav .brand-mark.brand-mark,
+.nav .brand-mark{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  width:auto !important;
+  min-width:0 !important;
+  height:auto !important;
+  padding:0 !important;
+  margin:0 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+.nav .brand-mark .brand-copy.brand-zuno,
+.nav .brand-mark .brand-copy.brand-zuno strong{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  position:static !important;
+}
+
+.nav .brand-mark .brand-copy.brand-zuno strong{
+  content:normal !important;
+  font-family:"DM Sans",sans-serif !important;
+  font-size:23px !important;
+  line-height:1 !important;
+  font-weight:800 !important;
+  letter-spacing:3px !important;
+  color:#fffaf0 !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.38) !important;
+}
+
+.nav .brand-mark .brand-copy.brand-zuno::before,
+.nav .brand-mark .brand-copy.brand-zuno::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* Personal greeting: deliberately isolated from all old .hero rules. */
+.greeting-hero{
+  display:block !important;
+  position:fixed !important;
+  left:50% !important;
+  top:26% !important;
+  width:min(1000px,92vw) !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+  transform:translate(-50%,-50%) !important;
+  z-index:30 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:none !important;
+  text-align:center !important;
+}
+
+.greeting-hero h1{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:100% !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+  font-family:"Tiro Devanagari Hindi","DM Sans",sans-serif !important;
+  font-size:clamp(62px,7.2vw,104px) !important;
+  font-weight:700 !important;
+  line-height:.92 !important;
+  letter-spacing:-3px !important;
+  color:#fff8e9 !important;
+  text-shadow:3px 3px 0 rgba(0,0,0,.50),0 10px 30px rgba(0,0,0,.45) !important;
+}
+
+.greeting-hero .hero-name,
+.greeting-hero .hero-time{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  color:#fff8e9 !important;
+  font-family:"Tiro Devanagari Hindi","DM Sans",sans-serif !important;
+  font-weight:700 !important;
+}
+
+.greeting-hero .hero-name{
+  font-size:.72em !important;
+  line-height:1 !important;
+  letter-spacing:-2px !important;
+}
+
+.greeting-hero .hero-time{
+  font-size:1em !important;
+  line-height:.92 !important;
+  letter-spacing:-3px !important;
+}
+
+@media(max-width:700px){
+  .nav .brand-mark .brand-copy.brand-zuno strong{
+    font-size:20px !important;
+    letter-spacing:2.5px !important;
+  }
+
+  .greeting-hero{
+    top:22% !important;
+    width:94vw !important;
+  }
+
+  .greeting-hero h1{
+    font-size:clamp(50px,12vw,78px) !important;
+    letter-spacing:-2px !important;
+  }
+}
+
+@media(max-width:430px){
+  .greeting-hero{
+    top:20% !important;
+  }
+
+  .greeting-hero h1{
+    font-size:clamp(44px,13vw,64px) !important;
+  }
+}
