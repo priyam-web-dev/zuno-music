@@ -4877,10 +4877,57 @@ nav{
   }
 }
 
+
 /* =========================================================
-   FINAL REQUEST — CONTROL PILL SHOWS SONG NAME ONLY
+   ZUNO FINAL FIX — SHOW CURRENT SONG NAME IN THE PLAYER
+   Video stays hidden. Artist is intentionally hidden.
    ========================================================= */
+.player-card .now-row{
+  flex:1 1 190px !important;
+  width:190px !important;
+  min-width:120px !important;
+  max-width:260px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:9px !important;
+  overflow:hidden !important;
+}
+
+.player-card .player-song-label{
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  width:100% !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+  font-family:"DM Sans",sans-serif !important;
+  font-size:13px !important;
+  line-height:1.2 !important;
+  font-weight:700 !important;
+  color:#fff !important;
+  text-shadow:none !important;
+}
 
 .player-card .artist{
   display:none !important;
+}
+
+.player-card .heart{
+  flex:0 0 32px !important;
+  width:32px !important;
+  min-width:32px !important;
+  height:32px !important;
+}
+
+@media(max-width:700px){
+  .player-card .now-row{
+    flex-basis:110px !important;
+    width:110px !important;
+    min-width:80px !important;
+    max-width:145px !important;
+  }
+
+  .player-card .player-song-label{
+    font-size:11px !important;
+  }
 }
