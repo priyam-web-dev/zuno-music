@@ -1699,10 +1699,44 @@ function PlaylistPanel({
 
 
 /* =========================================================
+   TIME-BASED HERO TEXT
+   ========================================================= */
+
+function getTimePhrase() {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return "की सुबह";
+  }
+
+  if (hour >= 12 && hour < 17) {
+    return "की दोपहर";
+  }
+
+  if (hour >= 17 && hour < 21) {
+    return "की शाम";
+  }
+
+  return "की रात";
+}
+
+function getFirstName(profile) {
+  const value =
+    profile?.display_name ||
+    profile?.username ||
+    "Priyam";
+
+  return String(value).trim().split(/\s+/)[0] || "Priyam";
+}
+
+/* =========================================================
    MAIN APP
    ========================================================= */
 
 function App() {
+
+  const [timePhrase, setTimePhrase] =
+    useState(getTimePhrase);
 
   const playerRef =
     useRef(null);
@@ -1779,6 +1813,22 @@ function App() {
     playlistOpen,
     setPlaylistOpen,
   ] = useState(false);
+
+
+  useEffect(() => {
+    const updateTimePhrase = () => {
+      setTimePhrase(getTimePhrase());
+    };
+
+    updateTimePhrase();
+
+    const timer = setInterval(
+      updateTimePhrase,
+      60000
+    );
+
+    return () => clearInterval(timer);
+  }, []);
 
 
   /* =======================================================
@@ -3082,39 +3132,9 @@ function App() {
 
         <header className="nav">
 
-          <div className="brand-mark" aria-label="P's Favourites">
-            <div className="brand-icon">
-              <svg
-                viewBox="0 0 48 48"
-                aria-hidden="true"
-              >
-                <path
-                  d="M14 34V12h11.5c5.5 0 8.5 3.1 8.5 7.7s-3 7.7-8.5 7.7H19"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M28 13.5c2.5 1.2 4.8 2.8 6.8 4.8"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                />
-                <circle
-                  cx="34.5"
-                  cy="30.5"
-                  r="2.2"
-                  fill="currentColor"
-                />
-              </svg>
-            </div>
-
-            <div className="brand-copy">
-              <strong>P's</strong>
-              <span>favourites</span>
+          <div className="brand-mark" aria-label="ZUNO">
+            <div className="brand-copy brand-zuno">
+              <strong>ZUNO</strong>
             </div>
           </div>
 
@@ -3180,79 +3200,18 @@ function App() {
 
         <main className="layout">
 
-
-          {/* VIDEO CARD */}
-
-          <section className="video-card">
-
-            <div className="video-card-heading">
-
-              <div>
-                <div className="video-card-kicker">
-                  VIDEO
-                </div>
-
-                <div className="video-card-title">
-                  अभी चल रहा गीत
-                </div>
-              </div>
-
-              <span className="video-card-mark">
-                ▶
-              </span>
-
-            </div>
-
-            <div className="video-shell">
-
-              {currentTrack ? (
-                <div id="youtube-player" />
-              ) : (
-                <div
-                  style={{
-                    minHeight: "100%",
-                    height: 300,
-                    display: "grid",
-                    placeItems: "center",
-                    textAlign: "center",
-                    padding: "24px",
-                    boxSizing: "border-box",
-                    color: "rgba(255,255,255,.82)",
-                    background: "rgba(0,0,0,.18)",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        marginBottom: 7,
-                      }}
-                    >
-                      Abhi tumhari playlist mein koi song nahi hai
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 13,
-                        opacity: .7,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      Playlist mein song add karo, phir yahan tumhara video chalega.
-                    </div>
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            <div className="video-card-note">
-              संगीत YouTube के आधिकारिक प्लेयर के माध्यम से चल रहा है।
-            </div>
-
+          {/* TIME-BASED HERO */}
+          <section className="hero greeting-hero" aria-label="Personal time greeting">
+            <h1>
+              <span className="hero-name">{getFirstName(profile)}</span>
+              <span className="hero-time">{timePhrase}</span>
+            </h1>
           </section>
 
-
+          {/* HIDDEN YOUTUBE HOST
+              The actual YouTube player remains mounted for audio playback,
+              while its visual video card is intentionally hidden. */}
+          <div id="youtube-player" className="youtube-player-hidden" aria-hidden="true" />
 
 
           {/* PLAYER */}
