@@ -1,5 +1,5 @@
 /* BACKGROUND SOURCE: React profile selection. Primary/default image is /assets/bg5.png (village). */
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Tiro+Devanagari+Hindi:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Tiro+Devanagari+Hindi:wght@400;700&family=Rozha+One&display=swap");
 
 :root{
   --paper:#fff8e8;
@@ -4611,4 +4611,363 @@ nav{
   background-image:none !important;
   color:#fff !important;
   border-bottom:1px solid rgba(255,255,255,.10) !important;
-}\n\n/* =========================================================\n   RESTORE YOUTUBE VIDEO + VOLUME\n   Video remains a separate card above the floating music pill.\n   ========================================================= */\n\n.video-card{\n  display:block !important;\n  visibility:visible !important;\n  opacity:1 !important;\n}\n\n.video-card .video-shell{\n  display:block !important;\n  visibility:visible !important;\n  opacity:1 !important;\n}\n\n.video-card .video-shell iframe,\n.video-card #youtube-player{\n  display:block !important;\n  width:100% !important;\n  height:100% !important;\n}\n\n/* Volume control: keep it inside the pill without changing the rest. */\n.player-card .utility{\n  display:flex !important;\n  align-items:center !important;\n  gap:7px !important;\n}\n\n.player-card .volume-icon{\n  display:flex !important;\n  align-items:center !important;\n  justify-content:center !important;\n  width:20px !important;\n  min-width:20px !important;\n  color:#fffaf0 !important;\n  font-size:16px !important;\n}\n\n.player-card .utility input[type="range"]{\n  display:block !important;\n  width:70px !important;\n  min-width:70px !important;\n  max-width:70px !important;\n  height:4px !important;\n  margin:0 !important;\n  padding:0 !important;\n  accent-color:#fffaf0 !important;\n}\n\n@media(max-width:700px){\n  .player-card .utility input[type="range"]{\n    width:48px !important;\n    min-width:48px !important;\n    max-width:48px !important;\n  }\n}\n
+}
+
+/* =========================================================
+   FINAL — TIME-BASED HERO / VIDEO VISUAL HIDDEN
+   ========================================================= */
+
+/* Keep the page composition clean: the music pill remains the active player. */
+.layout{
+  min-height:calc(100vh - 76px) !important;
+  width:100% !important;
+  position:relative !important;
+  display:block !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+
+/* The visual YouTube card is intentionally not rendered. */
+.video-card{
+  display:none !important;
+}
+
+/* Keep YouTube mounted so the existing audio controls continue working. */
+.youtube-player-hidden{
+  position:fixed !important;
+  width:1px !important;
+  height:1px !important;
+  left:-10px !important;
+  top:-10px !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+  overflow:hidden !important;
+  z-index:-1 !important;
+}
+
+/* Upper-middle placement, inspired by the supplied reference. */
+.hero{
+  position:absolute !important;
+  left:50% !important;
+  top:25% !important;
+  transform:translate(-50%,-50%) !important;
+  width:min(900px,92vw) !important;
+  z-index:5 !important;
+  margin:0 !important;
+  text-align:center !important;
+  pointer-events:none !important;
+}
+
+.hero h1{
+  margin:0 !important;
+  padding:0 !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:0 !important;
+
+  font-family:"Tiro Devanagari Hindi",serif !important;
+  font-weight:700 !important;
+  font-size:clamp(66px,8vw,118px) !important;
+  line-height:.88 !important;
+  letter-spacing:-3.5px !important;
+  color:#fff8e9 !important;
+
+  text-shadow:
+    3px 3px 0 rgba(0,0,0,.48),
+    0 9px 28px rgba(0,0,0,.42) !important;
+}
+
+.hero h1::after{
+  content:none !important;
+  display:none !important;
+}
+
+.hero-name,
+.hero-time{
+  display:block !important;
+  font-family:"Tiro Devanagari Hindi",serif !important;
+  font-weight:700 !important;
+  color:#fff8e9 !important;
+}
+
+.hero-name{
+  font-size:.78em !important;
+  line-height:.95 !important;
+  letter-spacing:-2.5px !important;
+}
+
+.hero-time{
+  font-size:1em !important;
+  line-height:.9 !important;
+  letter-spacing:-3px !important;
+}
+
+@media(max-width:900px){
+  .hero{
+    top:22% !important;
+    width:94vw !important;
+  }
+
+  .hero h1{
+    font-size:clamp(58px,11vw,86px) !important;
+    letter-spacing:-2.5px !important;
+  }
+}
+
+@media(max-width:520px){
+  .hero{
+    top:19% !important;
+  }
+
+  .hero h1{
+    font-size:clamp(48px,13vw,68px) !important;
+    letter-spacing:-2px !important;
+  }
+
+  .hero-name{
+    letter-spacing:-1.5px !important;
+  }
+
+  .hero-time{
+    letter-spacing:-2px !important;
+  }
+}
+
+
+
+/* =========================================================
+   ABSOLUTE FINAL OVERRIDE — ZUNO + PERSONAL GREETING
+   ========================================================= */
+
+/* Keep the real ZUNO wordmark. No legacy logo pseudo-elements. */
+.nav .brand-mark.brand-mark,
+.nav .brand-mark{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  width:auto !important;
+  min-width:0 !important;
+  height:auto !important;
+  padding:0 !important;
+  margin:0 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+
+.nav .brand-mark .brand-copy.brand-zuno,
+.nav .brand-mark .brand-copy.brand-zuno strong{
+  display:block !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  position:static !important;
+}
+
+.nav .brand-mark .brand-copy.brand-zuno strong{
+  content:normal !important;
+  font-family:"DM Sans",sans-serif !important;
+  font-size:23px !important;
+  line-height:1 !important;
+  font-weight:800 !important;
+  letter-spacing:3px !important;
+  color:#fffaf0 !important;
+  text-shadow:0 2px 12px rgba(0,0,0,.38) !important;
+}
+
+.nav .brand-mark .brand-copy.brand-zuno::before,
+.nav .brand-mark .brand-copy.brand-zuno::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* Personal greeting — time-based, centered upper-middle.
+   Both lines use the same Rozha One font. The second line is fitted
+   to the measured width of the user's first name so it never extends beyond it. */
+.greeting-hero{
+  display:block !important;
+  position:fixed !important;
+  left:50% !important;
+  top:27% !important;
+  width:100vw !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+  transform:translate(-50%,-50%) !important;
+  z-index:30 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:none !important;
+  text-align:center !important;
+}
+
+.greeting-hero h1{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:max-content !important;
+  max-width:calc(100vw - 32px) !important;
+  height:auto !important;
+  margin:0 auto !important;
+  padding:0 !important;
+  gap:8px !important;
+  font-family:"Rozha One",serif !important;
+  font-weight:400 !important;
+  line-height:.9 !important;
+  color:#fff8e9 !important;
+  text-shadow:3px 3px 0 rgba(0,0,0,.50),0 10px 30px rgba(0,0,0,.45) !important;
+}
+
+.greeting-hero .hero-name,
+.greeting-hero .hero-time{
+  display:block !important;
+  width:max-content !important;
+  max-width:100% !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  color:#fff8e9 !important;
+  font-family:"Rozha One",serif !important;
+  font-weight:400 !important;
+  white-space:nowrap !important;
+  transform-origin:center center !important;
+}
+
+.greeting-hero .hero-name{
+  font-size:clamp(64px,8vw,112px) !important;
+  line-height:.92 !important;
+  letter-spacing:-1.5px !important;
+}
+
+.greeting-hero .hero-time{
+  font-size:clamp(64px,8vw,112px) !important;
+  line-height:.9 !important;
+  letter-spacing:-1.5px !important;
+  transform-origin:center center !important;
+}
+
+@media(max-width:700px){
+  .greeting-hero{
+    top:23% !important;
+  }
+
+  .greeting-hero h1{
+    gap:6px !important;
+    max-width:calc(100vw - 24px) !important;
+  }
+
+  .greeting-hero .hero-name,
+  .greeting-hero .hero-time{
+    font-size:clamp(48px,13vw,82px) !important;
+  }
+}
+
+@media(max-width:430px){
+  .greeting-hero{
+    top:21% !important;
+  }
+
+  .greeting-hero h1{
+    gap:5px !important;
+  }
+
+  .greeting-hero .hero-name,
+  .greeting-hero .hero-time{
+    font-size:clamp(42px,14vw,68px) !important;
+  }
+}
+
+/* =========================================================
+   FINAL PLAYER ONLY — WIDER PILL + VOLUME CONTROL
+   Video player remains hidden. Nothing else is changed.
+   ========================================================= */
+
+.player-card{
+  width:min(720px, calc(100vw - 36px)) !important;
+  height:78px !important;
+  min-height:78px !important;
+}
+
+/* Keep the existing song info / heart / visualizer / controls untouched. */
+.player-card .utility{
+  display:flex !important;
+  align-items:center !important;
+  gap:9px !important;
+  flex:0 0 auto !important;
+  min-width:0 !important;
+}
+
+/* Visible volume section now that the video card is gone. */
+.player-card .volume-icon{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:25px !important;
+  height:25px !important;
+  flex:0 0 25px !important;
+  color:#fff !important;
+  font-family:Arial,sans-serif !important;
+  font-size:18px !important;
+  opacity:.82 !important;
+}
+
+/* Make the range actually visible inside the pill. */
+.player-card .utility input[type="range"]{
+  display:block !important;
+  width:92px !important;
+  min-width:92px !important;
+  max-width:92px !important;
+  height:4px !important;
+  margin:0 !important;
+  padding:0 !important;
+  flex:0 0 92px !important;
+  accent-color:#fff !important;
+  cursor:pointer !important;
+  opacity:.88 !important;
+}
+
+/* Keep the queue button exactly as the existing pill button, only give
+   the volume area enough room beside it. */
+.player-card .utility button{
+  flex:0 0 auto !important;
+  white-space:nowrap !important;
+}
+
+/* Desktop spacing for the wider pill. */
+@media(min-width:701px){
+  .player-card{
+    padding-left:16px !important;
+    padding-right:16px !important;
+    gap:14px !important;
+  }
+
+  .player-card .controls{
+    gap:5px !important;
+  }
+}
+
+/* Mobile: wider within the screen, but keep the volume control compact. */
+@media(max-width:700px){
+  .player-card{
+    width:calc(100vw - 24px) !important;
+    height:70px !important;
+    min-height:70px !important;
+  }
+
+  .player-card .utility{
+    gap:6px !important;
+  }
+
+  .player-card .volume-icon{
+    width:20px !important;
+    min-width:20px !important;
+    font-size:16px !important;
+  }
+
+  .player-card .utility input[type="range"]{
+    width:58px !important;
+    min-width:58px !important;
+    max-width:58px !important;
+    flex-basis:58px !important;
+  }
+}
