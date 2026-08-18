@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles.css";
 
@@ -1738,6 +1738,11 @@ function App() {
   const [timePhrase, setTimePhrase] =
     useState(getTimePhrase);
 
+  const greetingNameRef = useRef(null);
+  const greetingTimeRef = useRef(null);
+  const [greetingWidth, setGreetingWidth] = useState(null);
+  const [greetingTimeScale, setGreetingTimeScale] = useState(1);
+
   const playerRef =
     useRef(null);
 
@@ -1829,6 +1834,42 @@ function App() {
 
     return () => clearInterval(timer);
   }, []);
+
+  useLayoutEffect(() => {
+    let cancelled = false;
+
+    const fitGreeting = () => {
+      const nameEl = greetingNameRef.current;
+      const timeEl = greetingTimeRef.current;
+
+      if (!nameEl || !timeEl) return;
+
+      const nameWidth = Math.ceil(nameEl.getBoundingClientRect().width);
+      const timeWidth = Math.ceil(timeEl.scrollWidth);
+
+      if (!cancelled) {
+        setGreetingWidth(nameWidth);
+        setGreetingTimeScale(
+          timeWidth > nameWidth
+            ? Math.max(0.58, nameWidth / timeWidth)
+            : 1
+        );
+      }
+    };
+
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(fitGreeting);
+    } else {
+      fitGreeting();
+    }
+
+    window.addEventListener("resize", fitGreeting);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("resize", fitGreeting);
+    };
+  }, [profile, timePhrase]);
 
 
   /* =======================================================
@@ -3202,9 +3243,15 @@ function App() {
 
           {/* TIME-BASED HERO */}
           <section className="hero greeting-hero" aria-label="Personal time greeting">
-            <h1>
-              <span className="hero-name">{getFirstName(profile)}</span>
-              <span className="hero-time">{timePhrase}</span>
+            <h1 style={greetingWidth ? { width: `${greetingWidth}px` } : undefined}>
+              <span ref={greetingNameRef} className="hero-name">{getFirstName(profile)}</span>
+              <span
+                ref={greetingTimeRef}
+                className="hero-time"
+                style={{ transform: `scaleX(${greetingTimeScale})` }}
+              >
+                {timePhrase}
+              </span>
             </h1>
           </section>
 
