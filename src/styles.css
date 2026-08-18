@@ -4605,3 +4605,10 @@ nav{
     font-size:12px !important;
   }
 }
+/* FINAL FIX — queue header white/cream bar */
+.queue-overlay .queue-title{
+  background:rgba(18,18,18,.88) !important;
+  background-image:none !important;
+  color:#fff !important;
+  border-bottom:1px solid rgba(255,255,255,.10) !important;
+}
