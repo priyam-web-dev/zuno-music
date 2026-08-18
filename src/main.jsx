@@ -2227,17 +2227,55 @@ function App() {
             token
           );
 
+        /* Preserve the song that is currently playing when the
+           playlist is refreshed. The old code always forced index 0,
+           which made the player jump back to the first song after a
+           refresh even though another song was still playing. */
+        const currentSongId =
+          tracksRef.current?.[indexRef.current]?.id ||
+          null;
+
+        const preservedIndex =
+          currentSongId
+            ? songs.findIndex(
+                (song) => song.id === currentSongId
+              )
+            : -1;
+
+        const safeIndex =
+          preservedIndex >= 0 ? preservedIndex : 0;
+
+        const hadCurrentSong =
+          Boolean(currentSongId) &&
+          preservedIndex >= 0;
+
         tracksRef.current =
           songs;
+
+        indexRef.current =
+          safeIndex;
 
         setTracks(
           songs
         );
 
-        indexRef.current =
-          0;
+        setIndex(
+          safeIndex
+        );
 
-        setIndex(0);
+        /* If the currently playing song still exists, do NOT reload
+           YouTube. This keeps playback and the visible song title in
+           sync. Only load a song when the old one disappeared. */
+        if (
+          !hadCurrentSong &&
+          songs.length &&
+          playerRef.current
+        ) {
+          playerRef.current.loadVideoById({
+            videoId: songs[safeIndex].id,
+            startSeconds: 0,
+          });
+        }
 
         if (!songs.length) {
           // An empty playlist is a normal state for a new account.
