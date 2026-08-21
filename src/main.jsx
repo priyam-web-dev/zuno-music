@@ -1778,28 +1778,52 @@ function App() {
   const [liked, setLiked] =
     useState(false);
 
-  const [loading, setLoading] =
-    useState(true);
-
   const [error, setError] =
     useState("");
 
 
   /* AUTH */
 
-  const [
-    sessionLoading,
-    setSessionLoading,
-  ] = useState(true);
+  // Restore the last known account immediately so the main UI
+  // can render without showing a separate loading screen.
+  const getStoredUser = () => {
+    try {
+      return JSON.parse(
+        localStorage.getItem("pf_user") || "null"
+      );
+    } catch {
+      return null;
+    }
+  };
+
+  const storedUser = getStoredUser();
+
+  const storedToken =
+    localStorage.getItem("pf_access_token") || "";
+
+  const initialProfile = storedUser
+    ? {
+        id: storedUser.id,
+        username:
+          storedUser.user_metadata?.username ||
+          storedUser.email?.split("@")[0] ||
+          "user",
+        display_name:
+          storedUser.user_metadata?.display_name ||
+          storedUser.user_metadata?.username ||
+          "Priyam",
+        background_id: 5,
+      }
+    : null;
 
   const [user, setUser] =
-    useState(null);
+    useState(storedUser);
 
   const [token, setToken] =
-    useState("");
+    useState(storedToken);
 
   const [profile, setProfile] =
-    useState(null);
+    useState(initialProfile);
 
 
   /* PANELS */
@@ -2134,12 +2158,7 @@ function App() {
           );
 
         }
-
-
-        setSessionLoading(
-          false
-        );
-      };
+};
 
 
     boot();
@@ -2286,29 +2305,69 @@ function App() {
         } else {
           setError("");
         }
-
-        setLoading(false);
-
-      } catch (err) {
+} catch (err) {
         console.error(err);
 
         setError(
           err?.message ||
           "Tumhari playlists se songs load nahi ho sake."
         );
-
-        setLoading(false);
-      }
+}
     };
 
 
   useEffect(() => {
 
-    if (!user)
+    if (!user || !token)
       return;
 
 
-    refreshSongs();
+    /* Let the first ZUNO UI paint before fetching playlist data. */
+    const runInitialSongLoad =
+      () => {
+        refreshSongs();
+      };
+
+
+    let cleanupInitialLoad;
+
+
+    if (
+      "requestIdleCallback" in window
+    ) {
+
+      const idleId =
+        window.requestIdleCallback(
+          runInitialSongLoad,
+          {
+            timeout: 1200,
+          }
+        );
+
+
+      cleanupInitialLoad =
+        () =>
+          window.cancelIdleCallback(
+            idleId
+          );
+
+    }
+
+    else {
+
+      const frameId =
+        window.requestAnimationFrame(
+          runInitialSongLoad
+        );
+
+
+      cleanupInitialLoad =
+        () =>
+          window.cancelAnimationFrame(
+            frameId
+          );
+
+    }
 
 
     const interval =
@@ -2318,10 +2377,15 @@ function App() {
       );
 
 
-    return () =>
+    return () => {
+
+      cleanupInitialLoad?.();
+
       clearInterval(
         interval
       );
+
+    };
 
   }, [user, token]);
 
@@ -2368,7 +2432,6 @@ function App() {
       queueOpen ||
       profileOpen ||
       playlistOpen ||
-      sessionLoading ||
       !user
         ? "hidden"
         : "";
@@ -2383,7 +2446,6 @@ function App() {
     queueOpen,
     profileOpen,
     playlistOpen,
-    sessionLoading,
     user,
   ]);
 
@@ -2771,41 +2833,6 @@ function App() {
 
 
   /* =======================================================
-     LOADING
-     ======================================================= */
-
-  if (
-    sessionLoading
-  ) {
-
-    return (
-      <div
-        style={
-          authStyles.page
-        }
-      >
-
-        <div
-          style={
-            authStyles.loading
-          }
-        >
-          P's favourites
-
-          <br />
-
-          <small>
-            आपकी music world तैयार हो रही है…
-          </small>
-
-        </div>
-
-      </div>
-    );
-  }
-
-
-  /* =======================================================
      LOGIN
      ======================================================= */
 
@@ -2855,50 +2882,6 @@ function App() {
       ) - 1
     ] ||
     BACKGROUNDS[4];
-
-
-  /* =======================================================
-     LOADING SONGS
-     ======================================================= */
-
-  if (loading) {
-
-    return (
-      <div
-        className="scene"
-        style={{
-          backgroundImage:
-            `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
-        }}
-      >
-
-        <div
-          style={{
-            minHeight:
-              "100vh",
-
-            display:
-              "flex",
-
-            alignItems:
-              "center",
-
-            justifyContent:
-              "center",
-
-            color:
-              "#f5dfb7",
-
-            fontSize:
-              18,
-          }}
-        >
-          गीतों की सूची तैयार हो रही है...
-        </div>
-
-      </div>
-    );
-  }
 
 
   /* =======================================================
