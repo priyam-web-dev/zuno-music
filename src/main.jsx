@@ -506,169 +506,115 @@ function AuthScreen({
 
   return (
     <div style={authStyles.page}>
-      <div style={authStyles.glowOne} />
-      <div style={authStyles.glowTwo} />
+      <div style={authStyles.card}>
+        <div style={authStyles.logo}>ZUNO</div>
 
-      <div className="zuno-auth-shell" style={authStyles.shell}>
-        <section style={authStyles.intro}>
-          <div style={authStyles.logo}>ZUNO</div>
+        <div style={authStyles.eyebrow}>
+          {mode === "login" ? "WELCOME BACK" : "WELCOME TO ZUNO"}
+        </div>
 
-          <div style={authStyles.introContent}>
-            <div style={authStyles.introKicker}>
-              MUSIC · PLAYLISTS · MOMENTS
-            </div>
+        <h1 style={authStyles.title}>
+          {mode === "login" ? "Welcome back." : "Create your account."}
+        </h1>
 
-            <h1 style={authStyles.introTitle}>
-              Your music.
-              <br />
-              <span>Your space.</span>
-            </h1>
+        <p style={authStyles.sub}>
+          {mode === "login"
+            ? "अपनी music world में वापस आओ।"
+            : "अपना account बनाओ और अपनी पसंद सेव करो।"}
+        </p>
 
-            <p style={authStyles.introText}>
-              अपनी पसंद की धुनों के लिए वापस आओ।
-              <br />
-              जो सुनना है, वहीं से शुरू करो।
-            </p>
-          </div>
+        <div style={authStyles.tabs}>
+          <button
+            type="button"
+            onClick={() => {
+              setMode("login");
+              setMessage("");
+            }}
+            style={{
+              ...authStyles.tab,
+              ...(mode === "login" ? authStyles.activeTab : {}),
+            }}
+          >
+            Login
+          </button>
 
-          <div style={authStyles.introFooter}>
-            <span>01</span>
-            <div style={authStyles.footerLine} />
-            <span>YOUR FAVOURITES</span>
-          </div>
-        </section>
+          <button
+            type="button"
+            onClick={() => {
+              setMode("signup");
+              setMessage("");
+            }}
+            style={{
+              ...authStyles.tab,
+              ...(mode === "signup" ? authStyles.activeTab : {}),
+            }}
+          >
+            Create account
+          </button>
+        </div>
 
-        <section style={authStyles.card}>
-          <div style={authStyles.cardTop}>
-            <div>
-              <div style={authStyles.eyebrow}>
-                {mode === "login" ? "WELCOME BACK" : "WELCOME TO ZUNO"}
-              </div>
-
-              <h2 style={authStyles.title}>
-                {mode === "login"
-                  ? "Welcome back."
-                  : "Make it yours."}
-              </h2>
-
-              <p style={authStyles.sub}>
-                {mode === "login"
-                  ? "अपनी music world में वापस आओ।"
-                  : "अपना नाम, username और personal space बनाओ।"}
-              </p>
-            </div>
-
-            <div style={authStyles.mark}>♪</div>
-          </div>
-
-          <div style={authStyles.tabs}>
-            <button
-              type="button"
-              onClick={() => {
-                setMode("login");
-                setMessage("");
-              }}
-              style={{
-                ...authStyles.tab,
-                ...(mode === "login"
-                  ? authStyles.activeTab
-                  : {}),
-              }}
-            >
-              Login
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setMode("signup");
-                setMessage("");
-              }}
-              style={{
-                ...authStyles.tab,
-                ...(mode === "signup"
-                  ? authStyles.activeTab
-                  : {}),
-              }}
-            >
-              Create account
-            </button>
-          </div>
-
-          <form onSubmit={submit} style={authStyles.form}>
-            {mode === "signup" && (
-              <div style={authStyles.field}>
-                <label style={authStyles.label}>Your name</label>
-                <input
-                  style={authStyles.input}
-                  placeholder="Enter your name"
-                  value={displayName}
-                  onChange={(e) =>
-                    setDisplayName(e.target.value)
-                  }
-                  autoComplete="name"
-                />
-              </div>
-            )}
-
+        <form onSubmit={submit} style={authStyles.form}>
+          {mode === "signup" && (
             <div style={authStyles.field}>
-              <label style={authStyles.label}>Username</label>
+              <label style={authStyles.label}>Your name</label>
               <input
                 style={authStyles.input}
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) =>
-                  setUsername(e.target.value)
-                }
-                autoComplete="username"
+                placeholder="Enter your name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                autoComplete="name"
               />
             </div>
+          )}
 
-            <div style={authStyles.field}>
-              <label style={authStyles.label}>Password</label>
-              <input
-                style={authStyles.input}
-                placeholder="Enter your password"
-                type="password"
-                value={password}
-                onChange={(e) =>
-                  setPassword(e.target.value)
-                }
-                autoComplete={
-                  mode === "login"
-                    ? "current-password"
-                    : "new-password"
-                }
-              />
-            </div>
-
-            {message && (
-              <div style={authStyles.message}>
-                {message}
-              </div>
-            )}
-
-            <button
-              disabled={busy}
-              type="submit"
-              style={authStyles.submit}
-            >
-              <span>
-                {busy
-                  ? "Please wait…"
-                  : mode === "login"
-                  ? "Enter my favourites"
-                  : "Create my space"}
-              </span>
-              <span style={authStyles.submitArrow}>↗</span>
-            </button>
-          </form>
-
-          <div style={authStyles.hint}>
-            Free setup <span>·</span> Supabase Auth{" "}
-            <span>·</span> No paid service required
+          <div style={authStyles.field}>
+            <label style={authStyles.label}>Username</label>
+            <input
+              style={authStyles.input}
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+            />
           </div>
-        </section>
+
+          <div style={authStyles.field}>
+            <label style={authStyles.label}>Password</label>
+            <input
+              style={authStyles.input}
+              placeholder="Enter your password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+            />
+          </div>
+
+          {message && (
+            <div style={authStyles.message}>
+              {message}
+            </div>
+          )}
+
+          <button
+            disabled={busy}
+            type="submit"
+            style={authStyles.submit}
+          >
+            <span>
+              {busy
+                ? "Please wait…"
+                : mode === "login"
+                ? "Enter my favourites"
+                : "Create my account"}
+            </span>
+            <span style={authStyles.submitArrow}>→</span>
+          </button>
+        </form>
+
+        <div style={authStyles.hint}>
+          Free setup <span>·</span> Supabase Auth <span>·</span> No paid service required
+        </div>
       </div>
     </div>
   );
@@ -3499,208 +3445,88 @@ const authStyles = {
     overflow: "hidden",
     display: "grid",
     placeItems: "center",
-    padding: "32px",
-    background:
-      "radial-gradient(circle at 15% 20%, rgba(205,142,80,.13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(150,76,45,.12), transparent 32%), #12110f",
-    color: "#f4ead9",
+    padding: "24px",
+    background: "#080808",
+    color: "#fff",
     fontFamily: '"DM Sans", sans-serif',
   },
 
-  glowOne: {
-    position: "absolute",
-    width: 420,
-    height: 420,
-    borderRadius: "50%",
-    left: "-180px",
-    top: "-170px",
-    background: "rgba(244,207,155,.07)",
-    filter: "blur(80px)",
-    pointerEvents: "none",
-  },
-
-  glowTwo: {
-    position: "absolute",
-    width: 360,
-    height: 360,
-    borderRadius: "50%",
-    right: "-150px",
-    bottom: "-160px",
-    background: "rgba(157,73,43,.09)",
-    filter: "blur(80px)",
-    pointerEvents: "none",
-  },
-
-  shell: {
-    width: "min(1040px, 100%)",
-    minHeight: 610,
-    display: "grid",
-    gridTemplateColumns: "1.05fr .95fr",
-    position: "relative",
-    zIndex: 1,
+  card: {
+    width: "min(430px, 100%)",
+    boxSizing: "border-box",
+    padding: "38px 36px 30px",
     border: "1px solid rgba(255,255,255,.12)",
-    borderRadius: 30,
-    overflow: "hidden",
-    background: "rgba(25,23,20,.78)",
-    boxShadow:
-      "0 40px 120px rgba(0,0,0,.45), inset 0 1px rgba(255,255,255,.08)",
-    backdropFilter: "blur(24px)",
-    WebkitBackdropFilter: "blur(24px)",
-  },
-
-  intro: {
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-between",
-    minHeight: 610,
-    padding: "42px 48px",
-    borderRight: "1px solid rgba(255,255,255,.08)",
-    background:
-      "linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.012))",
+    borderTop: "3px solid #e52b20",
+    borderRadius: 18,
+    background: "#111111",
+    boxShadow: "0 28px 80px rgba(0,0,0,.55)",
   },
 
   logo: {
-    fontSize: 22,
+    display: "inline-block",
+    marginBottom: 42,
+    color: "#ffffff",
+    fontSize: 20,
     lineHeight: 1,
     letterSpacing: 4,
     fontWeight: 900,
-    color: "#fff8ec",
-  },
-
-  introContent: {
-    marginTop: 30,
-  },
-
-  introKicker: {
-    fontSize: 10,
-    letterSpacing: 2.6,
-    fontWeight: 800,
-    color: "rgba(244,234,217,.55)",
-    marginBottom: 22,
-  },
-
-  introTitle: {
-    margin: 0,
-    fontFamily: '"Tiro Devanagari Hindi", serif',
-    fontSize: "clamp(58px, 7vw, 94px)",
-    lineHeight: .92,
-    letterSpacing: "-2px",
-    fontWeight: 400,
-    color: "#f5dfb7",
-  },
-
-  introTitleSpan: {},
-
-  introText: {
-    margin: "28px 0 0",
-    color: "rgba(244,234,217,.62)",
-    fontSize: 14,
-    lineHeight: 1.75,
-    maxWidth: 360,
-  },
-
-  introFooter: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    fontSize: 9,
-    letterSpacing: 2,
-    fontWeight: 800,
-    color: "rgba(244,234,217,.4)",
-  },
-
-  footerLine: {
-    width: 42,
-    height: 1,
-    background: "rgba(244,234,217,.25)",
-  },
-
-  card: {
-    width: "100%",
-    boxSizing: "border-box",
-    padding: "54px 52px 42px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    background: "rgba(12,11,10,.34)",
-  },
-
-  cardTop: {
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 20,
-    marginBottom: 28,
-  },
-
-  mark: {
-    width: 42,
-    height: 42,
-    flexShrink: 0,
-    display: "grid",
-    placeItems: "center",
-    borderRadius: "50%",
-    border: "1px solid rgba(245,223,183,.22)",
-    background: "rgba(245,223,183,.07)",
-    color: "#f5dfb7",
-    fontSize: 20,
   },
 
   eyebrow: {
-    fontSize: 9,
-    letterSpacing: 2.5,
-    fontWeight: 800,
-    color: "rgba(245,223,183,.55)",
+    marginBottom: 9,
+    color: "#e52b20",
+    fontSize: 10,
+    letterSpacing: 2.4,
+    fontWeight: 900,
   },
 
   title: {
-    margin: "8px 0 8px",
+    margin: 0,
+    color: "#ffffff",
     fontFamily: '"Tiro Devanagari Hindi", serif',
-    fontSize: 42,
-    lineHeight: 1,
+    fontSize: 38,
+    lineHeight: 1.08,
     fontWeight: 400,
-    color: "#fffaf0",
-    letterSpacing: "-.5px",
   },
 
   sub: {
-    margin: 0,
-    color: "rgba(255,250,240,.52)",
+    margin: "10px 0 26px",
+    color: "rgba(255,255,255,.55)",
     fontSize: 13,
-    lineHeight: 1.6,
+    lineHeight: 1.55,
   },
 
   tabs: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
-    gap: 4,
-    padding: 4,
-    borderRadius: 12,
-    border: "1px solid rgba(255,255,255,.08)",
-    background: "rgba(0,0,0,.24)",
-    marginBottom: 24,
+    gap: 3,
+    padding: 3,
+    marginBottom: 22,
+    border: "1px solid rgba(255,255,255,.10)",
+    borderRadius: 10,
+    background: "#080808",
   },
 
   tab: {
     border: 0,
-    borderRadius: 9,
-    padding: "11px 10px",
+    borderRadius: 7,
+    padding: "11px 8px",
     background: "transparent",
-    color: "rgba(255,255,255,.43)",
+    color: "rgba(255,255,255,.45)",
     cursor: "pointer",
     fontSize: 12,
-    fontWeight: 700,
-    transition: "all .2s ease",
+    fontWeight: 800,
+    fontFamily: '"DM Sans", sans-serif',
   },
 
   activeTab: {
-    background: "#f5dfb7",
-    color: "#171411",
+    background: "#e52b20",
+    color: "#ffffff",
   },
 
   form: {
     display: "grid",
-    gap: 16,
+    gap: 14,
   },
 
   field: {
@@ -3709,32 +3535,32 @@ const authStyles = {
   },
 
   label: {
-    fontSize: 10,
-    letterSpacing: 1.5,
+    color: "rgba(255,255,255,.48)",
+    fontSize: 9,
+    letterSpacing: 1.6,
     textTransform: "uppercase",
     fontWeight: 800,
-    color: "rgba(255,250,240,.45)",
   },
 
   input: {
     width: "100%",
     boxSizing: "border-box",
     border: "1px solid rgba(255,255,255,.13)",
-    borderRadius: 11,
-    padding: "14px 15px",
+    borderRadius: 9,
+    padding: "13px 14px",
     outline: "none",
-    background: "rgba(255,255,255,.055)",
-    color: "#fff",
+    background: "#171717",
+    color: "#ffffff",
     fontSize: 13,
     fontFamily: '"DM Sans", sans-serif',
   },
 
   message: {
     padding: "10px 12px",
-    borderRadius: 10,
-    background: "rgba(255,90,70,.10)",
-    border: "1px solid rgba(255,120,100,.18)",
-    color: "#ffd6ce",
+    borderRadius: 8,
+    background: "rgba(229,43,32,.10)",
+    border: "1px solid rgba(229,43,32,.28)",
+    color: "#ffaaa3",
     fontSize: 11,
     lineHeight: 1.5,
   },
@@ -3745,27 +3571,27 @@ const authStyles = {
     alignItems: "center",
     justifyContent: "space-between",
     border: 0,
-    borderRadius: 11,
-    padding: "15px 17px",
+    borderRadius: 9,
+    padding: "14px 16px",
     marginTop: 2,
-    background: "#f5dfb7",
-    color: "#171411",
-    fontWeight: 800,
+    background: "#e52b20",
+    color: "#ffffff",
+    fontWeight: 900,
     fontSize: 13,
     cursor: "pointer",
     fontFamily: '"DM Sans", sans-serif',
   },
 
   submitArrow: {
-    fontSize: 18,
+    fontSize: 17,
     lineHeight: 1,
   },
 
   hint: {
-    marginTop: 22,
+    marginTop: 20,
+    color: "rgba(255,255,255,.28)",
     fontSize: 9,
     letterSpacing: .3,
-    color: "rgba(255,250,240,.28)",
     textAlign: "center",
   },
 
@@ -4324,10 +4150,9 @@ const panelStyles = {
 
 const authResponsiveStyle = document.createElement("style");
 authResponsiveStyle.textContent = `
-  @media (max-width: 760px) {
+  @media (max-width: 520px) {
     .zuno-auth-shell {
-      grid-template-columns: 1fr !important;
-      min-height: auto !important;
+      width: 100% !important;
     }
   }
 `;
