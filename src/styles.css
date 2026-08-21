@@ -2274,9 +2274,9 @@ nav{
    ========================================================= */
 
 .player-card{
-  width:min(560px, calc(100vw - 36px)) !important;
-  height:76px !important;
-  min-height:76px !important;
+  width:min(600px, calc(100vw - 32px)) !important;
+  height:84px !important;
+  min-height:84px !important;
 
   box-sizing:border-box !important;
 
@@ -3873,11 +3873,11 @@ nav{
 
   .player-card .album-art,
   .player-card img{
-    width:56px !important;
-    height:56px !important;
+    width:62px !important;
+    height:62px !important;
 
-    min-width:56px !important;
-    min-height:56px !important;
+    min-width:62px !important;
+    min-height:62px !important;
   }
 
   .player-card .song-title{
@@ -3945,9 +3945,9 @@ nav{
 
   transform:translateX(-50%) !important;
 
-  width:min(560px, calc(100vw - 36px)) !important;
-  height:76px !important;
-  min-height:76px !important;
+  width:min(600px, calc(100vw - 32px)) !important;
+  height:84px !important;
+  min-height:84px !important;
 
   box-sizing:border-box !important;
 
@@ -4095,6 +4095,11 @@ nav{
 
 
 .player-card .control{
+  width:36px !important;
+  height:36px !important;
+  min-width:36px !important;
+  min-height:36px !important;
+
   background:transparent !important;
 
   border:none !important;
@@ -4110,11 +4115,11 @@ nav{
    ========================================================= */
 
 .player-card .control.play{
-  width:48px !important;
-  height:48px !important;
+  width:52px !important;
+  height:52px !important;
 
-  min-width:48px !important;
-  min-height:48px !important;
+  min-width:52px !important;
+  min-height:52px !important;
 
   border-radius:50% !important;
 
@@ -4193,10 +4198,10 @@ nav{
 @media(max-width:700px){
 
   .player-card{
-    width:calc(100vw - 24px) !important;
+    width:calc(100vw - 20px) !important;
 
-    height:70px !important;
-    min-height:70px !important;
+    height:76px !important;
+    min-height:76px !important;
 
     bottom:14px !important;
 
@@ -4206,11 +4211,11 @@ nav{
   }
 
   .player-card .control.play{
-    width:42px !important;
-    height:42px !important;
+    width:46px !important;
+    height:46px !important;
 
-    min-width:42px !important;
-    min-height:42px !important;
+    min-width:46px !important;
+    min-height:46px !important;
 
     font-size:15px !important;
   }
