@@ -1741,6 +1741,9 @@ function App() {
   const playerRef =
     useRef(null);
 
+  const sceneRef =
+    useRef(null);
+
   const indexRef =
     useRef(0);
 
@@ -1780,6 +1783,120 @@ function App() {
 
   const [error, setError] =
     useState("");
+
+
+  /* =======================================================
+     BACKGROUND MOTION
+     - Very slow cinematic zoom
+     - Subtle mouse parallax on desktop
+     - No layout movement
+     ======================================================= */
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+
+    if (!scene) {
+      return;
+    }
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+    const finePointer =
+      window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+      );
+
+    if (
+      reducedMotion.matches ||
+      !finePointer.matches
+    ) {
+      scene.style.setProperty(
+        "--parallax-x",
+        "0px"
+      );
+
+      scene.style.setProperty(
+        "--parallax-y",
+        "0px"
+      );
+
+      return;
+    }
+
+    let frame = null;
+
+    const handlePointerMove = (event) => {
+      const x =
+        ((event.clientX / window.innerWidth) - 0.5) * 10;
+
+      const y =
+        ((event.clientY / window.innerHeight) - 0.5) * 7;
+
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      frame = requestAnimationFrame(() => {
+        scene.style.setProperty(
+          "--parallax-x",
+          `${x.toFixed(2)}px`
+        );
+
+        scene.style.setProperty(
+          "--parallax-y",
+          `${y.toFixed(2)}px`
+        );
+      });
+    };
+
+    const resetPointer = () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      frame = requestAnimationFrame(() => {
+        scene.style.setProperty(
+          "--parallax-x",
+          "0px"
+        );
+
+        scene.style.setProperty(
+          "--parallax-y",
+          "0px"
+        );
+      });
+    };
+
+    window.addEventListener(
+      "pointermove",
+      handlePointerMove,
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "blur",
+      resetPointer
+    );
+
+    return () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+
+      window.removeEventListener(
+        "blur",
+        resetPointer
+      );
+    };
+  }, []);
 
 
   /* AUTH */
@@ -2893,8 +3010,9 @@ function App() {
     return (
       <div
         className="scene"
+        ref={sceneRef}
         style={{
-          backgroundImage:
+          "--scene-background":
             `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
         }}
       >
@@ -3121,8 +3239,9 @@ function App() {
 
       <div
         className="scene"
+        ref={sceneRef}
         style={{
-          backgroundImage:
+          "--scene-background":
             `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
         }}
       >
