@@ -35,53 +35,29 @@ const AUTH_EMAIL_DOMAIN =
 const BACKGROUNDS = [
   {
     id: 1,
-    name: "शाम की गली",
-    value: "/assets/bg1.png",
+    name: "गाँव",
+    value: "/assets/village-background.png",
   },
+
   {
     id: 2,
     name: "सूरज ढलना",
-    value: "/assets/bg2.png",
+    value:
+      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2400&q=90",
   },
+
   {
     id: 3,
-    name: "सूर्यनगर स्टेशन",
-    value: "/assets/bg3.png",
+    name: "पहाड़",
+    value:
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=90",
   },
+
   {
     id: 4,
-    name: "पहाड़ी घाटी",
-    value: "/assets/bg4.png",
-  },
-  {
-    id: 5,
-    name: "गाँव",
-    value: "/assets/bg5.png",
-  },
-  {
-    id: 6,
-    name: "रंगीन बाज़ार",
-    value: "/assets/bg6.png",
-  },
-  {
-    id: 7,
-    name: "पुरानी हवेली",
-    value: "/assets/bg7.png",
-  },
-  {
-    id: 8,
-    name: "शहर की शाम",
-    value: "/assets/bg8.png",
-  },
-  {
-    id: 9,
-    name: "देसी गली",
-    value: "/assets/bg9.png",
-  },
-  {
-    id: 10,
-    name: "सुनहरी शाम",
-    value: "/assets/bg10.png",
+    name: "शहर",
+    value:
+      "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=90",
   },
 ];
 
@@ -530,161 +506,172 @@ function AuthScreen({
 
   return (
     <div style={authStyles.page}>
+      <div style={authStyles.glowOne} />
+      <div style={authStyles.glowTwo} />
 
-      <div style={authStyles.card}>
+      <div className="zuno-auth-shell" style={authStyles.shell}>
+        <section style={authStyles.intro}>
+          <div style={authStyles.logo}>ZUNO</div>
 
-        <div style={authStyles.mark}>
-          ♫
-        </div>
-
-        <div style={authStyles.eyebrow}>
-          P's favourites
-        </div>
-
-        <h1 style={authStyles.title}>
-          {
-            mode === "login"
-              ? "Welcome back."
-              : "Make it yours."
-          }
-        </h1>
-
-        <p style={authStyles.sub}>
-          {
-            mode === "login"
-              ? "अपनी music world में वापस आओ।"
-              : "अपना नाम, username और personal space बनाओ।"
-          }
-        </p>
-
-
-        <div style={authStyles.tabs}>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMode("login");
-              setMessage("");
-            }}
-            style={{
-              ...authStyles.tab,
-              ...(mode === "login"
-                ? authStyles.activeTab
-                : {}),
-            }}
-          >
-            Login
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setMode("signup");
-              setMessage("");
-            }}
-            style={{
-              ...authStyles.tab,
-              ...(mode === "signup"
-                ? authStyles.activeTab
-                : {}),
-            }}
-          >
-            Create account
-          </button>
-
-        </div>
-
-
-        <form
-          onSubmit={submit}
-          style={authStyles.form}
-        >
-
-          {mode === "signup" && (
-            <input
-              style={authStyles.input}
-              placeholder="Your name"
-              value={displayName}
-              onChange={(e) =>
-                setDisplayName(
-                  e.target.value
-                )
-              }
-              autoComplete="name"
-            />
-          )}
-
-
-          <input
-            style={authStyles.input}
-            placeholder="Username"
-            value={username}
-            onChange={(e) =>
-              setUsername(
-                e.target.value
-              )
-            }
-            autoComplete="username"
-          />
-
-
-          <input
-            style={authStyles.input}
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) =>
-              setPassword(
-                e.target.value
-              )
-            }
-            autoComplete={
-              mode === "login"
-                ? "current-password"
-                : "new-password"
-            }
-          />
-
-
-          {message && (
-            <div
-              style={
-                authStyles.message
-              }
-            >
-              {message}
+          <div style={authStyles.introContent}>
+            <div style={authStyles.introKicker}>
+              MUSIC · PLAYLISTS · MOMENTS
             </div>
-          )}
 
+            <h1 style={authStyles.introTitle}>
+              Your music.
+              <br />
+              <span>Your space.</span>
+            </h1>
 
-          <button
-            disabled={busy}
-            type="submit"
-            style={
-              authStyles.submit
-            }
-          >
-            {
-              busy
-                ? "Please wait…"
-                : mode === "login"
-                ? "Enter my favourites"
-                : "Create my space"
-            }
-          </button>
+            <p style={authStyles.introText}>
+              अपनी पसंद की धुनों के लिए वापस आओ।
+              <br />
+              जो सुनना है, वहीं से शुरू करो।
+            </p>
+          </div>
 
-        </form>
+          <div style={authStyles.introFooter}>
+            <span>01</span>
+            <div style={authStyles.footerLine} />
+            <span>YOUR FAVOURITES</span>
+          </div>
+        </section>
 
+        <section style={authStyles.card}>
+          <div style={authStyles.cardTop}>
+            <div>
+              <div style={authStyles.eyebrow}>
+                {mode === "login" ? "WELCOME BACK" : "WELCOME TO ZUNO"}
+              </div>
 
-        <div
-          style={authStyles.hint}
-        >
-          Free setup • Supabase Auth • No paid service required
-        </div>
+              <h2 style={authStyles.title}>
+                {mode === "login"
+                  ? "Welcome back."
+                  : "Make it yours."}
+              </h2>
 
+              <p style={authStyles.sub}>
+                {mode === "login"
+                  ? "अपनी music world में वापस आओ।"
+                  : "अपना नाम, username और personal space बनाओ।"}
+              </p>
+            </div>
+
+            <div style={authStyles.mark}>♪</div>
+          </div>
+
+          <div style={authStyles.tabs}>
+            <button
+              type="button"
+              onClick={() => {
+                setMode("login");
+                setMessage("");
+              }}
+              style={{
+                ...authStyles.tab,
+                ...(mode === "login"
+                  ? authStyles.activeTab
+                  : {}),
+              }}
+            >
+              Login
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMode("signup");
+                setMessage("");
+              }}
+              style={{
+                ...authStyles.tab,
+                ...(mode === "signup"
+                  ? authStyles.activeTab
+                  : {}),
+              }}
+            >
+              Create account
+            </button>
+          </div>
+
+          <form onSubmit={submit} style={authStyles.form}>
+            {mode === "signup" && (
+              <div style={authStyles.field}>
+                <label style={authStyles.label}>Your name</label>
+                <input
+                  style={authStyles.input}
+                  placeholder="Enter your name"
+                  value={displayName}
+                  onChange={(e) =>
+                    setDisplayName(e.target.value)
+                  }
+                  autoComplete="name"
+                />
+              </div>
+            )}
+
+            <div style={authStyles.field}>
+              <label style={authStyles.label}>Username</label>
+              <input
+                style={authStyles.input}
+                placeholder="Enter your username"
+                value={username}
+                onChange={(e) =>
+                  setUsername(e.target.value)
+                }
+                autoComplete="username"
+              />
+            </div>
+
+            <div style={authStyles.field}>
+              <label style={authStyles.label}>Password</label>
+              <input
+                style={authStyles.input}
+                placeholder="Enter your password"
+                type="password"
+                value={password}
+                onChange={(e) =>
+                  setPassword(e.target.value)
+                }
+                autoComplete={
+                  mode === "login"
+                    ? "current-password"
+                    : "new-password"
+                }
+              />
+            </div>
+
+            {message && (
+              <div style={authStyles.message}>
+                {message}
+              </div>
+            )}
+
+            <button
+              disabled={busy}
+              type="submit"
+              style={authStyles.submit}
+            >
+              <span>
+                {busy
+                  ? "Please wait…"
+                  : mode === "login"
+                  ? "Enter my favourites"
+                  : "Create my space"}
+              </span>
+              <span style={authStyles.submitArrow}>↗</span>
+            </button>
+          </form>
+
+          <div style={authStyles.hint}>
+            Free setup <span>·</span> Supabase Auth{" "}
+            <span>·</span> No paid service required
+          </div>
+        </section>
       </div>
-
     </div>
+  );
   );
 }
 
@@ -711,7 +698,7 @@ function ProfilePanel({
   ] = useState(
     Number(
       profile?.background_id
-    ) || 5
+    ) || 1
   );
 
   const [busy, setBusy] =
@@ -1699,44 +1686,10 @@ function PlaylistPanel({
 
 
 /* =========================================================
-   TIME-BASED HERO TEXT
-   ========================================================= */
-
-function getTimePhrase() {
-  const hour = new Date().getHours();
-
-  if (hour >= 5 && hour < 12) {
-    return "की सुबह";
-  }
-
-  if (hour >= 12 && hour < 17) {
-    return "की दोपहर";
-  }
-
-  if (hour >= 17 && hour < 21) {
-    return "की शाम";
-  }
-
-  return "की रात";
-}
-
-function getFirstName(profile) {
-  const value =
-    profile?.display_name ||
-    profile?.username ||
-    "Priyam";
-
-  return String(value).trim().split(/\s+/)[0] || "Priyam";
-}
-
-/* =========================================================
    MAIN APP
    ========================================================= */
 
 function App() {
-
-  const [timePhrase, setTimePhrase] =
-    useState(getTimePhrase);
 
   const playerRef =
     useRef(null);
@@ -1778,52 +1731,28 @@ function App() {
   const [liked, setLiked] =
     useState(false);
 
+  const [loading, setLoading] =
+    useState(true);
+
   const [error, setError] =
     useState("");
 
 
   /* AUTH */
 
-  // Restore the last known account immediately so the main UI
-  // can render without showing a separate loading screen.
-  const getStoredUser = () => {
-    try {
-      return JSON.parse(
-        localStorage.getItem("pf_user") || "null"
-      );
-    } catch {
-      return null;
-    }
-  };
-
-  const storedUser = getStoredUser();
-
-  const storedToken =
-    localStorage.getItem("pf_access_token") || "";
-
-  const initialProfile = storedUser
-    ? {
-        id: storedUser.id,
-        username:
-          storedUser.user_metadata?.username ||
-          storedUser.email?.split("@")[0] ||
-          "user",
-        display_name:
-          storedUser.user_metadata?.display_name ||
-          storedUser.user_metadata?.username ||
-          "Priyam",
-        background_id: 5,
-      }
-    : null;
+  const [
+    sessionLoading,
+    setSessionLoading,
+  ] = useState(true);
 
   const [user, setUser] =
-    useState(storedUser);
+    useState(null);
 
   const [token, setToken] =
-    useState(storedToken);
+    useState("");
 
   const [profile, setProfile] =
-    useState(initialProfile);
+    useState(null);
 
 
   /* PANELS */
@@ -1837,22 +1766,6 @@ function App() {
     playlistOpen,
     setPlaylistOpen,
   ] = useState(false);
-
-
-  useEffect(() => {
-    const updateTimePhrase = () => {
-      setTimePhrase(getTimePhrase());
-    };
-
-    updateTimePhrase();
-
-    const timer = setInterval(
-      updateTimePhrase,
-      60000
-    );
-
-    return () => clearInterval(timer);
-  }, []);
 
 
   /* =======================================================
@@ -1925,7 +1838,7 @@ function App() {
                   "Priyam",
 
                 background_id:
-                  5,
+                  1,
               },
               accessToken
             );
@@ -1934,41 +1847,6 @@ function App() {
             created?.[0];
         }
 
-
-
-        // Old background IDs belonged to the removed background set.
-        // Keep the new village (bg5) as the safe primary background.
-        if (
-          existing &&
-          Number(existing.background_id) >= 1 &&
-          Number(existing.background_id) <= 4
-        ) {
-          try {
-            const migrated = await saveProfile(
-              {
-                id: accountUser.id,
-                username: existing.username,
-                display_name: existing.display_name,
-                background_id: 5,
-              },
-              accessToken
-            );
-
-            existing = migrated?.[0] || {
-              ...existing,
-              background_id: 5,
-            };
-          } catch (migrationError) {
-            console.warn(
-              "Background migration failed:",
-              migrationError
-            );
-            existing = {
-              ...existing,
-              background_id: 5,
-            };
-          }
-        }
 
         setProfile(
           existing || {
@@ -1988,7 +1866,7 @@ function App() {
               "Priyam",
 
             background_id:
-              5,
+              1,
           }
         );
 
@@ -2015,7 +1893,7 @@ function App() {
             "Priyam",
 
           background_id:
-            5,
+            1,
         });
       }
     };
@@ -2158,7 +2036,12 @@ function App() {
           );
 
         }
-};
+
+
+        setSessionLoading(
+          false
+        );
+      };
 
 
     boot();
@@ -2246,128 +2129,47 @@ function App() {
             token
           );
 
-        /* Preserve the song that is currently playing when the
-           playlist is refreshed. The old code always forced index 0,
-           which made the player jump back to the first song after a
-           refresh even though another song was still playing. */
-        const currentSongId =
-          tracksRef.current?.[indexRef.current]?.id ||
-          null;
-
-        const preservedIndex =
-          currentSongId
-            ? songs.findIndex(
-                (song) => song.id === currentSongId
-              )
-            : -1;
-
-        const safeIndex =
-          preservedIndex >= 0 ? preservedIndex : 0;
-
-        const hadCurrentSong =
-          Boolean(currentSongId) &&
-          preservedIndex >= 0;
-
         tracksRef.current =
           songs;
-
-        indexRef.current =
-          safeIndex;
 
         setTracks(
           songs
         );
 
-        setIndex(
-          safeIndex
-        );
+        indexRef.current =
+          0;
 
-        /* If the currently playing song still exists, do NOT reload
-           YouTube. This keeps playback and the visible song title in
-           sync. Only load a song when the old one disappeared. */
-        if (
-          !hadCurrentSong &&
-          songs.length &&
-          playerRef.current
-        ) {
-          playerRef.current.loadVideoById({
-            videoId: songs[safeIndex].id,
-            startSeconds: 0,
-          });
-        }
+        setIndex(0);
 
         if (!songs.length) {
-          // An empty playlist is a normal state for a new account.
-          // Keep the complete website UI visible and show the instruction
-          // only inside the video player area.
           setError("");
           playerRef.current?.stopVideo?.();
         } else {
           setError("");
         }
-} catch (err) {
+
+        setLoading(false);
+
+      } catch (err) {
         console.error(err);
 
         setError(
           err?.message ||
           "Tumhari playlists se songs load nahi ho sake."
         );
-}
+
+        setLoading(false);
+      }
     };
 
 
   useEffect(() => {
 
-    if (!user || !token)
+    if (!user)
       return;
 
 
-    /* Let the first ZUNO UI paint before fetching playlist data. */
-    const runInitialSongLoad =
-      () => {
-        refreshSongs();
-      };
-
-
-    let cleanupInitialLoad;
-
-
-    if (
-      "requestIdleCallback" in window
-    ) {
-
-      const idleId =
-        window.requestIdleCallback(
-          runInitialSongLoad,
-          {
-            timeout: 1200,
-          }
-        );
-
-
-      cleanupInitialLoad =
-        () =>
-          window.cancelIdleCallback(
-            idleId
-          );
-
-    }
-
-    else {
-
-      const frameId =
-        window.requestAnimationFrame(
-          runInitialSongLoad
-        );
-
-
-      cleanupInitialLoad =
-        () =>
-          window.cancelAnimationFrame(
-            frameId
-          );
-
-    }
+    refreshSongs();
 
 
     const interval =
@@ -2377,15 +2179,10 @@ function App() {
       );
 
 
-    return () => {
-
-      cleanupInitialLoad?.();
-
+    return () =>
       clearInterval(
         interval
       );
-
-    };
 
   }, [user, token]);
 
@@ -2432,6 +2229,7 @@ function App() {
       queueOpen ||
       profileOpen ||
       playlistOpen ||
+      sessionLoading ||
       !user
         ? "hidden"
         : "";
@@ -2446,6 +2244,7 @@ function App() {
     queueOpen,
     profileOpen,
     playlistOpen,
+    sessionLoading,
     user,
   ]);
 
@@ -2833,6 +2632,41 @@ function App() {
 
 
   /* =======================================================
+     LOADING
+     ======================================================= */
+
+  if (
+    sessionLoading
+  ) {
+
+    return (
+      <div
+        style={
+          authStyles.page
+        }
+      >
+
+        <div
+          style={
+            authStyles.loading
+          }
+        >
+          P's favourites
+
+          <br />
+
+          <small>
+            आपकी music world तैयार हो रही है…
+          </small>
+
+        </div>
+
+      </div>
+    );
+  }
+
+
+  /* =======================================================
      LOGIN
      ======================================================= */
 
@@ -2878,10 +2712,54 @@ function App() {
       (
         Number(
           profile.background_id
-        ) || 5
+        ) || 1
       ) - 1
     ] ||
-    BACKGROUNDS[4];
+    BACKGROUNDS[0];
+
+
+  /* =======================================================
+     LOADING SONGS
+     ======================================================= */
+
+  if (loading) {
+
+    return (
+      <div
+        className="scene"
+        style={{
+          backgroundImage:
+            `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
+        }}
+      >
+
+        <div
+          style={{
+            minHeight:
+              "100vh",
+
+            display:
+              "flex",
+
+            alignItems:
+              "center",
+
+            justifyContent:
+              "center",
+
+            color:
+              "#f5dfb7",
+
+            fontSize:
+              18,
+          }}
+        >
+          गीतों की सूची तैयार हो रही है...
+        </div>
+
+      </div>
+    );
+  }
 
 
   /* =======================================================
@@ -2940,185 +2818,6 @@ function App() {
 
     <div className="site">
 
-
-        {/* ANIMATION STYLES */}
-        <style>{`
-          .ambient-effects{
-            position:absolute;
-            inset:0;
-            z-index:0;
-            pointer-events:none;
-            overflow:hidden;
-          }
-
-          .ambient-glow{
-            position:absolute;
-            width:42vw;
-            height:42vw;
-            min-width:320px;
-            min-height:320px;
-            border-radius:50%;
-            filter:blur(70px);
-            opacity:.16;
-            mix-blend-mode:screen;
-            will-change:transform;
-          }
-
-          .ambient-glow-one{
-            top:-18%;
-            left:-12%;
-            background:radial-gradient(circle,rgba(255,196,116,.72) 0%,rgba(255,196,116,0) 68%);
-            animation:pfAmbientGlowOne 20s ease-in-out infinite alternate;
-          }
-
-          .ambient-glow-two{
-            right:-16%;
-            bottom:-20%;
-            background:radial-gradient(circle,rgba(132,183,255,.48) 0%,rgba(132,183,255,0) 68%);
-            animation:pfAmbientGlowTwo 24s ease-in-out infinite alternate;
-          }
-
-          .ambient-vignette{
-            position:absolute;
-            inset:0;
-            background:radial-gradient(circle at 50% 48%,transparent 34%,rgba(4,7,7,.18) 100%);
-          }
-
-          .ambient-particles{
-            position:absolute;
-            inset:0;
-          }
-
-          .ambient-particle{
-            position:absolute;
-            left:var(--particle-x);
-            top:var(--particle-y);
-            width:var(--particle-size);
-            height:var(--particle-size);
-            border-radius:50%;
-            background:rgba(255,235,196,.72);
-            box-shadow:0 0 10px rgba(255,220,164,.32);
-            opacity:0;
-            animation:pfParticleFloat var(--particle-duration) ease-in-out var(--particle-delay) infinite;
-          }
-
-          .music-visualizer{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:3px;
-            width:58px;
-            height:30px;
-            margin:0 2px;
-            opacity:.48;
-            transition:opacity .35s ease,transform .35s ease;
-            flex-shrink:0;
-          }
-
-          .music-visualizer.is-playing{
-            opacity:.95;
-            transform:translateY(-1px);
-          }
-
-          .music-visualizer.is-idle{
-            opacity:.24;
-          }
-
-          .visualizer-bar{
-            display:block;
-            width:3px;
-            height:var(--bar-height);
-            max-height:24px;
-            border-radius:999px;
-            background:currentColor;
-            transform:scaleY(.22);
-            transform-origin:center;
-            transition:transform .35s ease;
-          }
-
-          .music-visualizer.is-playing .visualizer-bar{
-            animation:pfVisualizer .72s ease-in-out var(--bar-delay) infinite alternate;
-          }
-
-          @keyframes pfAmbientGlowOne{
-            0%{transform:translate3d(-3%,0,0) scale(.96);}
-            50%{transform:translate3d(12%,9%,0) scale(1.08);}
-            100%{transform:translate3d(4%,18%,0) scale(1);}
-          }
-
-          @keyframes pfAmbientGlowTwo{
-            0%{transform:translate3d(4%,5%,0) scale(1);}
-            50%{transform:translate3d(-10%,-8%,0) scale(1.08);}
-            100%{transform:translate3d(-3%,-16%,0) scale(.96);}
-          }
-
-          @keyframes pfParticleFloat{
-            0%{
-              opacity:0;
-              transform:translate3d(0,12px,0) scale(.72);
-            }
-            18%{opacity:.28;}
-            50%{
-              opacity:.55;
-              transform:translate3d(12px,-24px,0) scale(1);
-            }
-            82%{opacity:.2;}
-            100%{
-              opacity:0;
-              transform:translate3d(-8px,-52px,0) scale(.65);
-            }
-          }
-
-          @keyframes pfVisualizer{
-            0%{transform:scaleY(.18);}
-            25%{transform:scaleY(.58);}
-            50%{transform:scaleY(1);}
-            75%{transform:scaleY(.42);}
-            100%{transform:scaleY(.82);}
-          }
-
-
-          .site .scene > *:not(.ambient-effects){
-            position:relative;
-            z-index:1;
-          }
-
-          @media (max-width:700px){
-            .ambient-glow{
-              filter:blur(55px);
-              opacity:.12;
-            }
-
-            .music-visualizer{
-              width:44px;
-              gap:2px;
-            }
-
-            .visualizer-bar{
-              width:2.5px;
-              max-height:20px;
-            }
-
-            .ambient-particle:nth-child(n+13){
-              display:none;
-            }
-          }
-
-          @media (prefers-reduced-motion:reduce){
-            .ambient-glow-one,
-            .ambient-glow-two,
-            .ambient-particle,
-            .music-visualizer.is-playing .visualizer-bar{
-              animation:none !important;
-            }
-
-            .ambient-particle{
-              opacity:.12;
-              transform:none;
-            }
-          }
-        `}</style>
-
       <div
         className="scene"
         style={{
@@ -3127,35 +2826,44 @@ function App() {
         }}
       >
 
-        {/* AMBIENT BACKGROUND ANIMATION */}
-        <div className="ambient-effects" aria-hidden="true">
-          <div className="ambient-glow ambient-glow-one" />
-          <div className="ambient-glow ambient-glow-two" />
-          <div className="ambient-vignette" />
-          <div className="ambient-particles">
-            {Array.from({ length: 18 }).map((_, particleIndex) => (
-              <span
-                key={particleIndex}
-                className="ambient-particle"
-                style={{
-                  "--particle-x": `${6 + ((particleIndex * 37) % 88)}%`,
-                  "--particle-y": `${12 + ((particleIndex * 19) % 76)}%`,
-                  "--particle-delay": `${(particleIndex * 0.73) % 8}s`,
-                  "--particle-duration": `${8 + ((particleIndex * 1.7) % 7)}s`,
-                  "--particle-size": `${2 + (particleIndex % 3)}px`,
-                }}
-              />
-            ))}
-          </div>
-        </div>
 
         {/* NAV */}
 
         <header className="nav">
 
-          <div className="brand-mark" aria-label="ZUNO">
-            <div className="brand-copy brand-zuno">
-              <strong>ZUNO</strong>
+          <div className="brand-mark" aria-label="P's Favourites">
+            <div className="brand-icon">
+              <svg
+                viewBox="0 0 48 48"
+                aria-hidden="true"
+              >
+                <path
+                  d="M14 34V12h11.5c5.5 0 8.5 3.1 8.5 7.7s-3 7.7-8.5 7.7H19"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M28 13.5c2.5 1.2 4.8 2.8 6.8 4.8"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                />
+                <circle
+                  cx="34.5"
+                  cy="30.5"
+                  r="2.2"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+
+            <div className="brand-copy">
+              <strong>P's</strong>
+              <span>favourites</span>
             </div>
           </div>
 
@@ -3221,18 +2929,74 @@ function App() {
 
         <main className="layout">
 
-          {/* TIME-BASED HERO */}
-          <section className="hero greeting-hero" aria-label="Personal time greeting">
+
+          {/* HERO */}
+
+          <section className="hero">
+
+            <div className="eyebrow">
+              मेरी पसंद · मेरी धुनें
+            </div>
+
+
             <h1>
-              <span className="hero-name">{getFirstName(profile)}</span>
-              <span className="hero-time">{timePhrase}</span>
+              {
+                profile.display_name ||
+                "Priyam"
+              }
+              {" "}की
+              <br />
+              पसंद
             </h1>
+
+
+            <p>
+              हर गीत की अपनी एक कहानी होती है।
+              ये वही धुनें हैं जिन्हें मैं बार-बार
+              सुनना पसंद करता हूँ।
+            </p>
+
           </section>
 
-          {/* HIDDEN YOUTUBE HOST
-              The actual YouTube player remains mounted for audio playback,
-              while its visual video card is intentionally hidden. */}
-          <div id="youtube-player" className="youtube-player-hidden" aria-hidden="true" />
+
+          {currentTrack ? (
+            <>
+
+          {/* VIDEO CARD */}
+
+          <section className="video-card">
+
+            <div className="video-card-heading">
+
+              <div>
+                <div className="video-card-kicker">
+                  VIDEO
+                </div>
+
+                <div className="video-card-title">
+                  अभी चल रहा गीत
+                </div>
+              </div>
+
+              <span className="video-card-mark">
+                ▶
+              </span>
+
+            </div>
+
+            <div className="video-shell">
+
+              <div id="youtube-player" />
+
+            </div>
+
+            <div className="video-card-note">
+              संगीत YouTube के आधिकारिक प्लेयर के माध्यम से चल रहा है।
+            </div>
+
+          </section>
+
+
 
 
           {/* PLAYER */}
@@ -3253,12 +3017,31 @@ function App() {
 
 
             <div className="now-row">
-              <div className="player-song-label">
-                {
-                  currentTrack?.title ||
-                  "अपनी पसंद से कोई गीत चुनें"
-                }
+
+              <div>
+
+                <div className="kicker">
+                  अभी बज रहा है
+                </div>
+
+
+                <div className="song-title">
+                  {
+                    currentTrack?.title ||
+                    "अपनी पसंद से कोई गीत चुनें"
+                  }
+                </div>
+
+
+                <div className="artist">
+                  {
+                    currentTrack?.artist ||
+                    "Playlist से गीत शुरू करें"
+                  }
+                </div>
+
               </div>
+
 
               <button
                 type="button"
@@ -3280,6 +3063,7 @@ function App() {
                     : "♡"
                 }
               </button>
+
             </div>
 
 
@@ -3313,25 +3097,6 @@ function App() {
 
 
             <div className="controls">
-
-              {/* MUSIC-REACTIVE VISUALIZER */}
-              <div
-                className={`music-visualizer ${
-                  playing ? "is-playing" : ""
-                } ${!currentTrack ? "is-idle" : ""}`}
-                aria-hidden="true"
-              >
-                {Array.from({ length: 9 }).map((_, barIndex) => (
-                  <span
-                    key={barIndex}
-                    className="visualizer-bar"
-                    style={{
-                      "--bar-delay": `${barIndex * 0.08}s`,
-                      "--bar-height": `${8 + ((barIndex * 11) % 17)}px`,
-                    }}
-                  />
-                ))}
-              </div>
 
               <button
                 type="button"
@@ -3430,6 +3195,84 @@ function App() {
 
           </section>
 
+            </>
+          ) : (
+            <section
+              className="empty-library-card"
+              style={{
+                width: "min(560px,100%)",
+                position: "relative",
+                zIndex: 10,
+                padding: "34px 36px",
+                border: "1px solid rgba(255,255,255,.28)",
+                borderRadius: 24,
+                background: "rgba(255,255,255,.12)",
+                backdropFilter: "blur(20px) saturate(135%)",
+                WebkitBackdropFilter: "blur(20px) saturate(135%)",
+                boxShadow: "0 24px 70px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.28)",
+                color: "#fff",
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 800,
+                  letterSpacing: 2,
+                  opacity: 0.68,
+                  marginBottom: 10,
+                }}
+              >
+                YOUR MUSIC SPACE
+              </div>
+
+              <h2
+                style={{
+                  margin: 0,
+                  fontFamily: '"Tiro Devanagari Hindi",serif',
+                  fontSize: "clamp(28px,4vw,42px)",
+                  lineHeight: 1.15,
+                  textShadow: "0 3px 18px rgba(0,0,0,.3)",
+                }}
+              >
+                Abhi playlist khaali hai.
+              </h2>
+
+              <p
+                style={{
+                  margin: "12px auto 24px",
+                  maxWidth: 430,
+                  fontFamily: '"DM Sans",sans-serif',
+                  fontSize: 14,
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,.82)",
+                }}
+              >
+                Apni pehli playlist banao aur YouTube se apne favourite songs add karo.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => setPlaylistOpen(true)}
+                style={{
+                  border: "1px solid rgba(255,255,255,.42)",
+                  borderRadius: 999,
+                  padding: "11px 18px",
+                  background: "rgba(255,255,255,.16)",
+                  color: "#fff",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  cursor: "pointer",
+                  fontFamily: '"DM Sans",sans-serif',
+                  fontSize: 13,
+                  fontWeight: 800,
+                  boxShadow: "0 8px 22px rgba(0,0,0,.16)",
+                }}
+              >
+                ♫ Open Playlists
+              </button>
+            </section>
+          )}
 
         </main>
 
@@ -3590,6 +3433,21 @@ function App() {
       </div>
 
 
+      {/* FOOTER */}
+
+      <footer className="footer">
+
+        This website is owned by{" "}
+
+        <strong>
+          {
+            profile.display_name ||
+            "Priyam Mishra"
+          }
+        </strong>
+
+      </footer>
+
     </div>
   );
 }
@@ -3634,316 +3492,291 @@ const topButton = {
 
 
 const authStyles = {
-
   page: {
-
-    minHeight:
-      "100vh",
-
-    display:
-      "grid",
-
-    placeItems:
-      "center",
-
-    padding:
-      20,
-
+    minHeight: "100vh",
+    width: "100%",
+    boxSizing: "border-box",
+    position: "relative",
+    overflow: "hidden",
+    display: "grid",
+    placeItems: "center",
+    padding: "32px",
     background:
-      "radial-gradient(circle at 20% 10%,rgba(245,223,183,.18),transparent 30%),linear-gradient(135deg,#111,#25221d)",
-
-    color:
-      "#f5dfb7",
-
-    fontFamily:
-      '"DM Sans",sans-serif',
+      "radial-gradient(circle at 15% 20%, rgba(205,142,80,.13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(150,76,45,.12), transparent 32%), #12110f",
+    color: "#f4ead9",
+    fontFamily: '"DM Sans", sans-serif',
   },
 
+  glowOne: {
+    position: "absolute",
+    width: 420,
+    height: 420,
+    borderRadius: "50%",
+    left: "-180px",
+    top: "-170px",
+    background: "rgba(244,207,155,.07)",
+    filter: "blur(80px)",
+    pointerEvents: "none",
+  },
+
+  glowTwo: {
+    position: "absolute",
+    width: 360,
+    height: 360,
+    borderRadius: "50%",
+    right: "-150px",
+    bottom: "-160px",
+    background: "rgba(157,73,43,.09)",
+    filter: "blur(80px)",
+    pointerEvents: "none",
+  },
+
+  shell: {
+    width: "min(1040px, 100%)",
+    minHeight: 610,
+    display: "grid",
+    gridTemplateColumns: "1.05fr .95fr",
+    position: "relative",
+    zIndex: 1,
+    border: "1px solid rgba(255,255,255,.12)",
+    borderRadius: 30,
+    overflow: "hidden",
+    background: "rgba(25,23,20,.78)",
+    boxShadow:
+      "0 40px 120px rgba(0,0,0,.45), inset 0 1px rgba(255,255,255,.08)",
+    backdropFilter: "blur(24px)",
+    WebkitBackdropFilter: "blur(24px)",
+  },
+
+  intro: {
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    minHeight: 610,
+    padding: "42px 48px",
+    borderRight: "1px solid rgba(255,255,255,.08)",
+    background:
+      "linear-gradient(145deg, rgba(255,255,255,.045), rgba(255,255,255,.012))",
+  },
+
+  logo: {
+    fontSize: 22,
+    lineHeight: 1,
+    letterSpacing: 4,
+    fontWeight: 900,
+    color: "#fff8ec",
+  },
+
+  introContent: {
+    marginTop: 30,
+  },
+
+  introKicker: {
+    fontSize: 10,
+    letterSpacing: 2.6,
+    fontWeight: 800,
+    color: "rgba(244,234,217,.55)",
+    marginBottom: 22,
+  },
+
+  introTitle: {
+    margin: 0,
+    fontFamily: '"Tiro Devanagari Hindi", serif',
+    fontSize: "clamp(58px, 7vw, 94px)",
+    lineHeight: .92,
+    letterSpacing: "-2px",
+    fontWeight: 400,
+    color: "#f5dfb7",
+  },
+
+  introTitleSpan: {},
+
+  introText: {
+    margin: "28px 0 0",
+    color: "rgba(244,234,217,.62)",
+    fontSize: 14,
+    lineHeight: 1.75,
+    maxWidth: 360,
+  },
+
+  introFooter: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    fontSize: 9,
+    letterSpacing: 2,
+    fontWeight: 800,
+    color: "rgba(244,234,217,.4)",
+  },
+
+  footerLine: {
+    width: 42,
+    height: 1,
+    background: "rgba(244,234,217,.25)",
+  },
 
   card: {
-
-    width:
-      "min(430px,92vw)",
-
-    padding:
-      34,
-
-    border:
-      "1px solid rgba(255,255,255,.24)",
-
-    borderRadius:
-      26,
-
-    background:
-      "rgba(255,255,255,.09)",
-
-    backdropFilter:
-      "blur(24px) saturate(140%)",
-
-    WebkitBackdropFilter:
-      "blur(24px) saturate(140%)",
-
-    boxShadow:
-      "0 30px 90px rgba(0,0,0,.35)",
+    width: "100%",
+    boxSizing: "border-box",
+    padding: "54px 52px 42px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    background: "rgba(12,11,10,.34)",
   },
 
+  cardTop: {
+    display: "flex",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 20,
+    marginBottom: 28,
+  },
 
   mark: {
-
-    width:
-      46,
-
-    height:
-      46,
-
-    borderRadius:
-      "50%",
-
-    display:
-      "grid",
-
-    placeItems:
-      "center",
-
-    background:
-      "rgba(255,255,255,.13)",
-
-    fontSize:
-      22,
-
-    marginBottom:
-      18,
+    width: 42,
+    height: 42,
+    flexShrink: 0,
+    display: "grid",
+    placeItems: "center",
+    borderRadius: "50%",
+    border: "1px solid rgba(245,223,183,.22)",
+    background: "rgba(245,223,183,.07)",
+    color: "#f5dfb7",
+    fontSize: 20,
   },
-
 
   eyebrow: {
-
-    fontSize:
-      11,
-
-    letterSpacing:
-      2,
-
-    textTransform:
-      "uppercase",
-
-    opacity:
-      0.68,
+    fontSize: 9,
+    letterSpacing: 2.5,
+    fontWeight: 800,
+    color: "rgba(245,223,183,.55)",
   },
-
 
   title: {
-
-    margin:
-      "8px 0 6px",
-
-    fontFamily:
-      '"Tiro Devanagari Hindi",serif',
-
-    fontSize:
-      38,
-
-    lineHeight:
-      1.05,
-
-    color:
-      "#fff",
+    margin: "8px 0 8px",
+    fontFamily: '"Tiro Devanagari Hindi", serif',
+    fontSize: 42,
+    lineHeight: 1,
+    fontWeight: 400,
+    color: "#fffaf0",
+    letterSpacing: "-.5px",
   },
-
 
   sub: {
-
-    margin:
-      "0 0 22px",
-
-    opacity:
-      0.72,
-
-    lineHeight:
-      1.6,
+    margin: 0,
+    color: "rgba(255,250,240,.52)",
+    fontSize: 13,
+    lineHeight: 1.6,
   },
-
 
   tabs: {
-
-    display:
-      "flex",
-
-    gap:
-      5,
-
-    padding:
-      5,
-
-    borderRadius:
-      14,
-
-    background:
-      "rgba(0,0,0,.18)",
-
-    marginBottom:
-      18,
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 4,
+    padding: 4,
+    borderRadius: 12,
+    border: "1px solid rgba(255,255,255,.08)",
+    background: "rgba(0,0,0,.24)",
+    marginBottom: 24,
   },
-
 
   tab: {
-
-    flex:
-      1,
-
-    border:
-      0,
-
-    borderRadius:
-      10,
-
-    padding:
-      "10px 8px",
-
-    background:
-      "transparent",
-
-    color:
-      "rgba(255,255,255,.62)",
-
-    cursor:
-      "pointer",
-
-    fontWeight:
-      700,
+    border: 0,
+    borderRadius: 9,
+    padding: "11px 10px",
+    background: "transparent",
+    color: "rgba(255,255,255,.43)",
+    cursor: "pointer",
+    fontSize: 12,
+    fontWeight: 700,
+    transition: "all .2s ease",
   },
-
 
   activeTab: {
-
-    background:
-      "rgba(255,255,255,.15)",
-
-    color:
-      "#fff",
+    background: "#f5dfb7",
+    color: "#171411",
   },
-
 
   form: {
-
-    display:
-      "grid",
-
-    gap:
-      12,
+    display: "grid",
+    gap: 16,
   },
 
+  field: {
+    display: "grid",
+    gap: 7,
+  },
+
+  label: {
+    fontSize: 10,
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
+    fontWeight: 800,
+    color: "rgba(255,250,240,.45)",
+  },
 
   input: {
-
-    width:
-      "100%",
-
-    boxSizing:
-      "border-box",
-
-    border:
-      "1px solid rgba(255,255,255,.2)",
-
-    borderRadius:
-      12,
-
-    padding:
-      "13px 14px",
-
-    outline:
-      "none",
-
-    background:
-      "rgba(255,255,255,.09)",
-
-    color:
-      "#fff",
+    width: "100%",
+    boxSizing: "border-box",
+    border: "1px solid rgba(255,255,255,.13)",
+    borderRadius: 11,
+    padding: "14px 15px",
+    outline: "none",
+    background: "rgba(255,255,255,.055)",
+    color: "#fff",
+    fontSize: 13,
+    fontFamily: '"DM Sans", sans-serif',
   },
-
 
   message: {
-
-    padding:
-      "10px 12px",
-
-    borderRadius:
-      10,
-
-    background:
-      "rgba(255,90,70,.13)",
-
-    border:
-      "1px solid rgba(255,120,100,.22)",
-
-    color:
-      "#ffd6ce",
-
-    fontSize:
-      12,
-
-    lineHeight:
-      1.5,
+    padding: "10px 12px",
+    borderRadius: 10,
+    background: "rgba(255,90,70,.10)",
+    border: "1px solid rgba(255,120,100,.18)",
+    color: "#ffd6ce",
+    fontSize: 11,
+    lineHeight: 1.5,
   },
-
 
   submit: {
-
-    border:
-      0,
-
-    borderRadius:
-      12,
-
-    padding:
-      14,
-
-    background:
-      "#f5dfb7",
-
-    color:
-      "#171411",
-
-    fontWeight:
-      800,
-
-    cursor:
-      "pointer",
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    border: 0,
+    borderRadius: 11,
+    padding: "15px 17px",
+    marginTop: 2,
+    background: "#f5dfb7",
+    color: "#171411",
+    fontWeight: 800,
+    fontSize: 13,
+    cursor: "pointer",
+    fontFamily: '"DM Sans", sans-serif',
   },
 
+  submitArrow: {
+    fontSize: 18,
+    lineHeight: 1,
+  },
 
   hint: {
-
-    marginTop:
-      18,
-
-    fontSize:
-      11,
-
-    opacity:
-      0.45,
-
-    textAlign:
-      "center",
+    marginTop: 22,
+    fontSize: 9,
+    letterSpacing: .3,
+    color: "rgba(255,250,240,.28)",
+    textAlign: "center",
   },
-
 
   loading: {
-
-    textAlign:
-      "center",
-
-    fontFamily:
-      '"Tiro Devanagari Hindi",serif',
-
-    fontSize:
-      26,
-
-    lineHeight:
-      1.6,
+    textAlign: "center",
+    fontFamily: '"Tiro Devanagari Hindi",serif',
+    fontSize: 26,
+    lineHeight: 1.6,
   },
 };
-
 
 const panelStyles = {
 
@@ -4488,6 +4321,21 @@ const panelStyles = {
   },
 };
 
+
+
+const authResponsiveStyle = document.createElement("style");
+authResponsiveStyle.textContent = `
+  @media (max-width: 760px) {
+    .zuno-auth-shell {
+      grid-template-columns: 1fr !important;
+      min-height: auto !important;
+    }
+  }
+`;
+if (!document.head.querySelector('[data-zuno-auth-responsive]')) {
+  authResponsiveStyle.dataset.zunoAuthResponsive = "true";
+  document.head.appendChild(authResponsiveStyle);
+}
 
 /* =========================================================
    START APP
