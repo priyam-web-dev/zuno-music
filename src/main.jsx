@@ -2596,7 +2596,7 @@ function App() {
             authStyles.loading
           }
         >
-          P's favourites
+          ZUNO
 
           <br />
 
@@ -2776,7 +2776,7 @@ function App() {
 
         <header className="nav">
 
-          <div className="brand-mark" aria-label="P's Favourites">
+          <div className="brand-mark" aria-label="ZUNO">
             <div className="brand-icon">
               <svg
                 viewBox="0 0 48 48"
