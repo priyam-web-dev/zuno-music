@@ -3769,10 +3769,10 @@ const authStyles = {
       20,
 
     background:
-      "radial-gradient(circle at 20% 10%,rgba(245,223,183,.18),transparent 30%),linear-gradient(135deg,#111,#25221d)",
+      "#000",
 
     color:
-      "#f5dfb7",
+      "#fff",
 
     fontFamily:
       '"DM Sans",sans-serif',
@@ -3794,7 +3794,7 @@ const authStyles = {
       26,
 
     background:
-      "rgba(255,255,255,.09)",
+      "rgba(8,8,8,.94)",
 
     backdropFilter:
       "blur(24px) saturate(140%)",
@@ -3825,7 +3825,7 @@ const authStyles = {
       "center",
 
     background:
-      "rgba(255,255,255,.13)",
+      "rgba(255,255,255,.08)",
 
     fontSize:
       22,
@@ -3898,7 +3898,7 @@ const authStyles = {
       14,
 
     background:
-      "rgba(0,0,0,.18)",
+      "rgba(255,255,255,.05)",
 
     marginBottom:
       18,
@@ -3936,7 +3936,7 @@ const authStyles = {
   activeTab: {
 
     background:
-      "rgba(255,255,255,.15)",
+      "rgba(255,255,255,.10)",
 
     color:
       "#fff",
@@ -3974,7 +3974,7 @@ const authStyles = {
       "none",
 
     background:
-      "rgba(255,255,255,.09)",
+      "rgba(255,255,255,.04)",
 
     color:
       "#fff",
@@ -4018,10 +4018,10 @@ const authStyles = {
       14,
 
     background:
-      "#f5dfb7",
+      "#fff",
 
     color:
-      "#171411",
+      "#000",
 
     fontWeight:
       800,
