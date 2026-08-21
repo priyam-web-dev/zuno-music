@@ -672,7 +672,6 @@ function AuthScreen({
       </div>
     </div>
   );
-  );
 }
 
 
