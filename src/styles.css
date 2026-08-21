@@ -54,17 +54,46 @@ input{
 .scene{
   min-height:100vh;
   position:relative;
+  overflow:hidden;
 
-  background:
-    linear-gradient(
-      90deg,
-      rgba(5,10,9,.22),
-      rgba(5,8,8,.02) 48%,
-      rgba(5,8,8,.14)
-    ),
-    url("/assets/bg5.png") center center / cover fixed no-repeat;
+  background:#111;
+
+  --parallax-x:0px;
+  --parallax-y:0px;
 
   animation:sceneReveal 1s ease both;
+}
+
+.scene::after{
+  content:"";
+  position:absolute;
+  inset:-4%;
+  z-index:0;
+  pointer-events:none;
+
+  background-image:var(--scene-background);
+  background-position:center center;
+  background-size:cover;
+  background-repeat:no-repeat;
+
+  transform:
+    translate3d(
+      var(--parallax-x),
+      var(--parallax-y),
+      0
+    )
+    scale(1.035);
+
+  transform-origin:center center;
+
+  will-change:transform;
+
+  animation:
+    backgroundCinematicZoom
+    25s
+    ease-in-out
+    infinite
+    alternate;
 }
 
 .scene::before{
@@ -72,7 +101,7 @@ input{
   position:fixed;
   inset:0;
   pointer-events:none;
-  z-index:0;
+  z-index:1;
 
   background:radial-gradient(
     ellipse at center,
@@ -1200,6 +1229,28 @@ body .footer,
   }
 }
 
+@keyframes backgroundCinematicZoom{
+  from{
+    transform:
+      translate3d(
+        var(--parallax-x),
+        var(--parallax-y),
+        0
+      )
+      scale(1.035);
+  }
+
+  to{
+    transform:
+      translate3d(
+        var(--parallax-x),
+        var(--parallax-y),
+        0
+      )
+      scale(1.065);
+  }
+}
+
 @keyframes footerReveal{
   from{
     opacity:0;
@@ -1224,6 +1275,13 @@ body .footer,
   }
 }
 
+
+@media (prefers-reduced-motion:reduce){
+  .scene::after{
+    animation:none !important;
+    transform:scale(1.035) !important;
+  }
+}
 
 /* =========================================
    RESPONSIVE
