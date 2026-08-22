@@ -2904,6 +2904,15 @@ function App() {
       ? `https://i.ytimg.com/vi/${currentTrack.id}/hqdefault.jpg`
       : "";
 
+  const coverFallbackUrls = currentTrack?.id
+    ? [
+        `https://i.ytimg.com/vi/${currentTrack.id}/maxresdefault.jpg`,
+        `https://i.ytimg.com/vi/${currentTrack.id}/hqdefault.jpg`,
+        `https://i.ytimg.com/vi/${currentTrack.id}/mqdefault.jpg`,
+        `https://i.ytimg.com/vi/${currentTrack.id}/default.jpg`,
+      ]
+    : [];
+
 
   /* =======================================================
      MAIN UI
@@ -2975,53 +2984,111 @@ function App() {
             animation:pfParticleFloat var(--particle-duration) ease-in-out var(--particle-delay) infinite;
           }
 
-          .music-visualizer{
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            gap:3px;
-            width:58px;
-            height:30px;
-            margin:0 2px;
-            opacity:.48;
-            transition:opacity .35s ease,transform .35s ease;
-            flex-shrink:0;
+          /* =====================================================
+             PLAYER COVER + LARGER PILL OVERRIDES
+             ===================================================== */
+
+          .player-card{
+            width:min(720px, calc(100vw - 40px)) !important;
+            height:104px !important;
+            min-height:104px !important;
+            padding:12px 18px !important;
+            gap:14px !important;
+            border-radius:999px !important;
           }
 
           .player-track-meta{
-            display:flex;
-            align-items:center;
-            gap:12px;
-            min-width:0;
-            flex:1;
+            display:flex !important;
+            align-items:center !important;
+            gap:14px !important;
+            min-width:0 !important;
+            flex:1 1 auto !important;
           }
 
           .player-cover{
-            width:52px;
-            height:52px;
-            min-width:52px;
-            border-radius:50%;
-            overflow:hidden;
-            display:grid;
-            place-items:center;
-            flex-shrink:0;
-            position:relative;
-            background:rgba(255,255,255,.12);
-            border:1px solid rgba(255,255,255,.38);
-            box-shadow:0 8px 24px rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.08);
-            color:rgba(255,255,255,.72);
+            width:72px !important;
+            height:72px !important;
+            min-width:72px !important;
+            min-height:72px !important;
+            aspect-ratio:1 / 1 !important;
+            border-radius:50% !important;
+            overflow:hidden !important;
+            display:grid !important;
+            place-items:center !important;
+            flex:0 0 72px !important;
+            position:relative !important;
+            isolation:isolate !important;
+            background:rgba(255,255,255,.10) !important;
+            border:1px solid rgba(255,255,255,.42) !important;
+            box-shadow:0 8px 24px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.10) !important;
+            color:rgba(255,255,255,.78) !important;
           }
 
           .player-cover img{
-            width:100%;
-            height:100%;
-            display:block;
-            object-fit:cover;
-            border-radius:50%;
+            position:absolute !important;
+            inset:-2px !important;
+            width:calc(100% + 4px) !important;
+            height:calc(100% + 4px) !important;
+            min-width:0 !important;
+            min-height:0 !important;
+            display:block !important;
+            object-fit:cover !important;
+            object-position:center !important;
+            border-radius:50% !important;
+            transform-origin:center center !important;
+            backface-visibility:hidden !important;
+            -webkit-backface-visibility:hidden !important;
           }
 
           .player-cover.is-playing img{
-            animation:zunoCoverSpin 8s linear infinite;
+            animation:zunoCoverSpin 8s linear infinite !important;
+          }
+
+          .player-song-label{
+            min-width:0 !important;
+            overflow:hidden !important;
+            text-overflow:ellipsis !important;
+            white-space:nowrap !important;
+            font-size:15px !important;
+            line-height:1.25 !important;
+          }
+
+          .player-card .heart{
+            width:40px !important;
+            height:40px !important;
+            min-width:40px !important;
+            flex:0 0 40px !important;
+            font-size:20px !important;
+          }
+
+          .player-card .controls{
+            gap:4px !important;
+          }
+
+          .player-card .control{
+            width:38px !important;
+            height:38px !important;
+            min-width:38px !important;
+            font-size:19px !important;
+          }
+
+          .player-card .control.play{
+            width:54px !important;
+            height:54px !important;
+            min-width:54px !important;
+            font-size:17px !important;
+          }
+
+          .player-card .music-visualizer{
+            width:56px !important;
+            height:30px !important;
+            margin:0 5px !important;
+          }
+
+          .player-card .utility button{
+            height:38px !important;
+            padding:0 14px !important;
+            font-size:11px !important;
           }
 
           .player-cover-fallback{
@@ -3120,6 +3187,64 @@ function App() {
 
             .ambient-particle:nth-child(n+13){
               display:none;
+            }
+          }
+
+          @media (max-width:700px){
+            .player-card{
+              width:calc(100vw - 20px) !important;
+              height:82px !important;
+              min-height:82px !important;
+              padding:8px 10px !important;
+              gap:8px !important;
+            }
+
+            .player-track-meta{
+              gap:9px !important;
+            }
+
+            .player-cover{
+              width:58px !important;
+              height:58px !important;
+              min-width:58px !important;
+              min-height:58px !important;
+              flex-basis:58px !important;
+            }
+
+            .player-song-label{
+              font-size:12px !important;
+            }
+
+            .player-card .heart{
+              width:32px !important;
+              height:32px !important;
+              min-width:32px !important;
+              flex-basis:32px !important;
+              font-size:17px !important;
+            }
+
+            .player-card .music-visualizer{
+              display:none !important;
+            }
+
+            .player-card .control{
+              width:30px !important;
+              height:30px !important;
+              min-width:30px !important;
+              font-size:15px !important;
+            }
+
+            .player-card .control.play{
+              width:44px !important;
+              height:44px !important;
+              min-width:44px !important;
+              font-size:14px !important;
+            }
+
+            .player-card .utility button{
+              height:31px !important;
+              padding:0 9px !important;
+              font-size:9px !important;
             }
           }
 
@@ -3291,8 +3416,18 @@ function App() {
                       alt=""
                       loading="eager"
                       decoding="async"
+                      data-cover-index="0"
                       onError={(event) => {
-                        event.currentTarget.style.display = "none";
+                        const image = event.currentTarget;
+                        const nextIndex =
+                          Number(image.dataset.coverIndex || 0) + 1;
+
+                        if (nextIndex < coverFallbackUrls.length) {
+                          image.dataset.coverIndex = String(nextIndex);
+                          image.src = coverFallbackUrls[nextIndex];
+                        } else {
+                          image.style.display = "none";
+                        }
                       }}
                     />
                   ) : (
