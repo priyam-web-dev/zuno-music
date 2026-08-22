@@ -3341,6 +3341,114 @@ function App() {
 
 
   /* =======================================================
+     PLAY RECOMMENDED PLAYLIST INSIDE ZUNO
+     ======================================================= */
+
+  const playRecommendedPlaylist =
+    async (playlist) => {
+
+      if (!playlist?.url) return;
+
+      try {
+        setRecommendedOpen(false);
+        setQueueOpen(false);
+
+        const response = await fetch(
+          "/api/youtube",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url: playlist.url,
+            }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+            "Recommended playlist load नहीं हुई।"
+          );
+        }
+
+        if (
+          !Array.isArray(data?.songs) ||
+          !data.songs.length
+        ) {
+          throw new Error(
+            "Is playlist mein playable songs नहीं मिले।"
+          );
+        }
+
+        const mapped = data.songs
+          .filter((song) => song?.id)
+          .map((song) => ({
+            id: song.id,
+            title: song.title || "Unknown song",
+            artist: song.artist || "Unknown artist",
+          }));
+
+        if (!mapped.length) {
+          throw new Error(
+            "Is playlist mein playable songs नहीं मिले।"
+          );
+        }
+
+        tracksRef.current = mapped;
+        setTracks(mapped);
+        indexRef.current = 0;
+        setIndex(0);
+        setQueueFocusIndex(0);
+        playbackRestoreRef.current = null;
+        setLiked(false);
+        setProgress(0);
+        setElapsed("0:00");
+        setDuration("0:00");
+        setError("");
+
+        try {
+          localStorage.setItem(
+            "pf_playback_state",
+            JSON.stringify({
+              trackId: mapped[0].id,
+              position: 0,
+            })
+          );
+        } catch {
+          // Ignore storage failures.
+        }
+
+        const startPlayback = () => {
+          const player = playerRef.current;
+          if (!player) return false;
+
+          player.loadVideoById({
+            videoId: mapped[0].id,
+            startSeconds: 0,
+          });
+
+          return true;
+        };
+
+        if (!startPlayback()) {
+          setTimeout(startPlayback, 200);
+        }
+
+      } catch (err) {
+        console.error(err);
+        setError(
+          err?.message ||
+          "Recommended playlist play नहीं हो सकी।"
+        );
+      }
+    };
+
+
+  /* =======================================================
      SAVE PLAYBACK STATE ON PAGE EXIT
      ======================================================= */
   useEffect(() => {
@@ -4013,8 +4121,17 @@ function App() {
           @keyframes zunoRecommendedEnter{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 
           .zuno-recommended-card{
+            appearance:none;
+            -webkit-appearance:none;
+            border:0;
+            padding:0;
+            width:100%;
+            font:inherit;
+            text-align:left;
+            cursor:pointer;
             text-decoration:none;
             color:#fff;
+            background:none;
           }
           .zuno-recommended-card:hover .zuno-recommended-open{
             transform:translateY(0); opacity:1;
@@ -4521,13 +4638,12 @@ function App() {
               <p className="zuno-recommended-panel-label">5 curated moods</p>
               <div className="zuno-recommended-grid">
                 {RECOMMENDED_PLAYLISTS.map((playlist) => (
-                  <a
+                  <button
                     key={playlist.id}
+                    type="button"
                     className="zuno-recommended-card"
-                    href={playlist.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Open ${playlist.title} on YouTube Music`}
+                    onClick={() => playRecommendedPlaylist(playlist)}
+                    aria-label={`Play ${playlist.title} in ZUNO`}
                     style={{
                       "--playlist-bg": `linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.08)),url(${playlist.background})`,
                     }}
@@ -4536,9 +4652,9 @@ function App() {
                       <span className="zuno-recommended-mood">{playlist.mood}</span>
                       <h3>{playlist.title}</h3>
                       <p>{playlist.subtitle}</p>
-                      <span className="zuno-recommended-open">Open ↗</span>
+                      <span className="zuno-recommended-open">Play in ZUNO ▶</span>
                     </div>
-                  </a>
+                  </button>
                 ))}
               </div>
             </div>
