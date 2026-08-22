@@ -3754,7 +3754,7 @@ function App() {
 
           .zuno-nav-brand:hover{
             transform:translateY(-1px);
-            letter-spacing:3.6px;
+            letter-spacing:5px;
           }
 
           .zuno-nav-brand:hover::after{
