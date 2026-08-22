@@ -88,7 +88,7 @@ const BACKGROUNDS = [
 /* =========================================================
    ZUNO — RECOMMENDED PLAYLISTS
    Public curated playlists shown to every user.
-   YouTube links will be added after the UI is approved.
+   YouTube Music links for the five curated playlists.
    ========================================================= */
 const RECOMMENDED_PLAYLISTS = [
   {
@@ -97,6 +97,7 @@ const RECOMMENDED_PLAYLISTS = [
     subtitle: "For quiet roads & 2 AM thoughts",
     mood: "रात वाली vibe",
     background: "/assets/bg8.png",
+    url: "https://music.youtube.com/playlist?list=RDCLAK5uy_lSaqe-XXsDL1jXiSYdfKKuWDU2vnU6uaE&playnext=1&si=KINii4VhVIA6Y9-p",
   },
   {
     id: "punjabi-vibes",
@@ -104,6 +105,7 @@ const RECOMMENDED_PLAYLISTS = [
     subtitle: "Bass, beats & full desi energy",
     mood: "दिल से loud",
     background: "/assets/bg6.png",
+    url: "https://music.youtube.com/playlist?list=RDCLAK5uy_l1tvprsrxf2EDE9pHKetlLGn8yq7XSECo&playnext=1&si=xMsn_7tGzbH1_584",
   },
   {
     id: "soft-hours",
@@ -111,6 +113,7 @@ const RECOMMENDED_PLAYLISTS = [
     subtitle: "Slow songs for slower moments",
     mood: "थोड़ा ठहरो",
     background: "/assets/bg4.png",
+    url: "https://music.youtube.com/playlist?list=OLAK5uy_mUHTqhykunmVYqcjnlr_Vr-C3SlsvA2L4&si=qh0DD7NoyVZMRXgZ",
   },
   {
     id: "bollywood-mood",
@@ -118,6 +121,7 @@ const RECOMMENDED_PLAYLISTS = [
     subtitle: "Songs that already know the story",
     mood: "एक scene और",
     background: "/assets/bg10.png",
+    url: "https://music.youtube.com/playlist?list=RDCLAK5uy_lnJEMm7nZ6wPjGFPgDGWJoiz0dpUsgFQ8&playnext=1&si=SObjGwYSSBBgO_UG",
   },
   {
     id: "desi-chill",
@@ -125,6 +129,7 @@ const RECOMMENDED_PLAYLISTS = [
     subtitle: "Easy listening, Indian soul",
     mood: "बस चलने दो",
     background: "/assets/bg5.png",
+    url: "https://music.youtube.com/playlist?list=RDCLAK5uy_m4cVudgAhYmFlK-tudPAijltqK9DaYAOs&playnext=1&si=cVYEWZpWfyTTJQV9",
   },
 ];
 
@@ -4006,10 +4011,26 @@ function App() {
           }
           @keyframes zunoRecommendedFade{from{opacity:0}to{opacity:1}}
           @keyframes zunoRecommendedEnter{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+          .zuno-recommended-card{
+            text-decoration:none;
+            color:#fff;
+          }
+          .zuno-recommended-card:hover .zuno-recommended-open{
+            transform:translateY(0); opacity:1;
+          }
+          .zuno-recommended-open{
+            display:inline-flex; align-items:center; gap:4px; margin-top:13px;
+            color:rgba(255,255,255,.78); font-size:10px; font-weight:800;
+            letter-spacing:.8px; text-transform:uppercase;
+            transform:translateY(4px); opacity:.72;
+            transition:transform .25s ease,opacity .25s ease;
+          }
           @media(max-width:900px){
             .zuno-recommended-grid{display:flex;overflow-x:auto;gap:10px;padding-bottom:5px;scrollbar-width:none}
             .zuno-recommended-grid::-webkit-scrollbar{display:none}
             .zuno-recommended-card{flex:0 0 190px}
+
           }
           @media(max-width:700px){
             .zuno-recommended-trigger,.zuno-my-playlists-trigger{padding:0 9px !important;font-size:10px !important}
@@ -4500,9 +4521,13 @@ function App() {
               <p className="zuno-recommended-panel-label">5 curated moods</p>
               <div className="zuno-recommended-grid">
                 {RECOMMENDED_PLAYLISTS.map((playlist) => (
-                  <article
+                  <a
                     key={playlist.id}
                     className="zuno-recommended-card"
+                    href={playlist.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open ${playlist.title} on YouTube Music`}
                     style={{
                       "--playlist-bg": `linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.08)),url(${playlist.background})`,
                     }}
@@ -4511,8 +4536,9 @@ function App() {
                       <span className="zuno-recommended-mood">{playlist.mood}</span>
                       <h3>{playlist.title}</h3>
                       <p>{playlist.subtitle}</p>
+                      <span className="zuno-recommended-open">Open ↗</span>
                     </div>
-                  </article>
+                  </a>
                 ))}
               </div>
             </div>
