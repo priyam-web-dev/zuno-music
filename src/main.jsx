@@ -4087,13 +4087,13 @@ const panelStyles = {
       20,
 
     background:
-      "rgba(0,0,0,.38)",
+      "rgba(0,0,0,.46)",
 
     backdropFilter:
-      "blur(9px)",
+      "blur(12px)",
 
     WebkitBackdropFilter:
-      "blur(9px)",
+      "blur(12px)",
   },
 
 
@@ -4115,22 +4115,22 @@ const panelStyles = {
       22,
 
     border:
-      "1px solid rgba(255,255,255,.48)",
+      "1px solid rgba(255,255,255,.22)",
 
     background:
-      "rgba(247,239,221,.78)",
+      "rgba(18,18,18,.42)",
 
     color:
-      "#171411",
+      "#fff",
 
     backdropFilter:
-      "blur(26px) saturate(140%)",
+      "blur(24px) saturate(125%)",
 
     WebkitBackdropFilter:
-      "blur(26px) saturate(140%)",
+      "blur(24px) saturate(125%)",
 
     boxShadow:
-      "0 30px 90px rgba(0,0,0,.28)",
+      "0 30px 90px rgba(0,0,0,.42)",
   },
 
 
@@ -4159,7 +4159,7 @@ const panelStyles = {
       2,
 
     opacity:
-      0.5,
+      0.58,
 
     fontWeight:
       800,
@@ -4176,13 +4176,16 @@ const panelStyles = {
 
     fontSize:
       32,
+
+    color:
+      "#fff",
   },
 
 
   close: {
 
     border:
-      "1px solid rgba(20,20,20,.18)",
+      "1px solid rgba(255,255,255,.22)",
 
     width:
       38,
@@ -4194,10 +4197,10 @@ const panelStyles = {
       "50%",
 
     background:
-      "rgba(255,255,255,.25)",
+      "rgba(255,255,255,.10)",
 
     color:
-      "#111",
+      "#fff",
 
     cursor:
       "pointer",
@@ -4225,7 +4228,7 @@ const panelStyles = {
       "14px 0 6px",
 
     opacity:
-      0.65,
+      0.68,
   },
 
 
@@ -4238,10 +4241,13 @@ const panelStyles = {
       11,
 
     background:
-      "rgba(255,255,255,.35)",
+      "rgba(255,255,255,.09)",
 
     border:
-      "1px solid rgba(20,20,20,.08)",
+      "1px solid rgba(255,255,255,.13)",
+
+    color:
+      "#fff",
   },
 
 
@@ -4260,13 +4266,13 @@ const panelStyles = {
       11,
 
     border:
-      "1px solid rgba(20,20,20,.14)",
+      "1px solid rgba(255,255,255,.15)",
 
     background:
-      "rgba(255,255,255,.45)",
+      "rgba(255,255,255,.09)",
 
     color:
-      "#111",
+      "#fff",
 
     outline:
       "none",
@@ -4335,10 +4341,10 @@ const panelStyles = {
   bgActive: {
 
     borderColor:
-      "#111",
+      "rgba(255,255,255,.85)",
 
     boxShadow:
-      "0 0 0 2px rgba(255,255,255,.7) inset",
+      "0 0 0 2px rgba(255,255,255,.22) inset",
   },
 
 
@@ -4361,7 +4367,7 @@ const panelStyles = {
   logout: {
 
     border:
-      "1px solid rgba(150,30,20,.25)",
+      "1px solid rgba(255,255,255,.16)",
 
     borderRadius:
       11,
@@ -4370,10 +4376,10 @@ const panelStyles = {
       "11px 15px",
 
     background:
-      "rgba(180,50,40,.08)",
+      "rgba(255,255,255,.07)",
 
     color:
-      "#8a2e24",
+      "rgba(255,255,255,.86)",
 
     cursor:
       "pointer",
@@ -4395,10 +4401,10 @@ const panelStyles = {
       "11px 17px",
 
     background:
-      "#171411",
+      "rgba(255,255,255,.92)",
 
     color:
-      "#fff",
+      "#111",
 
     cursor:
       "pointer",
@@ -4449,7 +4455,7 @@ const panelStyles = {
       "uppercase",
 
     opacity:
-      0.55,
+      0.58,
 
     marginBottom:
       8,
@@ -4471,13 +4477,13 @@ const panelStyles = {
       "center",
 
     border:
-      "1px solid rgba(20,20,20,.1)",
+      "1px solid rgba(255,255,255,.12)",
 
     borderRadius:
       11,
 
     background:
-      "rgba(255,255,255,.3)",
+      "rgba(255,255,255,.08)",
 
     padding:
       "12px 13px",
@@ -4492,7 +4498,7 @@ const panelStyles = {
       "left",
 
     color:
-      "#111",
+      "#fff",
 
     fontWeight:
       700,
@@ -4502,10 +4508,10 @@ const panelStyles = {
   playlistActive: {
 
     background:
-      "rgba(20,20,20,.09)",
+      "rgba(255,255,255,.16)",
 
     borderColor:
-      "rgba(20,20,20,.3)",
+      "rgba(255,255,255,.32)",
   },
 
 
@@ -4515,7 +4521,7 @@ const panelStyles = {
       15,
 
     opacity:
-      0.55,
+      0.58,
 
     fontSize:
       13,
@@ -4531,7 +4537,7 @@ const panelStyles = {
       "100%",
 
     border:
-      "1px solid rgba(20,20,20,.16)",
+      "1px solid rgba(255,255,255,.14)",
 
     borderRadius:
       10,
@@ -4540,7 +4546,10 @@ const panelStyles = {
       11,
 
     background:
-      "rgba(255,255,255,.35)",
+      "rgba(255,255,255,.08)",
+
+    color:
+      "#fff",
 
     cursor:
       "pointer",
@@ -4559,7 +4568,10 @@ const panelStyles = {
       "9px 10px",
 
     borderBottom:
-      "1px solid rgba(20,20,20,.08)",
+      "1px solid rgba(255,255,255,.09)",
+
+    color:
+      "rgba(255,255,255,.92)",
   },
 
 
@@ -4581,10 +4593,10 @@ const panelStyles = {
       12,
 
     background:
-      "#171411",
+      "rgba(255,255,255,.92)",
 
     color:
-      "#fff",
+      "#111",
 
     cursor:
       "pointer",
@@ -4600,7 +4612,7 @@ const panelStyles = {
       12,
 
     color:
-      "#8a2e24",
+      "#ffb7aa",
 
     fontSize:
       12,
