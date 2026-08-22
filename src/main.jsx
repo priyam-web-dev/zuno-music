@@ -3270,65 +3270,216 @@ function App() {
 
         {/* NAV */}
 
-        <header className="nav">
+        <style>{`
+          .zuno-nav{
+            position:relative !important;
+            z-index:20 !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:space-between !important;
+            gap:24px !important;
+            width:100% !important;
+            box-sizing:border-box !important;
+            padding:18px 42px !important;
+          }
 
-          <div className="brand-mark" aria-label="ZUNO">
+          .zuno-nav::after{
+            content:"";
+            position:absolute;
+            left:42px;
+            right:42px;
+            bottom:0;
+            height:1px;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+            opacity:.7;
+            pointer-events:none;
+          }
+
+          .zuno-nav-brand{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            color:#fff;
+            text-decoration:none;
+            letter-spacing:3px;
+            font-size:20px;
+            font-weight:900;
+            text-shadow:0 2px 18px rgba(0,0,0,.45);
+            transition:transform .35s ease,letter-spacing .35s ease,opacity .35s ease;
+          }
+
+          .zuno-nav-brand::after{
+            content:"";
+            position:absolute;
+            left:0;
+            bottom:-7px;
+            width:0;
+            height:2px;
+            border-radius:999px;
+            background:#fff;
+            box-shadow:0 0 12px rgba(255,255,255,.55);
+            transition:width .35s ease;
+          }
+
+          .zuno-nav-brand:hover{
+            transform:translateY(-1px);
+            letter-spacing:3.6px;
+          }
+
+          .zuno-nav-brand:hover::after{
+            width:100%;
+          }
+
+          .zuno-nav-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:8px;
+            padding:5px;
+            border:1px solid rgba(255,255,255,.16);
+            border-radius:999px;
+            background:rgba(8,8,8,.18);
+            box-shadow:0 12px 35px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.08);
+            backdrop-filter:blur(14px) saturate(125%);
+            -webkit-backdrop-filter:blur(14px) saturate(125%);
+            transition:background .35s ease,border-color .35s ease,transform .35s ease;
+          }
+
+          .zuno-nav-actions:hover{
+            background:rgba(8,8,8,.28);
+            border-color:rgba(255,255,255,.24);
+            transform:translateY(-1px);
+          }
+
+          .zuno-nav-action{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            min-height:36px;
+            padding:0 14px;
+            border:1px solid transparent;
+            border-radius:999px;
+            background:transparent;
+            color:rgba(255,255,255,.9);
+            cursor:pointer;
+            font-size:12px;
+            font-weight:800;
+            letter-spacing:.1px;
+            text-shadow:0 1px 10px rgba(0,0,0,.35);
+            transition:background .28s ease,border-color .28s ease,color .28s ease,transform .28s ease;
+          }
+
+          .zuno-nav-action:hover{
+            background:rgba(255,255,255,.11);
+            border-color:rgba(255,255,255,.18);
+            color:#fff;
+            transform:translateY(-1px);
+          }
+
+          .zuno-nav-action:active{
+            transform:translateY(0) scale(.97);
+          }
+
+          .zuno-nav-count{
+            display:inline-flex;
+            align-items:center;
+            min-height:36px;
+            padding:0 15px;
+            border-left:1px solid rgba(255,255,255,.14);
+            border-radius:999px;
+            color:#fff;
+            font-size:12px;
+            font-weight:800;
+            white-space:nowrap;
+            text-shadow:0 1px 10px rgba(0,0,0,.4);
+          }
+
+          @media (max-width:700px){
+            .zuno-nav{
+              padding:14px 16px !important;
+            }
+
+            .zuno-nav::after{
+              left:16px;
+              right:16px;
+            }
+
+            .zuno-nav-actions{
+              gap:3px;
+              padding:4px;
+            }
+
+            .zuno-nav-action{
+              min-height:34px;
+              padding:0 9px;
+              font-size:11px;
+            }
+
+            .zuno-nav-count{
+              min-height:34px;
+              padding:0 9px;
+              font-size:11px;
+            }
+
+            .zuno-nav-brand{
+              font-size:17px;
+              letter-spacing:2.5px;
+            }
+          }
+
+          @media (max-width:470px){
+            .zuno-nav{
+              gap:8px !important;
+            }
+
+            .zuno-nav-count{
+              display:none;
+            }
+
+            .zuno-nav-actions{
+              margin-left:auto;
+            }
+          }
+        `}</style>
+
+        <header
+          className="nav zuno-nav"
+          style={{
+            background: "transparent",
+          }}
+        >
+
+          <div
+            className="brand-mark zuno-nav-brand"
+            aria-label="ZUNO"
+          >
             <div className="brand-copy brand-zuno">
               <strong>ZUNO</strong>
             </div>
           </div>
 
-
-          <div
-            style={{
-              display:
-                "flex",
-
-              alignItems:
-                "center",
-
-              gap:
-                10,
-            }}
-          >
+          <div className="zuno-nav-actions">
 
             <button
               type="button"
-              onClick={() =>
-                setPlaylistOpen(
-                  true
-                )
-              }
-              style={
-                topButton
-              }
+              className="zuno-nav-action"
+              onClick={() => setPlaylistOpen(true)}
             >
               ♫ Playlists
             </button>
 
-
             <button
               type="button"
-              onClick={() =>
-                setProfileOpen(
-                  true
-                )
-              }
-              style={
-                topButton
-              }
+              className="zuno-nav-action"
+              onClick={() => setProfileOpen(true)}
             >
               Hi,{" "}
-              {
-                profile.display_name ||
-                profile.username
-              }
+              {profile.display_name || profile.username}
             </button>
 
-
-            <div className="badge">
-              मेरी पसंद ·{" "}
-              {tracks.length} गीत
+            <div className="zuno-nav-count">
+              मेरी पसंद · {tracks.length} गीत
             </div>
 
           </div>
