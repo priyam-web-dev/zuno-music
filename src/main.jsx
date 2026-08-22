@@ -1741,9 +1741,6 @@ function App() {
   const playerRef =
     useRef(null);
 
-  const sceneRef =
-    useRef(null);
-
   const indexRef =
     useRef(0);
 
@@ -1781,122 +1778,11 @@ function App() {
   const [liked, setLiked] =
     useState(false);
 
+  const [loading, setLoading] =
+    useState(false);
+
   const [error, setError] =
     useState("");
-
-
-  /* =======================================================
-     BACKGROUND MOTION
-     - Very slow cinematic zoom
-     - Subtle mouse parallax on desktop
-     - No layout movement
-     ======================================================= */
-
-  useEffect(() => {
-    const scene = sceneRef.current;
-
-    if (!scene) {
-      return;
-    }
-
-    const reducedMotion =
-      window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      );
-
-    const finePointer =
-      window.matchMedia(
-        "(hover: hover) and (pointer: fine)"
-      );
-
-    if (
-      reducedMotion.matches ||
-      !finePointer.matches
-    ) {
-      scene.style.setProperty(
-        "--parallax-x",
-        "0px"
-      );
-
-      scene.style.setProperty(
-        "--parallax-y",
-        "0px"
-      );
-
-      return;
-    }
-
-    let frame = null;
-
-    const handlePointerMove = (event) => {
-      const x =
-        ((event.clientX / window.innerWidth) - 0.5) * 10;
-
-      const y =
-        ((event.clientY / window.innerHeight) - 0.5) * 7;
-
-      if (frame) {
-        cancelAnimationFrame(frame);
-      }
-
-      frame = requestAnimationFrame(() => {
-        scene.style.setProperty(
-          "--parallax-x",
-          `${x.toFixed(2)}px`
-        );
-
-        scene.style.setProperty(
-          "--parallax-y",
-          `${y.toFixed(2)}px`
-        );
-      });
-    };
-
-    const resetPointer = () => {
-      if (frame) {
-        cancelAnimationFrame(frame);
-      }
-
-      frame = requestAnimationFrame(() => {
-        scene.style.setProperty(
-          "--parallax-x",
-          "0px"
-        );
-
-        scene.style.setProperty(
-          "--parallax-y",
-          "0px"
-        );
-      });
-    };
-
-    window.addEventListener(
-      "pointermove",
-      handlePointerMove,
-      { passive: true }
-    );
-
-    window.addEventListener(
-      "blur",
-      resetPointer
-    );
-
-    return () => {
-      if (frame) {
-        cancelAnimationFrame(frame);
-      }
-
-      window.removeEventListener(
-        "pointermove",
-        handlePointerMove
-      );
-
-      window.removeEventListener(
-        "blur",
-        resetPointer
-      );
-    };
-  }, []);
 
 
   /* AUTH */
@@ -1932,6 +1818,9 @@ function App() {
         background_id: 5,
       }
     : null;
+
+  const [sessionLoading, setSessionLoading] =
+    useState(false);
 
   const [user, setUser] =
     useState(storedUser);
@@ -2275,7 +2164,12 @@ function App() {
           );
 
         }
-};
+
+
+        setSessionLoading(
+          false
+        );
+      };
 
 
     boot();
@@ -2422,69 +2316,29 @@ function App() {
         } else {
           setError("");
         }
-} catch (err) {
+
+        setLoading(false);
+
+      } catch (err) {
         console.error(err);
 
         setError(
           err?.message ||
           "Tumhari playlists se songs load nahi ho sake."
         );
-}
+
+        setLoading(false);
+      }
     };
 
 
   useEffect(() => {
 
-    if (!user || !token)
+    if (!user)
       return;
 
 
-    /* Let the first ZUNO UI paint before fetching playlist data. */
-    const runInitialSongLoad =
-      () => {
-        refreshSongs();
-      };
-
-
-    let cleanupInitialLoad;
-
-
-    if (
-      "requestIdleCallback" in window
-    ) {
-
-      const idleId =
-        window.requestIdleCallback(
-          runInitialSongLoad,
-          {
-            timeout: 1200,
-          }
-        );
-
-
-      cleanupInitialLoad =
-        () =>
-          window.cancelIdleCallback(
-            idleId
-          );
-
-    }
-
-    else {
-
-      const frameId =
-        window.requestAnimationFrame(
-          runInitialSongLoad
-        );
-
-
-      cleanupInitialLoad =
-        () =>
-          window.cancelAnimationFrame(
-            frameId
-          );
-
-    }
+    refreshSongs();
 
 
     const interval =
@@ -2494,15 +2348,10 @@ function App() {
       );
 
 
-    return () => {
-
-      cleanupInitialLoad?.();
-
+    return () =>
       clearInterval(
         interval
       );
-
-    };
 
   }, [user, token]);
 
@@ -2549,6 +2398,7 @@ function App() {
       queueOpen ||
       profileOpen ||
       playlistOpen ||
+      sessionLoading ||
       !user
         ? "hidden"
         : "";
@@ -2563,6 +2413,7 @@ function App() {
     queueOpen,
     profileOpen,
     playlistOpen,
+    sessionLoading,
     user,
   ]);
 
@@ -3010,9 +2861,8 @@ function App() {
     return (
       <div
         className="scene"
-        ref={sceneRef}
         style={{
-          "--scene-background":
+          backgroundImage:
             `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
         }}
       >
@@ -3048,6 +2898,11 @@ function App() {
 
   const currentTrack =
     tracks[index];
+
+  const currentCoverUrl =
+    currentTrack?.id
+      ? `https://i.ytimg.com/vi/${currentTrack.id}/hqdefault.jpg`
+      : "";
 
 
   /* =======================================================
@@ -3131,6 +2986,52 @@ function App() {
             opacity:.48;
             transition:opacity .35s ease,transform .35s ease;
             flex-shrink:0;
+          }
+
+          .player-track-meta{
+            display:flex;
+            align-items:center;
+            gap:12px;
+            min-width:0;
+            flex:1;
+          }
+
+          .player-cover{
+            width:52px;
+            height:52px;
+            min-width:52px;
+            border-radius:50%;
+            overflow:hidden;
+            display:grid;
+            place-items:center;
+            flex-shrink:0;
+            position:relative;
+            background:rgba(255,255,255,.12);
+            border:1px solid rgba(255,255,255,.38);
+            box-shadow:0 8px 24px rgba(0,0,0,.22), inset 0 0 0 1px rgba(255,255,255,.08);
+            color:rgba(255,255,255,.72);
+          }
+
+          .player-cover img{
+            width:100%;
+            height:100%;
+            display:block;
+            object-fit:cover;
+            border-radius:50%;
+          }
+
+          .player-cover.is-playing img{
+            animation:zunoCoverSpin 8s linear infinite;
+          }
+
+          .player-cover-fallback{
+            font-size:20px;
+            line-height:1;
+          }
+
+          @keyframes zunoCoverSpin{
+            from{transform:rotate(0deg);}
+            to{transform:rotate(360deg);}
           }
 
           .music-visualizer.is-playing{
@@ -3239,9 +3140,8 @@ function App() {
 
       <div
         className="scene"
-        ref={sceneRef}
         style={{
-          "--scene-background":
+          backgroundImage:
             `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
         }}
       >
@@ -3270,216 +3170,65 @@ function App() {
 
         {/* NAV */}
 
-        <style>{`
-          .zuno-nav{
-            position:relative !important;
-            z-index:20 !important;
-            display:flex !important;
-            align-items:center !important;
-            justify-content:space-between !important;
-            gap:24px !important;
-            width:100% !important;
-            box-sizing:border-box !important;
-            padding:18px 42px !important;
-          }
+        <header className="nav">
 
-          .zuno-nav::after{
-            content:"";
-            position:absolute;
-            left:42px;
-            right:42px;
-            bottom:0;
-            height:1px;
-            background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
-            opacity:.7;
-            pointer-events:none;
-          }
-
-          .zuno-nav-brand{
-            position:relative;
-            display:inline-flex;
-            align-items:center;
-            color:#fff;
-            text-decoration:none;
-            letter-spacing:3px;
-            font-size:20px;
-            font-weight:900;
-            text-shadow:0 2px 18px rgba(0,0,0,.45);
-            transition:transform .35s ease,letter-spacing .35s ease,opacity .35s ease;
-          }
-
-          .zuno-nav-brand::after{
-            content:"";
-            position:absolute;
-            left:0;
-            bottom:-7px;
-            width:0;
-            height:2px;
-            border-radius:999px;
-            background:#fff;
-            box-shadow:0 0 12px rgba(255,255,255,.55);
-            transition:width .35s ease;
-          }
-
-          .zuno-nav-brand:hover{
-            transform:translateY(-1px);
-            letter-spacing:3.6px;
-          }
-
-          .zuno-nav-brand:hover::after{
-            width:100%;
-          }
-
-          .zuno-nav-actions{
-            display:flex;
-            align-items:center;
-            justify-content:flex-end;
-            gap:8px;
-            padding:5px;
-            border:1px solid rgba(255,255,255,.16);
-            border-radius:999px;
-            background:rgba(8,8,8,.18);
-            box-shadow:0 12px 35px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.08);
-            backdrop-filter:blur(14px) saturate(125%);
-            -webkit-backdrop-filter:blur(14px) saturate(125%);
-            transition:background .35s ease,border-color .35s ease,transform .35s ease;
-          }
-
-          .zuno-nav-actions:hover{
-            background:rgba(8,8,8,.28);
-            border-color:rgba(255,255,255,.24);
-            transform:translateY(-1px);
-          }
-
-          .zuno-nav-action{
-            position:relative;
-            display:inline-flex;
-            align-items:center;
-            justify-content:center;
-            min-height:36px;
-            padding:0 14px;
-            border:1px solid transparent;
-            border-radius:999px;
-            background:transparent;
-            color:rgba(255,255,255,.9);
-            cursor:pointer;
-            font-size:12px;
-            font-weight:800;
-            letter-spacing:.1px;
-            text-shadow:0 1px 10px rgba(0,0,0,.35);
-            transition:background .28s ease,border-color .28s ease,color .28s ease,transform .28s ease;
-          }
-
-          .zuno-nav-action:hover{
-            background:rgba(255,255,255,.11);
-            border-color:rgba(255,255,255,.18);
-            color:#fff;
-            transform:translateY(-1px);
-          }
-
-          .zuno-nav-action:active{
-            transform:translateY(0) scale(.97);
-          }
-
-          .zuno-nav-count{
-            display:inline-flex;
-            align-items:center;
-            min-height:36px;
-            padding:0 15px;
-            border-left:1px solid rgba(255,255,255,.14);
-            border-radius:999px;
-            color:#fff;
-            font-size:12px;
-            font-weight:800;
-            white-space:nowrap;
-            text-shadow:0 1px 10px rgba(0,0,0,.4);
-          }
-
-          @media (max-width:700px){
-            .zuno-nav{
-              padding:14px 16px !important;
-            }
-
-            .zuno-nav::after{
-              left:16px;
-              right:16px;
-            }
-
-            .zuno-nav-actions{
-              gap:3px;
-              padding:4px;
-            }
-
-            .zuno-nav-action{
-              min-height:34px;
-              padding:0 9px;
-              font-size:11px;
-            }
-
-            .zuno-nav-count{
-              min-height:34px;
-              padding:0 9px;
-              font-size:11px;
-            }
-
-            .zuno-nav-brand{
-              font-size:17px;
-              letter-spacing:2.5px;
-            }
-          }
-
-          @media (max-width:470px){
-            .zuno-nav{
-              gap:8px !important;
-            }
-
-            .zuno-nav-count{
-              display:none;
-            }
-
-            .zuno-nav-actions{
-              margin-left:auto;
-            }
-          }
-        `}</style>
-
-        <header
-          className="nav zuno-nav"
-          style={{
-            background: "transparent",
-          }}
-        >
-
-          <div
-            className="brand-mark zuno-nav-brand"
-            aria-label="ZUNO"
-          >
+          <div className="brand-mark" aria-label="ZUNO">
             <div className="brand-copy brand-zuno">
               <strong>ZUNO</strong>
             </div>
           </div>
 
-          <div className="zuno-nav-actions">
+
+          <div
+            style={{
+              display:
+                "flex",
+
+              alignItems:
+                "center",
+
+              gap:
+                10,
+            }}
+          >
 
             <button
               type="button"
-              className="zuno-nav-action"
-              onClick={() => setPlaylistOpen(true)}
+              onClick={() =>
+                setPlaylistOpen(
+                  true
+                )
+              }
+              style={
+                topButton
+              }
             >
               ♫ Playlists
             </button>
 
+
             <button
               type="button"
-              className="zuno-nav-action"
-              onClick={() => setProfileOpen(true)}
+              onClick={() =>
+                setProfileOpen(
+                  true
+                )
+              }
+              style={
+                topButton
+              }
             >
               Hi,{" "}
-              {profile.display_name || profile.username}
+              {
+                profile.display_name ||
+                profile.username
+              }
             </button>
 
-            <div className="zuno-nav-count">
-              मेरी पसंद · {tracks.length} गीत
+
+            <div className="badge">
+              मेरी पसंद ·{" "}
+              {tracks.length} गीत
             </div>
 
           </div>
@@ -3523,11 +3272,40 @@ function App() {
 
 
             <div className="now-row">
-              <div className="player-song-label">
-                {
-                  currentTrack?.title ||
-                  "अपनी पसंद से कोई गीत चुनें"
-                }
+
+              <div className="player-track-meta">
+                <div
+                  key={currentTrack?.id || "empty-cover"}
+                  className={`player-cover ${
+                    playing && currentTrack ? "is-playing" : ""
+                  }`}
+                  aria-label={
+                    currentTrack
+                      ? `Cover art for ${currentTrack.title}`
+                      : "No song selected"
+                  }
+                >
+                  {currentCoverUrl ? (
+                    <img
+                      src={currentCoverUrl}
+                      alt=""
+                      loading="eager"
+                      decoding="async"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <span className="player-cover-fallback">♪</span>
+                  )}
+                </div>
+
+                <div className="player-song-label">
+                  {
+                    currentTrack?.title ||
+                    "अपनी पसंद से कोई गीत चुनें"
+                  }
+                </div>
               </div>
 
               <button
@@ -3920,10 +3698,10 @@ const authStyles = {
       20,
 
     background:
-      "#000",
+      "radial-gradient(circle at 20% 10%,rgba(245,223,183,.18),transparent 30%),linear-gradient(135deg,#111,#25221d)",
 
     color:
-      "#fff",
+      "#f5dfb7",
 
     fontFamily:
       '"DM Sans",sans-serif',
@@ -3945,7 +3723,7 @@ const authStyles = {
       26,
 
     background:
-      "rgba(8,8,8,.94)",
+      "rgba(255,255,255,.09)",
 
     backdropFilter:
       "blur(24px) saturate(140%)",
@@ -3976,7 +3754,7 @@ const authStyles = {
       "center",
 
     background:
-      "rgba(255,255,255,.08)",
+      "rgba(255,255,255,.13)",
 
     fontSize:
       22,
@@ -4049,7 +3827,7 @@ const authStyles = {
       14,
 
     background:
-      "rgba(255,255,255,.05)",
+      "rgba(0,0,0,.18)",
 
     marginBottom:
       18,
@@ -4087,7 +3865,7 @@ const authStyles = {
   activeTab: {
 
     background:
-      "rgba(255,255,255,.10)",
+      "rgba(255,255,255,.15)",
 
     color:
       "#fff",
@@ -4125,7 +3903,7 @@ const authStyles = {
       "none",
 
     background:
-      "rgba(255,255,255,.04)",
+      "rgba(255,255,255,.09)",
 
     color:
       "#fff",
@@ -4169,10 +3947,10 @@ const authStyles = {
       14,
 
     background:
-      "#fff",
+      "#f5dfb7",
 
     color:
-      "#000",
+      "#171411",
 
     fontWeight:
       800,
@@ -4238,13 +4016,13 @@ const panelStyles = {
       20,
 
     background:
-      "rgba(0,0,0,.46)",
+      "rgba(0,0,0,.38)",
 
     backdropFilter:
-      "blur(12px)",
+      "blur(9px)",
 
     WebkitBackdropFilter:
-      "blur(12px)",
+      "blur(9px)",
   },
 
 
@@ -4266,22 +4044,22 @@ const panelStyles = {
       22,
 
     border:
-      "1px solid rgba(255,255,255,.22)",
+      "1px solid rgba(255,255,255,.48)",
 
     background:
-      "rgba(18,18,18,.42)",
+      "rgba(247,239,221,.78)",
 
     color:
-      "#fff",
+      "#171411",
 
     backdropFilter:
-      "blur(24px) saturate(125%)",
+      "blur(26px) saturate(140%)",
 
     WebkitBackdropFilter:
-      "blur(24px) saturate(125%)",
+      "blur(26px) saturate(140%)",
 
     boxShadow:
-      "0 30px 90px rgba(0,0,0,.42)",
+      "0 30px 90px rgba(0,0,0,.28)",
   },
 
 
@@ -4310,7 +4088,7 @@ const panelStyles = {
       2,
 
     opacity:
-      0.58,
+      0.5,
 
     fontWeight:
       800,
@@ -4327,16 +4105,13 @@ const panelStyles = {
 
     fontSize:
       32,
-
-    color:
-      "#fff",
   },
 
 
   close: {
 
     border:
-      "1px solid rgba(255,255,255,.22)",
+      "1px solid rgba(20,20,20,.18)",
 
     width:
       38,
@@ -4348,10 +4123,10 @@ const panelStyles = {
       "50%",
 
     background:
-      "rgba(255,255,255,.10)",
+      "rgba(255,255,255,.25)",
 
     color:
-      "#fff",
+      "#111",
 
     cursor:
       "pointer",
@@ -4379,7 +4154,7 @@ const panelStyles = {
       "14px 0 6px",
 
     opacity:
-      0.68,
+      0.65,
   },
 
 
@@ -4392,13 +4167,10 @@ const panelStyles = {
       11,
 
     background:
-      "rgba(255,255,255,.09)",
+      "rgba(255,255,255,.35)",
 
     border:
-      "1px solid rgba(255,255,255,.13)",
-
-    color:
-      "#fff",
+      "1px solid rgba(20,20,20,.08)",
   },
 
 
@@ -4417,13 +4189,13 @@ const panelStyles = {
       11,
 
     border:
-      "1px solid rgba(255,255,255,.15)",
+      "1px solid rgba(20,20,20,.14)",
 
     background:
-      "rgba(255,255,255,.09)",
+      "rgba(255,255,255,.45)",
 
     color:
-      "#fff",
+      "#111",
 
     outline:
       "none",
@@ -4492,10 +4264,10 @@ const panelStyles = {
   bgActive: {
 
     borderColor:
-      "rgba(255,255,255,.85)",
+      "#111",
 
     boxShadow:
-      "0 0 0 2px rgba(255,255,255,.22) inset",
+      "0 0 0 2px rgba(255,255,255,.7) inset",
   },
 
 
@@ -4518,7 +4290,7 @@ const panelStyles = {
   logout: {
 
     border:
-      "1px solid rgba(255,255,255,.16)",
+      "1px solid rgba(150,30,20,.25)",
 
     borderRadius:
       11,
@@ -4527,10 +4299,10 @@ const panelStyles = {
       "11px 15px",
 
     background:
-      "rgba(255,255,255,.07)",
+      "rgba(180,50,40,.08)",
 
     color:
-      "rgba(255,255,255,.86)",
+      "#8a2e24",
 
     cursor:
       "pointer",
@@ -4552,10 +4324,10 @@ const panelStyles = {
       "11px 17px",
 
     background:
-      "rgba(255,255,255,.92)",
+      "#171411",
 
     color:
-      "#111",
+      "#fff",
 
     cursor:
       "pointer",
@@ -4606,7 +4378,7 @@ const panelStyles = {
       "uppercase",
 
     opacity:
-      0.58,
+      0.55,
 
     marginBottom:
       8,
@@ -4628,13 +4400,13 @@ const panelStyles = {
       "center",
 
     border:
-      "1px solid rgba(255,255,255,.12)",
+      "1px solid rgba(20,20,20,.1)",
 
     borderRadius:
       11,
 
     background:
-      "rgba(255,255,255,.08)",
+      "rgba(255,255,255,.3)",
 
     padding:
       "12px 13px",
@@ -4649,7 +4421,7 @@ const panelStyles = {
       "left",
 
     color:
-      "#fff",
+      "#111",
 
     fontWeight:
       700,
@@ -4659,10 +4431,10 @@ const panelStyles = {
   playlistActive: {
 
     background:
-      "rgba(255,255,255,.16)",
+      "rgba(20,20,20,.09)",
 
     borderColor:
-      "rgba(255,255,255,.32)",
+      "rgba(20,20,20,.3)",
   },
 
 
@@ -4672,7 +4444,7 @@ const panelStyles = {
       15,
 
     opacity:
-      0.58,
+      0.55,
 
     fontSize:
       13,
@@ -4688,7 +4460,7 @@ const panelStyles = {
       "100%",
 
     border:
-      "1px solid rgba(255,255,255,.14)",
+      "1px solid rgba(20,20,20,.16)",
 
     borderRadius:
       10,
@@ -4697,10 +4469,7 @@ const panelStyles = {
       11,
 
     background:
-      "rgba(255,255,255,.08)",
-
-    color:
-      "#fff",
+      "rgba(255,255,255,.35)",
 
     cursor:
       "pointer",
@@ -4719,10 +4488,7 @@ const panelStyles = {
       "9px 10px",
 
     borderBottom:
-      "1px solid rgba(255,255,255,.09)",
-
-    color:
-      "rgba(255,255,255,.92)",
+      "1px solid rgba(20,20,20,.08)",
   },
 
 
@@ -4744,10 +4510,10 @@ const panelStyles = {
       12,
 
     background:
-      "rgba(255,255,255,.92)",
+      "#171411",
 
     color:
-      "#111",
+      "#fff",
 
     cursor:
       "pointer",
@@ -4763,7 +4529,7 @@ const panelStyles = {
       12,
 
     color:
-      "#ffb7aa",
+      "#8a2e24",
 
     fontSize:
       12,
