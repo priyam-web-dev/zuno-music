@@ -3992,6 +3992,7 @@ function App() {
             align-items:center;
             color:#fff;
             text-decoration:none;
+            font-family:"DM Sans",sans-serif !important;
             letter-spacing:3px;
             font-size:20px;
             font-weight:900;
@@ -4046,6 +4047,7 @@ function App() {
             display:inline-flex;
             align-items:center;
             justify-content:center;
+            font-family:"DM Sans",sans-serif !important;
             min-height:36px;
             padding:0;
             border:0;
@@ -4104,6 +4106,7 @@ function App() {
           .zuno-nav-count{
             display:inline-flex;
             align-items:center;
+            font-family:"DM Sans",sans-serif !important;
             min-height:36px;
             padding:0 15px;
             border-left:0;
