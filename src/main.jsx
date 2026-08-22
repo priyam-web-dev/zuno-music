@@ -1425,10 +1425,15 @@ function PlaylistPanel({
   return (
     <>
       <style>{`
-        .zuno-my-overlay{
-          position:fixed;
-          inset:0;
-          z-index:9999;
+        /* The scene gives every direct child a relative stacking context.
+           This override must beat that rule so the playlist panel truly
+           sits above the cinematic background. */
+        .site .scene > .zuno-my-overlay{
+          position:fixed !important;
+          inset:0 !important;
+          z-index:99999 !important;
+          width:100vw !important;
+          height:100vh !important;
           display:flex;
           align-items:center;
           justify-content:center;
@@ -1440,7 +1445,8 @@ function PlaylistPanel({
         }
 
         .zuno-my-modal{
-          position:relative;
+          position:relative !important;
+          z-index:100000 !important;
           width:min(1000px,94vw);
           max-height:88vh;
           overflow:auto;
