@@ -1816,6 +1816,12 @@ function App() {
   const tracksRef =
     useRef([]);
 
+  // Which source currently owns the player queue.
+  // "recommended" must never be overwritten by the background
+  // refresh of the user's personal playlists.
+  const playbackSourceRef =
+    useRef("library");
+
 
   const [tracks, setTracks] =
     useState([]);
@@ -2460,6 +2466,13 @@ function App() {
             user.id,
             token
           );
+
+        // A library refresh can finish after the user has already
+        // started a recommended playlist. Never let that stale async
+        // result replace the recommended queue or stop its player.
+        if (playbackSourceRef.current === "recommended") {
+          return;
+        }
 
         /* Preserve the song that is currently playing when the
            playlist is refreshed. The old code always forced index 0,
@@ -3341,6 +3354,10 @@ function App() {
         return;
       }
 
+      // User explicitly chose a personal playlist, so the normal
+      // library refresh is allowed to own the queue again.
+      playbackSourceRef.current = "library";
+
 
       const mapped =
         songs.map(
@@ -3473,6 +3490,10 @@ function App() {
             "Is playlist mein playable songs नहीं मिले।"
           );
         }
+
+        // From this point onward the recommended playlist owns the
+        // player queue. Background library refreshes must leave it alone.
+        playbackSourceRef.current = "recommended";
 
         tracksRef.current = mapped;
         setTracks(mapped);
