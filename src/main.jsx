@@ -1504,7 +1504,7 @@ function PlaylistPanel({
           margin:0;
           color:#fff;
           font-family:"DM Sans",sans-serif !important;
-          font-size:clamp(30px,4vw,40px);
+          font-size:clamp(32px,4vw,42px);
           line-height:1;
           letter-spacing:-1.4px;
           font-weight:700;
@@ -1512,9 +1512,9 @@ function PlaylistPanel({
 
         .zuno-my-sub{
           margin:9px 0 0;
-          color:rgba(255,255,255,.40);
+          color:rgba(255,255,255,.58);
           font-family:"DM Sans",sans-serif !important;
-          font-size:11px;
+          font-size:13px;
           line-height:1.5;
         }
 
@@ -1570,9 +1570,9 @@ function PlaylistPanel({
         .zuno-my-create-label,
         .zuno-my-section-label{
           margin:0 0 10px;
-          color:rgba(255,255,255,.36);
+          color:rgba(255,255,255,.62);
           font-family:"DM Sans",sans-serif !important;
-          font-size:9px;
+          font-size:11px;
           font-weight:700;
           letter-spacing:1.8px;
           text-transform:uppercase;
@@ -1595,11 +1595,11 @@ function PlaylistPanel({
           outline:none;
           padding:0 11px;
           font-family:"DM Sans",sans-serif !important;
-          font-size:11px;
+          font-size:13px;
         }
 
         .zuno-my-input::placeholder{
-          color:rgba(255,255,255,.29);
+          color:rgba(255,255,255,.48);
         }
 
         .zuno-my-input:focus{
@@ -1617,7 +1617,7 @@ function PlaylistPanel({
           background:#f2f0ec;
           color:#171513;
           font-family:"DM Sans",sans-serif !important;
-          font-size:11px;
+          font-size:13px;
           font-weight:700;
           cursor:pointer;
         }
@@ -1648,15 +1648,15 @@ function PlaylistPanel({
         .zuno-my-action-title{
           color:rgba(255,255,255,.84);
           font-family:"DM Sans",sans-serif !important;
-          font-size:11px;
+          font-size:13px;
           font-weight:700;
         }
 
         .zuno-my-action-copy{
           margin-top:2px;
-          color:rgba(255,255,255,.34);
+          color:rgba(255,255,255,.52);
           font-family:"DM Sans",sans-serif !important;
-          font-size:9px;
+          font-size:11px;
           line-height:1.4;
         }
 
@@ -1677,7 +1677,7 @@ function PlaylistPanel({
           background:transparent;
           color:rgba(255,255,255,.70);
           font-family:"DM Sans",sans-serif !important;
-          font-size:10px;
+          font-size:12px;
           font-weight:600;
           cursor:pointer;
         }
@@ -1689,6 +1689,9 @@ function PlaylistPanel({
         }
 
         .zuno-my-hint{
+          color:rgba(255,255,255,.48) !important;
+          font-size:11px !important;
+          line-height:1.45;
           margin-top:7px;
           color:rgba(255,255,255,.27);
           font-family:"DM Sans",sans-serif !important;
@@ -1706,9 +1709,9 @@ function PlaylistPanel({
         }
 
         .zuno-my-count{
-          color:rgba(255,255,255,.27);
+          color:rgba(255,255,255,.55);
           font-family:"DM Sans",sans-serif !important;
-          font-size:9px;
+          font-size:11px;
         }
 
         .zuno-my-playlists{
@@ -1765,9 +1768,9 @@ function PlaylistPanel({
 
         .zuno-my-playlist-name{
           min-width:0;
-          color:rgba(255,255,255,.88);
+          color:rgba(255,255,255,.96);
           font-family:"DM Sans",sans-serif !important;
-          font-size:12px;
+          font-size:14px;
           font-weight:600;
           line-height:1.35;
           white-space:nowrap;
@@ -1777,9 +1780,9 @@ function PlaylistPanel({
 
         .zuno-my-playlist-meta{
           margin-top:3px;
-          color:rgba(255,255,255,.30);
+          color:rgba(255,255,255,.48);
           font-family:"DM Sans",sans-serif !important;
-          font-size:9px;
+          font-size:11px;
         }
 
         .zuno-my-card-actions{
@@ -1874,9 +1877,9 @@ function PlaylistPanel({
 
         .zuno-my-song-name{
           min-width:0;
-          color:rgba(255,255,255,.72);
+          color:rgba(255,255,255,.88);
           font-family:"DM Sans",sans-serif !important;
-          font-size:10px;
+          font-size:14px;
           white-space:nowrap;
           overflow:hidden;
           text-overflow:ellipsis;
@@ -1884,9 +1887,9 @@ function PlaylistPanel({
 
         .zuno-my-song-artist{
           margin-top:2px;
-          color:rgba(255,255,255,.28);
+          color:rgba(255,255,255,.46);
           font-family:"DM Sans",sans-serif !important;
-          font-size:8px;
+          font-size:10px;
         }
 
         .zuno-my-song-remove{
@@ -1901,16 +1904,16 @@ function PlaylistPanel({
         .zuno-my-empty{
           padding:25px 10px;
           text-align:center;
-          color:rgba(255,255,255,.28);
+          color:rgba(255,255,255,.52);
           font-family:"DM Sans",sans-serif !important;
-          font-size:10px;
+          font-size:12px;
         }
 
         .zuno-my-message{
           margin-top:11px;
           color:rgba(255,190,170,.78);
           font-family:"DM Sans",sans-serif !important;
-          font-size:9px;
+          font-size:11px;
           line-height:1.4;
         }
 
