@@ -1430,6 +1430,7 @@ function PlaylistPanel({
            sits above the cinematic background. */
         .site .scene > .zuno-my-overlay{
           position:fixed !important;
+          font-family:"DM Sans",sans-serif !important;
           inset:0 !important;
           z-index:99999 !important;
           width:100vw !important;
@@ -1447,6 +1448,7 @@ function PlaylistPanel({
         .zuno-my-modal{
           position:relative !important;
           z-index:100000 !important;
+          font-family:"DM Sans",sans-serif !important;
           width:min(1000px,94vw);
           max-height:88vh;
           overflow:auto;
@@ -1468,6 +1470,13 @@ function PlaylistPanel({
         .zuno-my-modal::-webkit-scrollbar-thumb{
           background:rgba(255,255,255,.16);
           border-radius:999px;
+        }
+
+.zuno-my-modal,
+        .zuno-my-modal button,
+        .zuno-my-modal input,
+        .zuno-my-modal textarea{
+          font-family:"DM Sans",sans-serif !important;
         }
 
         .zuno-my-head{
