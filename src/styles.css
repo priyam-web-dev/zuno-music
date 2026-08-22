@@ -4999,30 +4999,22 @@ nav{
    ZUNO — SUBTLE MUSICAL LIFE
    1. Ambient player pulse while music is playing
    2. Moving progress highlight / musical thread
-
-   Player dimensions, controls and actual progress remain unchanged.
    ========================================================= */
 
 .player-card.is-playing{
-  animation-name:zunoAmbientPulse !important;
-  animation-duration:2.8s !important;
-  animation-timing-function:ease-in-out !important;
-  animation-iteration-count:infinite !important;
-  animation-fill-mode:both !important;
-  animation-play-state:running !important;
+  animation:
+    zunoAmbientPulse
+    2.8s
+    ease-in-out
+    infinite !important;
 }
 
 @keyframes zunoAmbientPulse{
   0%,100%{
-    box-shadow:
-      0 18px 45px rgba(0,0,0,.34),
-      0 0 0 0 rgba(255,218,176,0);
+    filter:drop-shadow(0 18px 45px rgba(0,0,0,.34));
   }
-
   50%{
-    box-shadow:
-      0 20px 50px rgba(0,0,0,.34),
-      0 0 0 2px rgba(255,218,176,.08);
+    filter:drop-shadow(0 20px 52px rgba(255,218,176,.16));
   }
 }
 
@@ -5041,42 +5033,30 @@ nav{
   position:absolute;
   top:0;
   bottom:0;
-  left:-38%;
-  width:38%;
-  background:linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255,226,190,.78) 48%,
-    transparent 100%
-  );
+  left:-32%;
+  width:32%;
+  background:linear-gradient(90deg,transparent,rgba(255,226,190,.92),transparent);
   opacity:0;
   pointer-events:none;
-  transform:translateX(0);
 }
 
 .player-card.is-playing .seek-fill::after{
   opacity:.9;
-  animation-name:zunoProgressThread !important;
-  animation-duration:1.65s !important;
-  animation-timing-function:ease-in-out !important;
-  animation-iteration-count:infinite !important;
-  animation-fill-mode:both !important;
-  animation-play-state:running !important;
+  animation:zunoProgressThread 1.65s ease-in-out infinite;
 }
 
 @keyframes zunoProgressThread{
   0%{
     transform:translateX(0);
   }
-
   100%{
-    transform:translateX(365%);
+    transform:translateX(410%);
   }
 }
 
 @media(max-width:700px){
   .player-card.is-playing{
-    animation-duration:2.6s !important;
+    animation-duration:2.6s;
   }
 }
 
@@ -5086,6 +5066,146 @@ nav{
   }
 
   .player-card.is-playing .seek-fill::after{
+    animation:none !important;
+  }
+}
+/* =========================================================
+   ZUNO — VISIBLE SUBTLE MUSICAL LIFE
+   Final targeted override
+   - No player resize / movement
+   - Pulse is rendered as a soft inner edge, not a shadow
+   - Musical thread is rendered on the existing seek track
+   - Playback progress logic remains untouched
+   ========================================================= */
+
+.player-card{
+  position:fixed !important;
+}
+
+/* ---------------------------------------------------------
+   AMBIENT PULSE
+   --------------------------------------------------------- */
+.player-card::before{
+  content:"" !important;
+  display:block !important;
+  position:absolute !important;
+  inset:0 !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+  border-radius:inherit !important;
+  border:1px solid rgba(255,232,204,.16);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
+  opacity:0;
+}
+
+.player-card.is-playing::before{
+  opacity:1;
+  animation:zunoAmbientEdge 2.8s ease-in-out infinite !important;
+}
+
+@keyframes zunoAmbientEdge{
+  0%,100%{
+    opacity:.28;
+    border-color:rgba(255,232,204,.12);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.018);
+  }
+  50%{
+    opacity:.95;
+    border-color:rgba(255,232,204,.32);
+    box-shadow:inset 0 0 0 1px rgba(255,232,204,.07);
+  }
+}
+
+/* Keep every existing player control above the pulse layer. */
+.player-card > *{
+  position:relative;
+  z-index:1;
+}
+
+/* ---------------------------------------------------------
+   MUSICAL PROGRESS THREAD
+   --------------------------------------------------------- */
+.player-card .seek{
+  position:absolute !important;
+  left:18px !important;
+  right:18px !important;
+  bottom:5px !important;
+  width:auto !important;
+  height:3px !important;
+  margin:0 !important;
+  z-index:2 !important;
+  overflow:hidden !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.16) !important;
+}
+
+.player-card .seek-fill{
+  position:relative !important;
+  height:100% !important;
+  min-width:0 !important;
+  border-radius:999px !important;
+  background:rgba(255,255,255,.78) !important;
+  overflow:hidden !important;
+  transition:width .08s linear !important;
+}
+
+/* Flowing light travels across the existing progress track. */
+.player-card .seek::after{
+  content:"" !important;
+  position:absolute !important;
+  top:0 !important;
+  bottom:0 !important;
+  left:-28% !important;
+  width:28% !important;
+  border-radius:999px !important;
+  background:linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,235,211,.15) 15%,
+    rgba(255,235,211,.95) 50%,
+    rgba(255,235,211,.15) 85%,
+    transparent 100%
+  ) !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+  transform:translateX(0) !important;
+}
+
+.player-card.is-playing .seek::after{
+  opacity:.9 !important;
+  animation:zunoProgressThread 1.65s ease-in-out infinite !important;
+}
+
+@keyframes zunoProgressThread{
+  0%{
+    transform:translateX(0);
+  }
+  100%{
+    transform:translateX(460%);
+  }
+}
+
+/* Pause means the thread freezes completely. */
+.player-card:not(.is-playing) .seek::after{
+  animation:none !important;
+  opacity:0 !important;
+}
+
+@media(max-width:700px){
+  .player-card .seek{
+    left:14px !important;
+    right:14px !important;
+    bottom:4px !important;
+  }
+
+  .player-card.is-playing::before{
+    animation-duration:2.6s !important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .player-card.is-playing::before,
+  .player-card.is-playing .seek::after{
     animation:none !important;
   }
 }
