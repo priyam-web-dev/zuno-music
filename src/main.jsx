@@ -1423,316 +1423,820 @@ function PlaylistPanel({
   };
 
   return (
-    <div
-      style={panelStyles.backdrop}
-      onClick={onClose}
-    >
+    <>
+      <style>{`
+        .zuno-my-overlay{
+          position:fixed;
+          inset:0;
+          z-index:9999;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          padding:24px;
+          background:rgba(0,0,0,.56);
+          backdrop-filter:blur(18px) saturate(115%);
+          -webkit-backdrop-filter:blur(18px) saturate(115%);
+          animation:zunoMyFade .28s ease both;
+        }
+
+        .zuno-my-modal{
+          position:relative;
+          width:min(1000px,94vw);
+          max-height:88vh;
+          overflow:auto;
+          padding:30px;
+          border:1px solid rgba(255,255,255,.15);
+          border-radius:28px;
+          background:
+            radial-gradient(circle at 12% 0%,rgba(191,119,58,.13),transparent 30%),
+            linear-gradient(145deg,rgba(20,17,15,.94),rgba(11,11,11,.90));
+          color:#fff;
+          box-shadow:0 35px 110px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.06);
+          scrollbar-width:thin;
+          scrollbar-color:rgba(255,255,255,.18) transparent;
+          animation:zunoMyEnter .34s cubic-bezier(.2,.8,.2,1) both;
+        }
+
+        .zuno-my-modal::-webkit-scrollbar{width:6px}
+        .zuno-my-modal::-webkit-scrollbar-track{background:transparent}
+        .zuno-my-modal::-webkit-scrollbar-thumb{
+          background:rgba(255,255,255,.16);
+          border-radius:999px;
+        }
+
+        .zuno-my-head{
+          display:flex;
+          align-items:flex-start;
+          justify-content:space-between;
+          gap:20px;
+          margin-bottom:28px;
+        }
+
+        .zuno-my-kicker{
+          margin:0 0 7px;
+          color:rgba(255,193,126,.82);
+          font-family:"DM Sans",sans-serif;
+          font-size:10px;
+          font-weight:900;
+          letter-spacing:2.6px;
+          text-transform:uppercase;
+        }
+
+        .zuno-my-title{
+          margin:0;
+          font-family:"DM Sans",sans-serif;
+          font-size:clamp(30px,4vw,42px);
+          line-height:1;
+          letter-spacing:-1.5px;
+          font-weight:800;
+        }
+
+        .zuno-my-sub{
+          margin:9px 0 0;
+          color:rgba(255,255,255,.48);
+          font-family:"DM Sans",sans-serif;
+          font-size:12px;
+        }
+
+        .zuno-my-close{
+          width:40px;
+          height:40px;
+          flex:0 0 auto;
+          border:1px solid rgba(255,255,255,.16);
+          border-radius:50%;
+          background:rgba(255,255,255,.055);
+          color:#fff;
+          font-size:22px;
+          line-height:1;
+          cursor:pointer;
+          transition:background .22s ease,border-color .22s ease,transform .22s ease;
+        }
+
+        .zuno-my-close:hover{
+          background:rgba(255,255,255,.11);
+          border-color:rgba(255,255,255,.28);
+          transform:rotate(5deg);
+        }
+
+        .zuno-my-layout{
+          display:grid;
+          grid-template-columns:290px minmax(0,1fr);
+          gap:18px;
+          align-items:start;
+        }
+
+        .zuno-my-sidebar{
+          display:flex;
+          flex-direction:column;
+          gap:10px;
+        }
+
+        .zuno-my-action{
+          width:100%;
+          border:1px solid rgba(255,255,255,.10);
+          border-radius:17px;
+          background:rgba(255,255,255,.035);
+          color:#fff;
+          padding:16px;
+          text-align:left;
+          cursor:pointer;
+          transition:transform .22s ease,background .22s ease,border-color .22s ease;
+        }
+
+        .zuno-my-action:hover{
+          transform:translateY(-2px);
+          background:rgba(255,255,255,.065);
+          border-color:rgba(255,255,255,.18);
+        }
+
+        .zuno-my-action-top{
+          display:flex;
+          align-items:center;
+          gap:12px;
+        }
+
+        .zuno-my-action-icon{
+          width:38px;
+          height:38px;
+          display:grid;
+          place-items:center;
+          flex:0 0 auto;
+          border:1px solid rgba(255,177,91,.22);
+          border-radius:12px;
+          background:rgba(190,104,35,.10);
+          color:rgba(255,194,124,.95);
+          font-size:20px;
+        }
+
+        .zuno-my-action-title{
+          font-family:"DM Sans",sans-serif;
+          font-size:13px;
+          font-weight:800;
+        }
+
+        .zuno-my-action-copy{
+          margin-top:3px;
+          color:rgba(255,255,255,.42);
+          font-family:"DM Sans",sans-serif;
+          font-size:10px;
+          line-height:1.45;
+        }
+
+        .zuno-my-create{
+          padding:15px;
+          border:1px solid rgba(255,255,255,.09);
+          border-radius:17px;
+          background:rgba(255,255,255,.025);
+        }
+
+        .zuno-my-create-label{
+          margin:0 0 9px;
+          color:rgba(255,255,255,.45);
+          font-family:"DM Sans",sans-serif;
+          font-size:9px;
+          font-weight:900;
+          letter-spacing:1.8px;
+          text-transform:uppercase;
+        }
+
+        .zuno-my-create-row{
+          display:flex;
+          gap:7px;
+        }
+
+        .zuno-my-input{
+          min-width:0;
+          width:100%;
+          box-sizing:border-box;
+          border:1px solid rgba(255,255,255,.12);
+          border-radius:11px;
+          background:rgba(255,255,255,.055);
+          color:#fff;
+          outline:none;
+          padding:11px 12px;
+          font-family:"DM Sans",sans-serif;
+          font-size:12px;
+        }
+
+        .zuno-my-input::placeholder{color:rgba(255,255,255,.32)}
+
+        .zuno-my-input:focus{
+          border-color:rgba(255,185,106,.42);
+          box-shadow:0 0 0 3px rgba(210,122,51,.08);
+        }
+
+        .zuno-my-create-btn{
+          flex:0 0 auto;
+          border:0;
+          border-radius:11px;
+          padding:0 14px;
+          background:#fff;
+          color:#111;
+          font-family:"DM Sans",sans-serif;
+          font-size:11px;
+          font-weight:900;
+          cursor:pointer;
+        }
+
+        .zuno-my-section-label{
+          margin:0 0 10px;
+          color:rgba(255,255,255,.43);
+          font-family:"DM Sans",sans-serif;
+          font-size:9px;
+          font-weight:900;
+          letter-spacing:1.8px;
+          text-transform:uppercase;
+        }
+
+        .zuno-my-import{
+          padding:15px;
+          border:1px solid rgba(255,255,255,.09);
+          border-radius:17px;
+          background:rgba(255,255,255,.025);
+        }
+
+        .zuno-my-import-row{
+          display:flex;
+          gap:7px;
+        }
+
+        .zuno-my-import-btn,
+        .zuno-my-add-btn{
+          width:100%;
+          margin-top:8px;
+          border:1px solid rgba(255,255,255,.10);
+          border-radius:11px;
+          padding:10px 12px;
+          background:rgba(255,255,255,.07);
+          color:#fff;
+          font-family:"DM Sans",sans-serif;
+          font-size:11px;
+          font-weight:800;
+          cursor:pointer;
+        }
+
+        .zuno-my-import-btn:hover,
+        .zuno-my-add-btn:hover{
+          background:rgba(255,255,255,.12);
+        }
+
+        .zuno-my-hint{
+          margin-top:8px;
+          color:rgba(255,255,255,.34);
+          font-family:"DM Sans",sans-serif;
+          font-size:9px;
+          line-height:1.45;
+        }
+
+        .zuno-my-list-head{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:12px;
+          margin-bottom:10px;
+        }
+
+        .zuno-my-count{
+          color:rgba(255,255,255,.35);
+          font-family:"DM Sans",sans-serif;
+          font-size:10px;
+        }
+
+        .zuno-my-playlists{
+          display:grid;
+          gap:8px;
+        }
+
+        .zuno-my-playlist{
+          position:relative;
+          display:grid;
+          grid-template-columns:58px minmax(0,1fr) auto;
+          align-items:center;
+          gap:13px;
+          width:100%;
+          min-height:76px;
+          padding:9px 10px;
+          box-sizing:border-box;
+          border:1px solid rgba(255,255,255,.09);
+          border-radius:17px;
+          background:rgba(255,255,255,.035);
+          color:#fff;
+          text-align:left;
+          cursor:pointer;
+          transition:transform .22s ease,background .22s ease,border-color .22s ease;
+        }
+
+        .zuno-my-playlist:hover{
+          transform:translateX(2px);
+          background:rgba(255,255,255,.065);
+          border-color:rgba(255,255,255,.17);
+        }
+
+        .zuno-my-playlist.is-selected{
+          background:linear-gradient(90deg,rgba(184,105,46,.15),rgba(255,255,255,.055));
+          border-color:rgba(231,164,96,.35);
+          box-shadow:inset 3px 0 0 rgba(235,164,91,.82);
+        }
+
+        .zuno-my-art{
+          width:58px;
+          height:58px;
+          overflow:hidden;
+          border-radius:13px;
+          display:grid;
+          place-items:center;
+          background:linear-gradient(135deg,var(--art-one),var(--art-two));
+          color:rgba(255,255,255,.86);
+          font-family:"DM Sans",sans-serif;
+          font-size:22px;
+          box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+        }
+
+        .zuno-my-playlist-name{
+          min-width:0;
+          font-family:"DM Sans",sans-serif;
+          font-size:13px;
+          font-weight:800;
+          line-height:1.3;
+          white-space:nowrap;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        }
+
+        .zuno-my-playlist-meta{
+          margin-top:4px;
+          color:rgba(255,255,255,.38);
+          font-family:"DM Sans",sans-serif;
+          font-size:10px;
+        }
+
+        .zuno-my-card-actions{
+          display:flex;
+          align-items:center;
+          gap:5px;
+        }
+
+        .zuno-my-play{
+          width:38px;
+          height:38px;
+          border:1px solid rgba(232,166,98,.45);
+          border-radius:50%;
+          background:rgba(190,104,35,.08);
+          color:#ffd09c;
+          display:grid;
+          place-items:center;
+          cursor:pointer;
+          transition:transform .2s ease,background .2s ease;
+        }
+
+        .zuno-my-play:hover{
+          transform:scale(1.06);
+          background:rgba(190,104,35,.16);
+        }
+
+        .zuno-my-delete{
+          width:34px;
+          height:34px;
+          border:0;
+          background:transparent;
+          color:rgba(255,255,255,.30);
+          border-radius:50%;
+          cursor:pointer;
+          font-size:17px;
+        }
+
+        .zuno-my-delete:hover{
+          color:#ff9b8d;
+          background:rgba(255,90,70,.08);
+        }
+
+        .zuno-my-detail{
+          margin-top:12px;
+          padding:15px;
+          border:1px solid rgba(255,255,255,.09);
+          border-radius:18px;
+          background:rgba(0,0,0,.16);
+        }
+
+        .zuno-my-detail-head{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:10px;
+          margin-bottom:9px;
+        }
+
+        .zuno-my-detail-title{
+          min-width:0;
+          color:#fff;
+          font-family:"DM Sans",sans-serif;
+          font-size:13px;
+          font-weight:800;
+          overflow:hidden;
+          text-overflow:ellipsis;
+          white-space:nowrap;
+        }
+
+        .zuno-my-songs{
+          max-height:150px;
+          overflow:auto;
+          scrollbar-width:thin;
+        }
+
+        .zuno-my-song{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:10px;
+          padding:8px 0;
+          border-bottom:1px solid rgba(255,255,255,.06);
+        }
+
+        .zuno-my-song:last-child{border-bottom:0}
+
+        .zuno-my-song-name{
+          min-width:0;
+          color:rgba(255,255,255,.82);
+          font-family:"DM Sans",sans-serif;
+          font-size:11px;
+          white-space:nowrap;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        }
+
+        .zuno-my-song-artist{
+          margin-top:2px;
+          color:rgba(255,255,255,.33);
+          font-family:"DM Sans",sans-serif;
+          font-size:9px;
+        }
+
+        .zuno-my-song-remove{
+          border:0;
+          background:transparent;
+          color:rgba(255,255,255,.28);
+          cursor:pointer;
+          font-size:15px;
+        }
+
+        .zuno-my-empty{
+          padding:22px 12px;
+          text-align:center;
+          color:rgba(255,255,255,.34);
+          font-family:"DM Sans",sans-serif;
+          font-size:11px;
+        }
+
+        .zuno-my-message{
+          margin-top:12px;
+          color:#ffc0ad;
+          font-family:"DM Sans",sans-serif;
+          font-size:10px;
+          line-height:1.4;
+        }
+
+        @keyframes zunoMyFade{from{opacity:0}to{opacity:1}}
+        @keyframes zunoMyEnter{
+          from{opacity:0;transform:translateY(14px) scale(.985)}
+          to{opacity:1;transform:translateY(0) scale(1)}
+        }
+
+        @media(max-width:780px){
+          .zuno-my-overlay{padding:12px;align-items:flex-end}
+          .zuno-my-modal{
+            width:100%;
+            max-height:92vh;
+            padding:21px 17px 20px;
+            border-radius:25px 25px 0 0;
+          }
+          .zuno-my-layout{grid-template-columns:1fr}
+          .zuno-my-sidebar{display:grid;grid-template-columns:1fr 1fr}
+          .zuno-my-create{grid-column:1/-1}
+          .zuno-my-import{grid-column:1/-1}
+        }
+
+        @media(max-width:500px){
+          .zuno-my-head{margin-bottom:20px}
+          .zuno-my-title{font-size:30px}
+          .zuno-my-sidebar{display:flex}
+          .zuno-my-playlist{
+            grid-template-columns:52px minmax(0,1fr) auto;
+            min-height:68px;
+          }
+          .zuno-my-art{width:52px;height:52px}
+          .zuno-my-play{width:34px;height:34px}
+          .zuno-my-delete{width:30px;height:30px}
+        }
+
+        @media(prefers-reduced-motion:reduce){
+          .zuno-my-overlay,.zuno-my-modal{animation:none !important}
+          .zuno-my-action,.zuno-my-playlist,.zuno-my-play{transition:none !important}
+        }
+      `}</style>
+
       <div
-        style={{
-          ...panelStyles.card,
-          maxWidth: 820,
-        }}
-        onClick={(e) => e.stopPropagation()}
+        className="zuno-my-overlay"
+        onClick={onClose}
       >
-        <div style={panelStyles.head}>
-          <div>
-            <div style={panelStyles.eyebrow}>
-              YOUR MUSIC
-            </div>
-
-            <h2 style={panelStyles.title}>
-              Playlists
-            </h2>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            style={panelStyles.close}
-          >
-            ×
-          </button>
-        </div>
-
-        <div style={panelStyles.createRow}>
-          <input
-            style={{
-              ...panelStyles.input,
-              margin: 0,
-            }}
-            placeholder="New playlist name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                create();
-              }
-            }}
-          />
-
-          <button
-            type="button"
-            onClick={create}
-            disabled={busy}
-            style={panelStyles.save}
-          >
-            Create
-          </button>
-        </div>
-
         <div
-          style={{
-            marginTop: 14,
-            padding: 14,
-            borderRadius: 16,
-            background: "rgba(255,255,255,.34)",
-            border: "1px solid rgba(30,25,20,.12)",
-          }}
+          className="zuno-my-modal"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div
-            style={{
-              fontSize: 10,
-              letterSpacing: 1.6,
-              fontWeight: 800,
-              opacity: 0.55,
-              marginBottom: 7,
-            }}
-          >
-            QUICK ADD
-          </div>
-
-          <div
-            style={{
-              fontSize: 13,
-              fontWeight: 700,
-              marginBottom: 10,
-            }}
-          >
-            Add a song or import a YouTube playlist
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              flexWrap: "wrap",
-            }}
-          >
-            <input
-              style={{
-                ...panelStyles.input,
-                flex: "1 1 280px",
-                margin: 0,
-              }}
-              placeholder="Paste YouTube / YouTube Music URL"
-              value={onlineUrl}
-              onChange={(e) => setOnlineUrl(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  addOnlineSong();
-                }
-              }}
-            />
+          <div className="zuno-my-head">
+            <div>
+              <div className="zuno-my-kicker">YOUR MUSIC</div>
+              <h2 className="zuno-my-title">My Playlists</h2>
+              <p className="zuno-my-sub">
+                Create, manage and play your playlists.
+              </p>
+            </div>
 
             <button
               type="button"
-              onClick={addOnlineSong}
-              disabled={busy}
-              style={panelStyles.addSong}
+              className="zuno-my-close"
+              onClick={onClose}
+              aria-label="Close playlists"
             >
-              {onlineMode === "song"
-                ? "Adding…"
-                : "+ Add song"}
-            </button>
-
-            <button
-              type="button"
-              onClick={importOnlinePlaylist}
-              disabled={busy}
-              style={panelStyles.playPlaylist}
-            >
-              {onlineMode === "playlist"
-                ? "Importing…"
-                : "Import playlist"}
+              ×
             </button>
           </div>
 
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 11,
-              opacity: 0.55,
-            }}
-          >
-            Single video → Add song · Playlist link → Import playlist.
-          </div>
-        </div>
+          <div className="zuno-my-layout">
 
-        <div
-          style={{
-            ...panelStyles.playlistGrid,
-            marginTop: 18,
-          }}
-        >
-          <div>
-            <div style={panelStyles.sectionTitle}>
-              Your playlists
-            </div>
+            <aside className="zuno-my-sidebar">
 
-            {playlists.length === 0 ? (
-              <div style={panelStyles.empty}>
-                Abhi koi playlist nahi hai.
-              </div>
-            ) : (
-              playlists.map((playlist) => (
-                <div
-                  key={playlist.id}
-                  style={{
-                    display: "flex",
-                    gap: 6,
-                    alignItems: "stretch",
-                    marginBottom: 7,
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => openPlaylist(playlist)}
-                    style={{
-                      ...panelStyles.playlistItem,
-                      flex: 1,
-                      ...(selected?.id === playlist.id
-                        ? panelStyles.playlistActive
-                        : {}),
+              <div className="zuno-my-create">
+                <div className="zuno-my-create-label">CREATE</div>
+
+                <div className="zuno-my-create-row">
+                  <input
+                    className="zuno-my-input"
+                    placeholder="New playlist name"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") create();
                     }}
-                  >
-                    <span>♫</span>
-                    <span>{playlist.name}</span>
-                  </button>
+                  />
 
                   <button
                     type="button"
-                    onClick={() => removePlaylist(playlist)}
+                    className="zuno-my-create-btn"
+                    onClick={create}
                     disabled={busy}
-                    title="Delete playlist"
-                    style={{
-                      border:
-                        "1px solid rgba(30,25,20,.14)",
-                      borderRadius: 10,
-                      background:
-                        "rgba(255,255,255,.35)",
-                      color: "#6b2b24",
-                      width: 40,
-                      cursor: "pointer",
-                    }}
                   >
-                    ×
+                    Create
                   </button>
                 </div>
-              ))
-            )}
-          </div>
+              </div>
 
-          <div>
-            <div style={panelStyles.sectionTitle}>
-              {selected
-                ? selected.name
-                : "Select a playlist"}
-            </div>
+              <div className="zuno-my-import">
+                <div className="zuno-my-section-label">IMPORT</div>
 
-            {selected ? (
-              <>
+                <div className="zuno-my-action-top">
+                  <div className="zuno-my-action-icon">▶</div>
+                  <div>
+                    <div className="zuno-my-action-title">
+                      Import from YouTube
+                    </div>
+                    <div className="zuno-my-action-copy">
+                      Paste a YouTube playlist link
+                    </div>
+                  </div>
+                </div>
+
+                <div className="zuno-my-import-row" style={{marginTop:10}}>
+                  <input
+                    className="zuno-my-input"
+                    placeholder="YouTube / YouTube Music URL"
+                    value={onlineUrl}
+                    onChange={(e) => setOnlineUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") addOnlineSong();
+                    }}
+                  />
+                </div>
+
                 <button
                   type="button"
-                  onClick={addCurrentSong}
-                  disabled={busy || !currentTrack}
-                  style={{
-                    ...panelStyles.addSong,
-                    opacity: busy ? 0.6 : 1,
-                  }}
+                  className="zuno-my-import-btn"
+                  onClick={addOnlineSong}
+                  disabled={busy}
                 >
-                  + Add current song
+                  {onlineMode === "song" ? "Adding…" : "+ Add song"}
                 </button>
 
-                {songs.length ? (
-                  songs.map((song) => (
-                    <div
-                      key={song.id}
-                      style={{
-                        ...panelStyles.songItem,
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: 10,
-                      }}
-                    >
-                      <div>
-                        <strong>
-                          {song.song_name}
-                        </strong>
+                <button
+                  type="button"
+                  className="zuno-my-import-btn"
+                  onClick={importOnlinePlaylist}
+                  disabled={busy}
+                >
+                  {onlineMode === "playlist" ? "Importing…" : "Import playlist"}
+                </button>
+              </div>
 
-                        <small
-                          style={{
-                            display: "block",
-                            opacity: 0.55,
-                            marginTop: 3,
-                          }}
-                        >
-                          {song.artist}
-                        </small>
+              <button
+                type="button"
+                className="zuno-my-action"
+                onClick={addCurrentSong}
+                disabled={busy || !selected || !currentTrack}
+              >
+                <div className="zuno-my-action-top">
+                  <div className="zuno-my-action-icon">♪</div>
+                  <div>
+                    <div className="zuno-my-action-title">Add current song</div>
+                    <div className="zuno-my-action-copy">
+                      Save the song currently playing
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              <div className="zuno-my-hint">
+                Select a playlist to manage its songs.
+              </div>
+            </aside>
+
+            <section>
+              <div className="zuno-my-list-head">
+                <div className="zuno-my-section-label" style={{margin:0}}>
+                  YOUR PLAYLISTS
+                </div>
+
+                <div className="zuno-my-count">
+                  {playlists.length} {playlists.length === 1 ? "playlist" : "playlists"}
+                </div>
+              </div>
+
+              {playlists.length === 0 ? (
+                <div className="zuno-my-empty">
+                  No playlists yet. Create your first one.
+                </div>
+              ) : (
+                <div className="zuno-my-playlists">
+                  {playlists.map((playlist, playlistIndex) => (
+                    <div
+                      key={playlist.id}
+                      className={`zuno-my-playlist ${
+                        selected?.id === playlist.id ? "is-selected" : ""
+                      }`}
+                      style={{
+                        "--art-one": [
+                          "#4a2c20",
+                          "#3a2948",
+                          "#21433f",
+                          "#493327",
+                          "#2e3650",
+                        ][playlistIndex % 5],
+                        "--art-two": [
+                          "#b06d3c",
+                          "#7661a6",
+                          "#4c887b",
+                          "#a25a38",
+                          "#6876a6",
+                        ][playlistIndex % 5],
+                      }}
+                      onClick={() => openPlaylist(playlist)}
+                    >
+                      <div className="zuno-my-art" aria-hidden="true">
+                        ♪
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => removeSong(song)}
-                        disabled={busy}
-                        title="Remove song"
-                        style={{
-                          border:
-                            "1px solid rgba(30,25,20,.14)",
-                          borderRadius: 9,
-                          background:
-                            "rgba(255,255,255,.35)",
-                          color: "#6b2b24",
-                          width: 34,
-                          height: 34,
-                          cursor: "pointer",
-                          flexShrink: 0,
-                        }}
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <div style={panelStyles.empty}>
-                    Playlist empty hai.
-                  </div>
-                )}
+                      <div>
+                        <div className="zuno-my-playlist-name">
+                          {playlist.name}
+                        </div>
+                        <div className="zuno-my-playlist-meta">
+                          {selected?.id === playlist.id
+                            ? `${songs.length} ${songs.length === 1 ? "song" : "songs"}`
+                            : "Click to open"}
+                        </div>
+                      </div>
 
-                <button
-                  type="button"
-                  onClick={() => onPlayPlaylist(songs)}
-                  disabled={!songs.length}
-                  style={panelStyles.playPlaylist}
-                >
-                  ▶ Play this playlist
-                </button>
-              </>
-            ) : (
-              <div style={panelStyles.empty}>
-                Left side se playlist choose karo.
-              </div>
-            )}
+                      <div className="zuno-my-card-actions">
+                        <button
+                          type="button"
+                          className="zuno-my-play"
+                          title="Play playlist"
+                          onClick={async (event) => {
+                            event.stopPropagation();
+
+                            try {
+                              const data = await getPlaylistSongs(
+                                playlist.id,
+                                token
+                              );
+
+                              if (data?.length) {
+                                onPlayPlaylist(data);
+                                onClose();
+                              } else {
+                                setMessage("Playlist empty hai.");
+                              }
+                            } catch (e) {
+                              setMessage(
+                                e.message || "Playlist play नहीं हुई।"
+                              );
+                            }
+                          }}
+                        >
+                          ▶
+                        </button>
+
+                        <button
+                          type="button"
+                          className="zuno-my-delete"
+                          title="Delete playlist"
+                          disabled={busy}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            removePlaylist(playlist);
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {selected && (
+                <div className="zuno-my-detail">
+                  <div className="zuno-my-detail-head">
+                    <div className="zuno-my-detail-title">
+                      {selected.name}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="zuno-my-play"
+                      onClick={() => {
+                        if (songs.length) {
+                          onPlayPlaylist(songs);
+                          onClose();
+                        }
+                      }}
+                      disabled={!songs.length}
+                      title="Play this playlist"
+                    >
+                      ▶
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="zuno-my-add-btn"
+                    onClick={addCurrentSong}
+                    disabled={busy || !currentTrack}
+                  >
+                    + Add current song
+                  </button>
+
+                  {songs.length ? (
+                    <div className="zuno-my-songs">
+                      {songs.map((song) => (
+                        <div key={song.id} className="zuno-my-song">
+                          <div style={{minWidth:0}}>
+                            <div className="zuno-my-song-name">
+                              {song.song_name}
+                            </div>
+                            <div className="zuno-my-song-artist">
+                              {song.artist}
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="zuno-my-song-remove"
+                            onClick={() => removeSong(song)}
+                            disabled={busy}
+                            title="Remove song"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="zuno-my-empty">
+                      This playlist is empty.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {message && (
+                <div className="zuno-my-message">
+                  {message}
+                </div>
+              )}
+            </section>
           </div>
         </div>
-
-        {message && (
-          <div style={panelStyles.error}>
-            {message}
-          </div>
-        )}
       </div>
-    </div>
+    </>
   );
 }
 
