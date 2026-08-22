@@ -3939,7 +3939,9 @@ function App() {
           {/* PLAYER */}
 
           <section
-            className="player-card"
+            className={`player-card ${
+              playing ? "is-playing" : ""
+            }`}
             onDoubleClick={(event) => {
               if (event.target.closest("button, input")) {
                 return;
