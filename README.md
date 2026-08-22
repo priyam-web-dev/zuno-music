@@ -1,934 +1,647 @@
-# 🎵 P’s Favourites
+# ZUNO
 
-> **Your vibe. Your music. Your world.**  
-> A personal, cinematic music experience built around the songs you
-> love.
+> **A personal corner for songs, scenes, and the moments attached to them.**
 
-<p align="center">
-<strong>🎧 Personal Music Player · 📚 Custom Playlists · 🔐 User
-Accounts · 🖼️ Personal Backgrounds</strong>
-</p>
-<p align="center">
-<a href="#-features">Features</a> • <a href="#-how-it-works">How it
-works</a> • <a href="#-tech-stack">Tech Stack</a> •
-<a href="#-getting-started">Getting Started</a> •
-<a href="#-project-structure">Structure</a> •
-<a href="#-roadmap">Roadmap</a>
-</p>
+ZUNO is a personalized music experience built around one simple idea:
 
-------------------------------------------------------------------------
+**your music space should feel like yours.**
 
-## 🌐 Live Experience
+Instead of turning the homepage into a dashboard full of widgets, ZUNO keeps the interface intentionally quiet: an immersive visual scene, a personal greeting, and a compact music console that stays out of the way until you need it.
 
-**Live deployment:** `https://p-fvrts.vercel.app`
+---
 
-P’s Favourites is a personal music space rather than a generic streaming
-clone.
+## ✦ What is ZUNO?
 
-> **Open the app → log in → choose your music → play → create playlists
-> → make the space yours.**
+ZUNO is a personal favourites / music web app where each signed-in user gets their own:
 
-------------------------------------------------------------------------
+- profile
+- display name
+- selected visual background
+- playlists
+- saved playlist songs
+- playback controls
 
-## ✨ What is P’s Favourites?
+The homepage is designed as an **immersive, cinematic scene**, not a conventional music-dashboard layout.
 
-P’s Favourites is a personalized web music player where users can:
+The visual language is intentionally:
 
-- 🔐 Create an account and log in
-- 🎵 Browse songs supplied through a Google Sheet
-- ▶️ Play songs through the YouTube IFrame Player API
-- ⏯️ Play, pause, skip and seek through tracks
-- ❤️ Like the currently playing song
-- 📋 Create personal playlists
-- ➕ Add the current song to a playlist
-- ▶️ Play an entire playlist
-- 🖼️ Choose a personal visual background
-- 👤 Manage profile information
-- 💾 Store user-specific data through Supabase
-- 📱 Use the experience on desktop and mobile
+**premium · cinematic · Indian · artistic · minimal**
 
-The song catalog is maintained through Google Sheets, so adding a song
-does not require editing the UI code.
+The current design uses full-screen illustrated Indian environments, a personalized time-based greeting, a floating pill-shaped music player, and translucent controls that sit naturally over the scene.
 
-------------------------------------------------------------------------
+---
 
-# 🎨 Design Philosophy
+## ✦ The Experience
 
-P’s Favourites uses a **cinematic + glassmorphism-inspired** interface.
+### 01 — Arrive
 
-### Visual language
+The user lands inside a full-screen visual scene.
 
-- Full-screen scenic backgrounds
-- Translucent glass panels
-- Soft blur and saturation
-- Rounded controls
-- Large visual video area
-- Compact floating music player
-- Minimal typography
-- Hindi + English interface text
-- Responsive desktop/mobile layouts
+No separate loading page is used before the main experience. Stored account information is restored immediately so the interface can appear without an unnecessary loading wall.
 
-### Compact music player
+### 02 — See your moment
 
-The current player is intentionally a **small pill-shaped floating
-control** rather than a huge dashboard.
+The hero greeting is personalized from the logged-in profile.
 
-``` text
-┌──────────────────────────────────────────────────────────────┐
-│  Song Name · Artist        ♡    ‹    ▶    ›    Playlist      │
-└──────────────────────────────────────────────────────────────┘
+The first line uses the user's first name.
+
+The second line changes with the time of day:
+
+```text
+Priyam
+की सुबह
 ```
 
-------------------------------------------------------------------------
+```text
+Priyam
+की दोपहर
+```
 
-# 🚀 Features
+```text
+Priyam
+की शाम
+```
 
-## 🔐 Authentication
+```text
+Priyam
+की रात
+```
 
-Users can create accounts and log in using a username + password flow.
+The phrase updates automatically as the time changes.
 
-Supabase handles authentication behind the scenes.
+### 03 — Listen
 
-Internally, the username is converted into a synthetic email:
+The bottom music console provides the core playback experience:
 
-``` text
-username
-   ↓
+- current song title
+- favourite / like action
+- progress seeking
+- elapsed time
+- total duration
+- previous track
+- play / pause
+- next track
+- volume
+- queue access
+- animated music visualizer
+
+The actual YouTube player remains hidden visually while continuing to provide playback.
+
+### 04 — Make it yours
+
+The profile panel lets the user change:
+
+- display name
+- visual background
+
+The playlist panel lets the user:
+
+- create playlists
+- select playlists
+- add the currently selected song
+- add a song from a YouTube / YouTube Music URL
+- import a YouTube playlist
+- remove songs
+- delete playlists
+- play a selected playlist
+
+---
+
+# ✦ Core Features
+
+## Authentication
+
+ZUNO uses Supabase Authentication with a username-first interface.
+
+The user does not have to think about email-style credentials in the UI. Internally, the application converts the username into a synthetic authentication email using:
+
+```text
 username@pfavourites.local
-   ↓
-Supabase Authentication
-```
-
-### Authentication flow
-
-``` mermaid
-flowchart LR
-    A[Open App] --> B{Session exists?}
-    B -->|No| C[Login / Signup]
-    C --> D[Supabase Auth]
-    D --> E[User Session]
-    E --> F[Load Profile]
-    B -->|Yes| F
-    F --> G[Music Experience]
-```
-
-------------------------------------------------------------------------
-
-## 🎵 Music Catalog
-
-Songs are loaded from a **Google Sheet**.
-
-Required columns:
-
-| Column      | Purpose                     |
-|-------------|-----------------------------|
-| `Song Name` | Song title                  |
-| `Artist`    | Artist name                 |
-| `URL`       | YouTube / YouTube Music URL |
-
-Example:
-
-``` text
-Song Name        | Artist       | URL
------------------|--------------|-------------------------
-Song A           | Artist A     | https://youtube.com/...
-Song B           | Artist B     | https://youtu.be/...
-```
-
-The application fetches the sheet as CSV, parses the rows, extracts
-YouTube IDs and converts them into track objects.
-
-------------------------------------------------------------------------
-
-## ▶️ YouTube Playback
-
-The application uses the **YouTube IFrame Player API**.
-
-Playback state is synchronized with React state:
-
-``` text
-YouTube Player
-      │
-      ├── Playing
-      ├── Paused
-      ├── Ended
-      ├── Current Time
-      └── Duration
-             │
-             ▼
-        React State
-             │
-             ▼
-       Custom UI Controls
-```
-
-When a track ends, the player can move to the next track in the active
-queue.
-
-------------------------------------------------------------------------
-
-## 📋 Personal Playlists
-
-Users can create their own playlists.
-
-A playlist can contain:
-
-- Playlist name
-- Songs
-- Song order
-- Current user’s ownership
-
-### Playlist workflow
-
-``` mermaid
-flowchart TD
-    A[Open Playlists] --> B[Create Playlist]
-    B --> C[Select Playlist]
-    C --> D[Add Current Song]
-    D --> E[Song Stored]
-    E --> F[Playlist Updated]
-    F --> G[Play Playlist]
-    G --> H[Tracks Loaded Into Player]
-    H --> I[Music Starts]
-```
-
-Supported actions include:
-
-- Create playlist
-- Select playlist
-- Load playlist songs
-- Add current song
-- Play selected playlist
-
-------------------------------------------------------------------------
-
-## ❤️ Like Interaction
-
-The player includes a heart interaction for the currently playing song.
-
-The idea is intentionally simple:
-
-> **These are your favourites — not an endless algorithmic feed.**
-
-------------------------------------------------------------------------
-
-## 🖼️ Personal Backgrounds
-
-The application supports multiple visual backgrounds selected through
-the user’s profile.
-
-The current implementation includes scenes such as:
-
-- 🌄 Village
-- 🌇 Sunset
-- 🏔️ Mountains
-- 🌆 City
-
-Backgrounds can be local assets or external image sources.
-
-------------------------------------------------------------------------
-
-# 🧠 How It Works
-
-At a high level, the application has four major layers:
-
-``` mermaid
-flowchart TB
-
-    UI[React UI]
-
-    UI --> AUTH[Supabase Authentication]
-    UI --> DATA[Supabase User Data]
-    UI --> SHEET[Google Sheet]
-    UI --> YT[YouTube IFrame Player]
-
-    AUTH --> PROFILE[User Profile]
-    DATA --> PLAYLISTS[User Playlists]
-    SHEET --> SONGS[Song Catalog]
-    SONGS --> YT
-    PLAYLISTS --> YT
-```
-
-### Application flow
-
-``` text
-1. Open application
-        ↓
-2. Check authentication session
-        ↓
-3. Login / Signup if necessary
-        ↓
-4. Load user profile
-        ↓
-5. Load songs from Google Sheet
-        ↓
-6. Extract YouTube video IDs
-        ↓
-7. Initialize YouTube player
-        ↓
-8. Render music experience
-        ↓
-9. Play / pause / skip / seek
-        ↓
-10. Create and play personal playlists
-```
-
-------------------------------------------------------------------------
-
-# 🛠️ Tech Stack
-
-| Technology            | Role                                   |
-|-----------------------|----------------------------------------|
-| ⚛️ React              | UI and application state               |
-| 🟨 JavaScript         | Application logic                      |
-| 🎨 CSS                | Custom visual system and responsive UI |
-| ▶️ YouTube IFrame API | Music/video playback                   |
-| 📊 Google Sheets      | Song catalog                           |
-| 🔐 Supabase           | Authentication + user data             |
-| ▲ Vercel              | Deployment                             |
-| 🐙 GitHub             | Source control                         |
-
-------------------------------------------------------------------------
-
-# 📁 Project Structure
-
-A simplified structure:
-
-``` text
-P's-Favourites/
-│
-├── public/
-│   └── assets/
-│       ├── village-background.png
-│       └── ...
-│
-├── src/
-│   ├── main.jsx
-│   ├── styles.css
-│   └── ...
-│
-├── package.json
-├── README.md
-└── ...
-```
-
-### Important files
-
-#### `main.jsx`
-
-Contains the application logic for:
-
-- Authentication
-- Profile loading
-- Song loading
-- YouTube player
-- Playback controls
-- Playlist logic
-- Profile/playlist panels
-
-#### `styles.css`
-
-Contains:
-
-- Layout
-- Background
-- Glass effects
-- Video card
-- Music player
-- Playlist UI
-- Responsive behavior
-- Mobile styling
-
-------------------------------------------------------------------------
-
-# 🔌 Data Architecture
-
-## Google Sheets → Music Catalog
-
-``` text
-Google Sheet
-     │
-     │ CSV
-     ▼
-loadSongs()
-     │
-     ▼
-parseCSV()
-     │
-     ▼
-YouTube ID extraction
-     │
-     ▼
-React tracks[]
-     │
-     ▼
-YouTube Player
-```
-
-The application expects:
-
-``` text
-Song Name
-Artist
-URL
-```
-
-Rows without a usable ID, title or artist are filtered out.
-
-------------------------------------------------------------------------
-
-## Supabase → User Data
-
-Conceptually:
-
-``` text
-Supabase
-│
-├── Authentication
-│   ├── User
-│   └── Session
-│
-├── Profiles
-│   ├── Display name
-│   ├── Username
-│   └── Background preference
-│
-└── Playlists
-    ├── Playlist
-    └── Playlist Songs
-```
-
-------------------------------------------------------------------------
-
-# ⚙️ Getting Started
-
-## 1. Clone
-
-``` bash
-git clone <your-repository-url>
-cd P-s-Favourites
-```
-
-## 2. Install
-
-``` bash
-npm install
-```
-
-## 3. Run locally
-
-``` bash
-npm run dev
-```
-
-Then open the local URL shown by Vite, usually:
-
-``` text
-http://localhost:5173
-```
-
-------------------------------------------------------------------------
-
-# 🔑 Configuration
-
-The project needs:
-
-- Google Sheet access
-- Supabase project
-- Supabase authentication
-- YouTube IFrame API
-
-For production, configuration should be stored in environment variables.
-
-Example:
-
-``` env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_PUBLISHABLE_KEY=your_publishable_key
-VITE_SHEET_URL=your_google_sheet_csv_url
-```
-
-Then:
-
-``` js
-const SUPABASE_URL =
-  import.meta.env.VITE_SUPABASE_URL;
-
-const SUPABASE_KEY =
-  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-```
-
-> ⚠️ Never put Supabase service-role keys, database passwords, private
-> API keys, access tokens or refresh tokens into frontend source code.
-
-------------------------------------------------------------------------
-
-# 📊 Google Sheet Setup
-
-Create a sheet with:
-
-``` text
-Song Name | Artist | URL
 ```
 
 Example:
 
-``` text
-Perfect | Ed Sheeran | https://www.youtube.com/watch?v=...
-Tum Ho | Mohit Chauhan | https://www.youtube.com/watch?v=...
-```
-
-The application reads the sheet as CSV.
-
-------------------------------------------------------------------------
-
-# 🗄️ Supabase Setup
-
-Create a Supabase project and configure Authentication.
-
-The current application uses username-based authentication internally
-through:
-
-``` text
-pfavourites.local
-```
-
-For example:
-
-``` text
+```text
 priyam
-```
-
-becomes:
-
-``` text
+↓
 priyam@pfavourites.local
 ```
 
-For production:
+The application supports:
 
-- Enable appropriate authentication settings
-- Enable Row Level Security
-- Restrict profile access to the owner
-- Restrict playlist access to the owner
-- Keep server-side secrets off the client
+- Login
+- Account creation
+- Session restoration
+- Logout
+- Stored access / refresh tokens
+- Profile restoration after authentication
 
-------------------------------------------------------------------------
+---
 
-# 🎧 Player Controls
+## Personal Profiles
 
-| Control  | Action                   |
-|----------|--------------------------|
-| ▶️       | Play / Pause             |
-| ‹        | Previous track           |
-| ›        | Next track               |
-| ♡        | Like                     |
-| Playlist | Open playlist controls   |
-| Seek     | Jump to another position |
+Every account has a profile containing:
 
-The player tracks:
+```text
+id
+username
+display_name
+background_id
+```
 
-``` text
-playing
+The display name powers the personalized hero greeting and the account control in the navbar.
+
+---
+
+## Personal Backgrounds
+
+ZUNO currently provides a collection of locally stored illustrated scenes.
+
+Available background themes include:
+
+- शाम की गली
+- सूरज ढलना
+- सूर्यनगर स्टेशन
+- पहाड़ी घाटी
+- गाँव
+- रंगीन बाज़ार
+- पुरानी हवेली
+- शहर की शाम
+- देसी गली
+- सुनहरी शाम
+
+The selected background is stored with the user's profile and restored for that account.
+
+---
+
+## Music Playback
+
+Playback is handled through the **YouTube IFrame Player API**.
+
+The visible video player has intentionally been removed from the main visual experience. The YouTube player is mounted as a hidden playback host while ZUNO presents its own custom music controls.
+
+The custom player tracks:
+
+```text
+current track
+playing state
 progress
-elapsed
+elapsed time
 duration
 volume
-current track
 queue
+liked state
 ```
 
-------------------------------------------------------------------------
+When a track ends, ZUNO automatically advances to the next available track.
 
-# 📱 Responsive Design
+---
 
-Desktop:
+## Playlists
 
-``` text
-             VIDEO
-               ↓
-          MUSIC PILL
-```
+Playlist data is stored per user in Supabase.
 
-Mobile:
+The current playlist system supports:
 
-``` text
-      VIDEO
+```text
+Create playlist
         ↓
-   ┌────────────────┐
-   │ 🎵  ♡  ‹  ▶  › │
-   └────────────────┘
+Select playlist
+        ↓
+Load its songs
+        ↓
+Add songs
+        ↓
+Play playlist
+        ↓
+Remove songs / delete playlists
 ```
 
-The player becomes shorter and tighter on smaller screens while keeping
-the important controls usable.
+A playlist can receive:
 
-------------------------------------------------------------------------
+- the current ZUNO song
+- a single YouTube / YouTube Music URL
+- a public YouTube playlist import
 
-# 🧩 UI Architecture
+Imported tracks are saved as playlist songs and remain playable through ZUNO's existing YouTube-based player.
 
-``` text
-App
+---
+
+## Queue
+
+The queue provides a simple view of the user's available tracks.
+
+The active song is highlighted, and selecting any queue item immediately changes playback.
+
+The queue is intentionally compact so it does not compete with the main cinematic scene.
+
+---
+
+# ✦ Keyboard & Interaction Layer
+
+ZUNO provides practical keyboard controls so the interface can be used without constantly reaching for the mouse.
+
+| Key / Gesture | Action |
+|---|---|
+| `Space` | Play / pause |
+| `←` | Previous song |
+| `→` | Next song |
+| `M` | Mute / restore volume |
+| `↑` | Increase volume |
+| `↓` | Decrease volume |
+| `0` | Restart current song |
+| `Shift + ←` | Seek backward 10 seconds |
+| `Shift + →` | Seek forward 10 seconds |
+| `F` | Open playlists |
+| `P` | Open queue |
+| `Enter` | Play selected queue item |
+| `Esc` | Close open panels |
+| Double-click player | Play / pause |
+
+Keyboard shortcuts intentionally avoid interfering with:
+
+- inputs
+- textareas
+- selects
+- contenteditable elements
+
+---
+
+# ✦ Playback Persistence
+
+ZUNO remembers useful playback preferences so returning to the site feels continuous rather than reset-heavy.
+
+Current persistence and continuity include:
+
+- last known account session
+- volume preference
+- current track context where available
+- playback position / resume context where supported by the player state
+- preserving the currently playing song when playlist data refreshes
+
+The playlist refresh logic intentionally avoids jumping back to the first track when the current song is still present.
+
+---
+
+# ✦ Visual Design System
+
+ZUNO follows a deliberately restrained visual system.
+
+### The scene
+
+The background is the primary visual canvas.
+
+The UI does not try to overpower it.
+
+### The hero
+
+Large, personalized typography sits inside the scene rather than inside a conventional card.
+
+### The navbar
+
+The current navbar uses:
+
+- ZUNO branding
+- playlist access
+- profile access
+- favourites count
+
+Controls use subtle translucency and blur so the background remains visible.
+
+### The player
+
+The music player is a **wide pill-shaped floating console**.
+
+It is intentionally compact, rounded, translucent, and centered near the bottom of the viewport.
+
+### Motion
+
+Motion is used as seasoning, not decoration.
+
+Current visual motion includes:
+
+- cinematic scene reveal
+- slow ambient glows
+- floating particles
+- music visualizer motion while playing
+- subtle background mouse parallax
+- reduced-motion handling
+- small interaction transitions
+
+The design intentionally avoids turning every element into an animation.
+
+---
+
+# ✦ Typography
+
+The current website font system uses three primary typefaces:
+
+| Font | Role |
+|---|---|
+| **Tiro Devanagari Hindi** | Main typography and Hindi-facing visual language |
+| **DM Sans** | UI, controls, buttons, labels |
+| **Playfair Display** | Branding / logo treatment |
+
+The combination gives ZUNO:
+
+**Indian editorial character + modern interface clarity + premium branding.**
+
+---
+
+# ✦ Responsive Behaviour
+
+ZUNO is designed to remain usable across desktop and mobile layouts.
+
+On smaller screens:
+
+- navigation compresses
+- secondary navbar information can collapse
+- the music player becomes tighter
+- player controls reduce proportionally
+- ambient effects are reduced
+- pointer parallax is avoided where it is not appropriate
+
+The visual hierarchy remains the same:
+
+```text
+BACKGROUND
+     ↓
+PERSONAL GREETING
+     ↓
+MUSIC
+     ↓
+CONTROLS
+```
+
+---
+
+# ✦ Technical Architecture
+
+At a high level:
+
+```text
+                    ┌────────────────────┐
+                    │       ZUNO UI      │
+                    │      React App     │
+                    └─────────┬──────────┘
+                              │
+          ┌───────────────────┼───────────────────┐
+          │                   │                   │
+          ▼                   ▼                   ▼
+   Supabase Auth        Supabase Data      YouTube IFrame
+          │                   │                   │
+          ▼                   ▼                   ▼
+     User session      Profiles / Playlists    Playback
+                              │
+                              ▼
+                         Player State
+                              │
+                              ▼
+                       ZUNO Music UI
+```
+
+---
+
+# ✦ Current Tech Stack
+
+Only the technologies currently used by the project are listed here.
+
+| Technology | Purpose |
+|---|---|
+| **React** | UI and application architecture |
+| **Vite** | Development / build tooling |
+| **JavaScript / JSX** | Application logic |
+| **CSS** | Custom visual system, animations and responsive design |
+| **Supabase** | Authentication and persistent user / playlist data |
+| **YouTube IFrame Player API** | Actual music playback |
+| **GitHub** | Source control |
+| **Vercel** | Deployment |
+
+### Browser / platform APIs used
+
+The application also uses standard browser capabilities for:
+
+- `localStorage`
+- keyboard events
+- pointer events
+- `requestAnimationFrame`
+- `requestIdleCallback` where available
+- media/player integration through the YouTube API
+
+These are implementation APIs rather than separate framework dependencies.
+
+---
+
+# ✦ Project Structure
+
+The core application currently revolves around a small number of focused files:
+
+```text
+ZUNO/
 │
-├── Authentication
-│   ├── Login
-│   └── Signup
+├── public/
+│   └── assets/
+│       ├── bg1.png
+│       ├── bg2.png
+│       ├── ...
+│       └── bg10.png
 │
-├── Main Scene
-│   ├── Navbar
-│   ├── Profile
-│   ├── Background
-│   ├── Video Player
-│   └── Music Player
+├── src/
+│   ├── main.jsx
+│   └── styles.css
 │
-└── Panels
-    ├── Profile Panel
-    └── Playlist Panel
+├── package.json
+├── index.html
+└── README.md
 ```
 
-------------------------------------------------------------------------
+### `src/main.jsx`
 
-# 💡 Why Google Sheets?
+Contains the application logic for:
 
-Google Sheets works as a lightweight content-management layer.
+- authentication
+- profile loading and saving
+- background selection
+- playlist operations
+- song loading
+- YouTube player setup
+- playback state
+- player controls
+- keyboard controls
+- queue
+- profile panel
+- playlist panel
+- background motion
+- personalized time greeting
 
-Instead of:
+### `src/styles.css`
 
-``` text
-Add song
-   ↓
-Edit code
-   ↓
-Commit
-   ↓
-Deploy
+Contains the visual system for:
+
+- full-screen scene layout
+- typography
+- navbar
+- hero positioning
+- music player
+- responsive behaviour
+- panels
+- controls
+- visual effects
+- animations
+
+---
+
+# ✦ Data Model
+
+The application currently works around these core concepts:
+
+```text
+User
+ │
+ ├── Profile
+ │    ├── username
+ │    ├── display_name
+ │    └── background_id
+ │
+ └── Playlists
+      │
+      ├── Playlist
+      │    ├── id
+      │    ├── name
+      │    └── created_at
+      │
+      └── Playlist Songs
+           ├── youtube_id
+           ├── song_name
+           ├── artist
+           └── position
 ```
 
-the workflow becomes:
+The player converts stored playlist-song data into the internal track representation used by the React player state.
 
-``` text
-Add song to Sheet
-       ↓
-Application fetches CSV
-       ↓
-Song appears in catalog
+---
+
+# ✦ Local Development
+
+Clone the repository:
+
+```bash
+git clone <your-repository-url>
+cd ZUNO
 ```
 
-Simple. Fast. No tiny database admin panel needed just to add a song.
+Install dependencies:
 
-------------------------------------------------------------------------
-
-# 🚀 Deployment
-
-Recommended production flow:
-
-``` text
-Local Code
-    │
-    ▼
-GitHub
-    │
-    ▼
-Vercel
-    │
-    ▼
-Production Website
+```bash
+npm install
 ```
 
-Push updates:
+Start the development server:
 
-``` bash
-git add .
-git commit -m "Update P's Favourites"
-git push origin main
-```
-
-When GitHub is connected to Vercel, new commits can trigger deployments
-automatically.
-
-------------------------------------------------------------------------
-
-# 🧪 Development Workflow
-
-``` bash
-# Development
+```bash
 npm run dev
-
-# Stage
-git add .
-
-# Commit
-git commit -m "Describe the change"
-
-# Push
-git push origin main
 ```
 
-Good commit messages:
+Vite will provide the local development URL.
 
-``` text
-Add playlist deletion
-Fix mobile player
-Improve background selector
-Add song search
+---
+
+# ✦ Deployment
+
+The current deployment workflow is intentionally simple:
+
+```text
+Code
+  ↓
+GitHub
+  ↓
+Vercel
+  ↓
+Production
 ```
 
-Avoid:
+Push changes to the connected GitHub repository and Vercel handles the production deployment.
 
-``` text
-update
-changes
-final final
-new new
+Current production site:
+
+**https://zuuno.vercel.app**
+
+---
+
+# ✦ Configuration & Security Notes
+
+The project integrates Supabase directly from the application and uses the YouTube IFrame Player API.
+
+For production hygiene:
+
+- use environment variables for configuration
+- keep private secrets off the client
+- use Supabase Row Level Security for user-owned data
+- never expose service-role keys or database credentials in frontend code
+- keep authentication tokens out of committed source files
+
+The current repository should treat the public Supabase publishable key as client configuration and never expose privileged Supabase credentials.
+
+---
+
+# ✦ Design Principles
+
+ZUNO is intentionally built around a few rules.
+
+### **1. The background is the artwork.**
+The interface should sit inside the scene, not fight it.
+
+### **2. Personalization beats complexity.**
+A user's name, time of day, playlists and chosen background matter more than an overloaded dashboard.
+
+### **3. Motion should have a reason.**
+Playback state, interaction feedback and scene depth are useful. Animation for animation's sake is not.
+
+### **4. Compact controls are better than permanent panels.**
+The player, queue and profile tools stay available without consuming the whole screen.
+
+### **5. Don't overbuild the quiet parts.**
+ZUNO is deliberately not trying to become a full streaming platform.
+
+---
+
+# ✦ Current Feature Boundary
+
+The current project is best understood as:
+
+> **A personalized music space, not a streaming service clone.**
+
+It focuses on:
+
+- personal playlists
+- personal backgrounds
+- personal greetings
+- YouTube-based playback
+- lightweight account persistence
+- a custom cinematic interface
+
+That boundary is part of the product.
+
+More features are not automatically better features.
+
+---
+
+# ✦ Status
+
+**ZUNO is in its polished personal-product phase.**
+
+The core experience is intentionally considered complete enough to stop adding interface noise and start letting the design breathe.
+
+```text
+A scene.
+A name.
+A time.
+A song.
+Your space.
 ```
 
-Git history deserves a little dignity. 😄
+---
 
-------------------------------------------------------------------------
+## Built with attention to the details that should stay quiet.
 
-# 🐛 Troubleshooting
-
-<details>
-<summary>
-<strong>🎵 Songs are not loading</strong>
-</summary>
-
-Check:
-
-1.  Google Sheet accessibility
-2.  Sheet URL
-3.  Header names
-4.  YouTube URLs
-5.  Browser console
-
-Required headers:
-
-``` text
-Song Name
-Artist
-URL
-```
-
-</details>
-<details>
-<summary>
-<strong>▶️ YouTube player is blank</strong>
-</summary>
-
-Check:
-
-- Valid YouTube video ID
-- YouTube IFrame API loading
-- Browser console
-- Whether the video allows embedding
-
-</details>
-<details>
-<summary>
-<strong>🔐 Login is not working</strong>
-</summary>
-
-Check:
-
-- Supabase URL
-- Publishable/anon key
-- Authentication configuration
-- Session handling
-- Supabase policies
-
-</details>
-<details>
-<summary>
-<strong>📋 Playlist is empty</strong>
-</summary>
-
-Check:
-
-- User is authenticated
-- Playlist belongs to the current user
-- Playlist-song relationship exists
-- Supabase policies allow access
-
-</details>
-<details>
-<summary>
-<strong>🎨 Background is not showing</strong>
-</summary>
-
-Check:
-
-- Asset filename
-- `/public/assets/` path
-- CSS background rules
-- External image availability
-
-</details>
-
-------------------------------------------------------------------------
-
-# 🔒 Security Notes
-
-Never commit:
-
-``` text
-.env
-.env.local
-private API keys
-service-role keys
-database passwords
-access tokens
-refresh tokens
-```
-
-Recommended `.gitignore`:
-
-``` gitignore
-.env
-.env.local
-.env.production
-node_modules/
-dist/
-```
-
-Frontend code cannot hide true secrets.
-
-If an operation requires a private credential, move that operation to a
-secure backend/server function.
-
-------------------------------------------------------------------------
-
-# 🗺️ Roadmap
-
-## ✅ Current
-
-- [x] User authentication
-- [x] Profile-based experience
-- [x] Google Sheet music catalog
-- [x] YouTube playback
-- [x] Play / pause
-- [x] Previous / next
-- [x] Playlist creation
-- [x] Add songs to playlists
-- [x] Playlist playback
-- [x] Custom backgrounds
-- [x] Responsive player
-- [x] Compact pill music control
-
-## 🔜 Next
-
-- [ ] Playlist deletion
-- [ ] Rename playlists
-- [ ] Remove individual songs
-- [ ] Drag-and-drop playlist ordering
-- [ ] Persistent liked songs
-- [ ] Search
-- [ ] Recently played
-- [ ] Recently added
-- [ ] Better mobile navigation
-- [ ] Keyboard shortcuts
-- [ ] Better loading states
-- [ ] Better error handling
-
-## 🚀 Future
-
-- [ ] Public/private playlists
-- [ ] Shareable playlists
-- [ ] Profile customization
-- [ ] Music statistics
-- [ ] Listening history
-- [ ] Favorite artists
-- [ ] Theme system
-- [ ] PWA / installable app
-- [ ] Offline UI shell
-- [ ] Admin music management
-- [ ] Server-side API layer
-
-------------------------------------------------------------------------
-
-# 💭 Project Vision
-
-P’s Favourites is **not trying to be Spotify**.
-
-It is a **personal digital music room**.
-
-``` text
-Your songs
-    +
-Your playlists
-    +
-Your background
-    +
-Your profile
-    +
-Your vibe
-```
-
-come together in one focused web experience.
-
-------------------------------------------------------------------------
-
-# 🤝 Contributing
-
-1.  Fork the repository
-2.  Create a branch
-
-``` bash
-git checkout -b feature/my-feature
-```
-
-3.  Make your changes
-4.  Test locally
-5.  Commit
-
-``` bash
-git commit -m "Add my feature"
-```
-
-6.  Push
-
-``` bash
-git push origin feature/my-feature
-```
-
-7.  Open a Pull Request
-
-------------------------------------------------------------------------
-
-# 📜 License
-
-Add your preferred license before making the repository public.
-
-Example:
-
-``` text
-MIT License
-```
-
-------------------------------------------------------------------------
-
-# 👨‍💻 Author
-
-**Priyam**
-
-Built as a personal web development project focused on:
-
-- React
-- JavaScript
-- UI/UX
-- APIs
-- Authentication
-- Database-backed features
-- Deployment
-- Real-world product building
-
-------------------------------------------------------------------------
-
-<p align="center">
-
-### 🎧 P’s Favourites
-
-**Your vibe. Your music. Your world.**
-
-Made with ❤️ and a questionable number of CSS tweaks.
-
-</p>
+**ZUNO**
