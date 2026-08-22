@@ -5000,10 +5000,7 @@ nav{
    1. Ambient player pulse while music is playing
    2. Moving progress highlight / musical thread
 
-   IMPORTANT:
-   - Player dimensions and layout stay untouched.
-   - The pulse uses only a very subtle shadow/filter change.
-   - The progress thread never changes actual progress width.
+   Player dimensions, controls and actual progress remain unchanged.
    ========================================================= */
 
 .player-card.is-playing{
@@ -5012,16 +5009,20 @@ nav{
   animation-timing-function:ease-in-out !important;
   animation-iteration-count:infinite !important;
   animation-fill-mode:both !important;
-  will-change:filter;
+  animation-play-state:running !important;
 }
 
 @keyframes zunoAmbientPulse{
   0%,100%{
-    filter:drop-shadow(0 18px 45px rgba(0,0,0,.34));
+    box-shadow:
+      0 18px 45px rgba(0,0,0,.34),
+      0 0 0 0 rgba(255,218,176,0);
   }
 
   50%{
-    filter:drop-shadow(0 20px 50px rgba(255,218,176,.14));
+    box-shadow:
+      0 20px 50px rgba(0,0,0,.34),
+      0 0 0 2px rgba(255,218,176,.08);
   }
 }
 
@@ -5040,26 +5041,27 @@ nav{
   position:absolute;
   top:0;
   bottom:0;
-  left:-34%;
-  width:34%;
+  left:-38%;
+  width:38%;
   background:linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255,226,190,.72) 48%,
+    rgba(255,226,190,.78) 48%,
     transparent 100%
   );
   opacity:0;
   pointer-events:none;
-  will-change:transform,opacity;
+  transform:translateX(0);
 }
 
 .player-card.is-playing .seek-fill::after{
-  opacity:.85;
+  opacity:.9;
   animation-name:zunoProgressThread !important;
   animation-duration:1.65s !important;
   animation-timing-function:ease-in-out !important;
   animation-iteration-count:infinite !important;
   animation-fill-mode:both !important;
+  animation-play-state:running !important;
 }
 
 @keyframes zunoProgressThread{
@@ -5068,7 +5070,7 @@ nav{
   }
 
   100%{
-    transform:translateX(395%);
+    transform:translateX(365%);
   }
 }
 
@@ -5081,7 +5083,6 @@ nav{
 @media(prefers-reduced-motion:reduce){
   .player-card.is-playing{
     animation:none !important;
-    will-change:auto;
   }
 
   .player-card.is-playing .seek-fill::after{
