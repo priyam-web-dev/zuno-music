@@ -2047,8 +2047,8 @@ function App() {
   ] = useState(false);
 
   const [
-    playlistHubOpen,
-    setPlaylistHubOpen,
+    recommendedOpen,
+    setRecommendedOpen,
   ] = useState(false);
 
 
@@ -2405,7 +2405,7 @@ function App() {
 
       setProfileOpen(false);
       setPlaylistOpen(false);
-      setPlaylistHubOpen(false);
+      setRecommendedOpen(false);
     };
 
 
@@ -2640,7 +2640,7 @@ function App() {
           setQueueOpen(false);
           setProfileOpen(false);
           setPlaylistOpen(false);
-          setPlaylistHubOpen(false);
+          setRecommendedOpen(false);
 
         }
       };
@@ -2667,7 +2667,7 @@ function App() {
       queueOpen ||
       profileOpen ||
       playlistOpen ||
-      playlistHubOpen ||
+      recommendedOpen ||
       !user
         ? "hidden"
         : "";
@@ -2682,7 +2682,7 @@ function App() {
     queueOpen,
     profileOpen,
     playlistOpen,
-    playlistHubOpen,
+    recommendedOpen,
     user,
   ]);
 
@@ -3180,7 +3180,7 @@ function App() {
 
       if (key === "f") {
         event.preventDefault();
-        setPlaylistHubOpen(true);
+        setRecommendedOpen(true);
         return;
       }
 
@@ -3306,7 +3306,7 @@ function App() {
         false
       );
 
-      setPlaylistHubOpen(
+      setRecommendedOpen(
         false
       );
 
@@ -3959,175 +3959,74 @@ function App() {
         `}</style>
 
         <style>{`
-          .zuno-playlist-hub-overlay{
-            position:fixed; inset:0; z-index:90;
-            display:flex; align-items:center; justify-content:center;
-            padding:28px;
-            background:rgba(4,4,4,.58);
-            backdrop-filter:blur(18px) saturate(115%);
-            -webkit-backdrop-filter:blur(18px) saturate(115%);
-            animation:zunoHubFade .24s ease both;
+          .zuno-recommended-overlay{
+            position:fixed !important; inset:0 !important; z-index:9999 !important;
+            display:flex; align-items:center; justify-content:center; padding:28px;
+            background:rgba(4,4,4,.62);
+            backdrop-filter:blur(18px) saturate(115%); -webkit-backdrop-filter:blur(18px) saturate(115%);
+            animation:zunoRecommendedFade .22s ease both;
           }
-
-          .zuno-playlist-hub{
-            position:relative;
-            width:min(1080px,94vw);
-            max-height:min(760px,88vh);
-            overflow:auto;
-            padding:28px;
-            border:1px solid rgba(255,255,255,.18);
-            border-radius:28px;
-            background:linear-gradient(145deg,rgba(24,20,17,.90),rgba(9,9,9,.80));
-            box-shadow:0 30px 100px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.08);
-            color:#fff;
-            animation:zunoHubEnter .34s cubic-bezier(.2,.75,.2,1) both;
+          .zuno-recommended-panel{
+            position:relative; width:min(1080px,94vw); max-height:min(760px,88vh); overflow:auto;
+            padding:28px; border:1px solid rgba(255,255,255,.18); border-radius:28px;
+            background:linear-gradient(145deg,rgba(24,20,17,.94),rgba(9,9,9,.88));
+            box-shadow:0 30px 100px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.08);
+            color:#fff; animation:zunoRecommendedEnter .3s cubic-bezier(.2,.75,.2,1) both;
           }
-
-          .zuno-playlist-hub::before{
-            content:""; position:absolute; inset:-1px; border-radius:inherit;
-            pointer-events:none;
+          .zuno-recommended-panel::before{
+            content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
             background:linear-gradient(120deg,rgba(255,255,255,.08),transparent 30%,transparent 70%,rgba(255,220,185,.08));
           }
-
-          .zuno-playlist-hub-head{
-            position:relative; display:flex; align-items:flex-start;
-            justify-content:space-between; gap:20px; margin-bottom:24px;
+          .zuno-recommended-panel-head{
+            position:relative; display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:22px;
           }
-
-          .zuno-playlist-hub-kicker{
-            margin:0 0 7px; color:rgba(255,255,255,.5); font-size:10px;
-            font-weight:800; letter-spacing:2.4px; text-transform:uppercase;
+          .zuno-recommended-panel-kicker{
+            margin:0 0 7px; color:rgba(255,255,255,.5); font-size:10px; font-weight:800; letter-spacing:2.4px; text-transform:uppercase;
           }
-
-          .zuno-playlist-hub-title{
-            margin:0; font-family:"DM Sans",sans-serif;
-            font-size:clamp(28px,4vw,42px); line-height:.98;
-            letter-spacing:-1.4px; font-weight:800;
+          .zuno-recommended-panel-title{
+            margin:0; font-family:"DM Sans",sans-serif; font-size:clamp(30px,4vw,44px); line-height:.98; letter-spacing:-1.5px; font-weight:800;
             text-shadow:0 4px 25px rgba(0,0,0,.32);
           }
-
-          .zuno-playlist-hub-sub{
-            margin:9px 0 0; max-width:560px; color:rgba(255,255,255,.58);
-            font-size:12px; line-height:1.55;
+          .zuno-recommended-panel-sub{
+            margin:9px 0 0; max-width:600px; color:rgba(255,255,255,.58); font-size:12px; line-height:1.55;
           }
-
-          .zuno-playlist-hub-close{
-            position:relative; flex:0 0 auto; width:42px; height:42px;
-            border:1px solid rgba(255,255,255,.14); border-radius:50%;
-            background:rgba(255,255,255,.06); color:#fff; font-size:23px;
-            line-height:1; cursor:pointer;
+          .zuno-recommended-panel-close{
+            flex:0 0 auto; width:42px; height:42px; border:1px solid rgba(255,255,255,.14); border-radius:50%;
+            background:rgba(255,255,255,.06); color:#fff; font-size:23px; line-height:1; cursor:pointer;
             transition:background .25s ease,border-color .25s ease,transform .25s ease;
           }
-
-          .zuno-playlist-hub-close:hover{
-            background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25);
-            transform:rotate(4deg);
+          .zuno-recommended-panel-close:hover{
+            background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25); transform:rotate(4deg);
           }
-
-          .zuno-playlist-options{
-            position:relative; display:grid; grid-template-columns:1fr 1fr;
-            gap:12px; margin-bottom:24px;
+          .zuno-recommended-panel-label{
+            position:relative; margin:0 0 12px; color:rgba(255,255,255,.62); font-size:10px; font-weight:800; letter-spacing:1.8px; text-transform:uppercase;
           }
-
-          .zuno-playlist-option{
-            position:relative; min-height:112px; padding:18px;
-            border:1px solid rgba(255,255,255,.12); border-radius:18px;
-            background:rgba(255,255,255,.045); color:#fff; text-align:left;
-            cursor:pointer; overflow:hidden;
-            transition:transform .28s ease,background .28s ease,border-color .28s ease,box-shadow .28s ease;
+          .zuno-recommended-grid{
+            position:relative; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px;
           }
-
-          .zuno-playlist-option::after{
-            content:""; position:absolute; width:150px; height:150px; right:-70px; bottom:-90px;
-            border-radius:50%; background:rgba(255,224,192,.08); filter:blur(22px); pointer-events:none;
-          }
-
-          .zuno-playlist-option:hover{
-            transform:translateY(-2px); background:rgba(255,255,255,.075);
-            border-color:rgba(255,255,255,.22); box-shadow:0 14px 35px rgba(0,0,0,.18);
-          }
-
-          .zuno-playlist-option.active{
-            background:rgba(255,255,255,.085); border-color:rgba(255,232,207,.30);
-            box-shadow:0 0 24px rgba(255,220,185,.08);
-          }
-
-          .zuno-playlist-option-icon{
-            display:inline-flex; align-items:center; justify-content:center;
-            width:38px; height:38px; margin-bottom:14px;
-            border:1px solid rgba(255,255,255,.14); border-radius:12px;
-            background:rgba(255,255,255,.06); font-size:17px;
-          }
-
-          .zuno-playlist-option-title{display:block;font-size:15px;font-weight:800}
-          .zuno-playlist-option-text{display:block;margin-top:4px;color:rgba(255,255,255,.52);font-size:10px;line-height:1.4}
-
-          .zuno-playlist-recommended{position:relative}
-          .zuno-playlist-recommended-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:12px}
-          .zuno-playlist-recommended-title{margin:0;font-size:15px;font-weight:800}
-          .zuno-playlist-recommended-note{margin:0;color:rgba(255,255,255,.43);font-size:10px}
-
-          .zuno-recommended-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
-
-          .zuno-recommended-card{
-            position:relative; min-height:158px; overflow:hidden;
-            border:1px solid rgba(255,255,255,.14); border-radius:16px;
-            background:#211b17; box-shadow:0 14px 34px rgba(0,0,0,.18); isolation:isolate;
-          }
-
-          .zuno-recommended-card::before{
-            content:""; position:absolute; inset:0; z-index:-2;
-            background-image:var(--playlist-bg); background-size:cover; background-position:center;
-            transform:scale(1.02); transition:transform .45s ease;
-          }
-
-          .zuno-recommended-card::after{
-            content:""; position:absolute; inset:0; z-index:-1;
-            background:linear-gradient(180deg,rgba(0,0,0,.05) 5%,rgba(0,0,0,.16) 42%,rgba(0,0,0,.84) 100%);
-          }
-
-          .zuno-recommended-card-inner{
-            min-height:158px; padding:13px; display:flex; flex-direction:column; justify-content:flex-end;
-          }
-
-          .zuno-recommended-mood{
-            align-self:flex-start; margin-bottom:auto; padding:5px 8px;
-            border:1px solid rgba(255,255,255,.18); border-radius:999px;
-            background:rgba(0,0,0,.22); backdrop-filter:blur(8px);
-            color:rgba(255,255,255,.9); font-size:9px; font-weight:700;
-          }
-
-          .zuno-recommended-card h3{margin:0;color:#fff;font-family:"DM Sans",sans-serif;font-size:16px;line-height:1.05;font-weight:800;letter-spacing:-.3px;text-shadow:0 2px 10px rgba(0,0,0,.34)}
-          .zuno-recommended-card p{margin:5px 0 0;color:rgba(255,255,255,.78);font-size:9.5px;line-height:1.35}
-
-          @media (hover:hover) and (pointer:fine){.zuno-recommended-card:hover::before{transform:scale(1.08)}}
-
-          @keyframes zunoHubFade{from{opacity:0}to{opacity:1}}
-          @keyframes zunoHubEnter{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
-
+          @keyframes zunoRecommendedFade{from{opacity:0}to{opacity:1}}
+          @keyframes zunoRecommendedEnter{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
           @media(max-width:900px){
-            .zuno-playlist-hub{padding:22px}
             .zuno-recommended-grid{display:flex;overflow-x:auto;gap:10px;padding-bottom:5px;scrollbar-width:none}
             .zuno-recommended-grid::-webkit-scrollbar{display:none}
             .zuno-recommended-card{flex:0 0 190px}
           }
-
+          @media(max-width:700px){
+            .zuno-recommended-trigger,.zuno-my-playlists-trigger{padding:0 9px !important;font-size:10px !important}
+          }
           @media(max-width:600px){
-            .zuno-playlist-hub-overlay{align-items:flex-end;padding:0}
-            .zuno-playlist-hub{width:100%;max-height:91vh;padding:20px 16px 24px;border-radius:26px 26px 0 0}
-            .zuno-playlist-hub-title{font-size:30px}
-            .zuno-playlist-hub-sub{font-size:11px}
-            .zuno-playlist-options{grid-template-columns:1fr 1fr;gap:8px}
-            .zuno-playlist-option{min-height:104px;padding:14px}
-            .zuno-playlist-option-icon{width:34px;height:34px;margin-bottom:10px}
-            .zuno-playlist-option-title{font-size:13px}
-            .zuno-playlist-option-text{font-size:9px}
+            .zuno-recommended-overlay{align-items:flex-end;padding:0}
+            .zuno-recommended-panel{width:100%;max-height:91vh;padding:20px 16px 24px;border-radius:26px 26px 0 0}
+            .zuno-recommended-panel-title{font-size:30px}
+            .zuno-recommended-panel-sub{font-size:11px}
             .zuno-recommended-card{flex-basis:72vw;max-width:260px;min-height:150px}
             .zuno-recommended-card-inner{min-height:150px}
           }
-
+          @media(max-width:470px){
+            .zuno-recommended-trigger,.zuno-my-playlists-trigger{padding:0 6px !important;font-size:8.5px !important}
+          }
           @media(prefers-reduced-motion:reduce){
-            .zuno-playlist-trigger-dot,.zuno-playlist-hub-overlay,.zuno-playlist-hub{animation:none !important}
+            .zuno-recommended-overlay,.zuno-recommended-panel,.zuno-playlist-trigger-dot{animation:none !important}
           }
         `}</style>
 
@@ -4151,13 +4050,21 @@ function App() {
 
             <button
               type="button"
-              className="zuno-nav-action zuno-playlist-trigger"
-              onClick={() => setPlaylistHubOpen(true)}
+              className="zuno-nav-action zuno-playlist-trigger zuno-recommended-trigger"
+              onClick={() => setRecommendedOpen(true)}
               aria-haspopup="dialog"
-              aria-expanded={playlistHubOpen}
+              aria-expanded={recommendedOpen}
             >
               <span className="zuno-playlist-trigger-dot" aria-hidden="true" />
-              ♫ Playlists
+              ♫ Recommended
+            </button>
+
+            <button
+              type="button"
+              className="zuno-nav-action zuno-my-playlists-trigger"
+              onClick={() => setPlaylistOpen(true)}
+            >
+              ♡ My Playlists
             </button>
 
             <button
@@ -4554,94 +4461,59 @@ function App() {
         )}
 
 
-        {/* PLAYLIST HUB */}
-        {playlistHubOpen && (
+        {/* RECOMMENDED PLAYLISTS */}
+        {recommendedOpen && (
           <div
-            className="zuno-playlist-hub-overlay"
+            className="zuno-recommended-overlay"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="zuno-playlist-hub-title"
+            aria-labelledby="zuno-recommended-panel-title"
             onClick={(event) => {
               if (event.target === event.currentTarget) {
-                setPlaylistHubOpen(false);
+                setRecommendedOpen(false);
               }
             }}
           >
             <div
-              className="zuno-playlist-hub"
+              className="zuno-recommended-panel"
               onClick={(event) => event.stopPropagation()}
             >
-              <div className="zuno-playlist-hub-head">
+              <div className="zuno-recommended-panel-head">
                 <div>
-                  <p className="zuno-playlist-hub-kicker">ZUNO MUSIC</p>
-                  <h2 id="zuno-playlist-hub-title" className="zuno-playlist-hub-title">
-                    Pick your playlist.
+                  <p className="zuno-recommended-panel-kicker">ZUNO MUSIC</p>
+                  <h2 id="zuno-recommended-panel-title" className="zuno-recommended-panel-title">
+                    Recommended playlists.
                   </h2>
-                  <p className="zuno-playlist-hub-sub">
-                    Curated moods from ZUNO, or your own playlists. Everything music, one quiet place.
+                  <p className="zuno-recommended-panel-sub">
+                    Ready-made playlists curated by ZUNO. Pick a mood and let the music take it from there.
                   </p>
                 </div>
-
                 <button
                   type="button"
-                  className="zuno-playlist-hub-close"
-                  onClick={() => setPlaylistHubOpen(false)}
-                  aria-label="Close playlists"
+                  className="zuno-recommended-panel-close"
+                  onClick={() => setRecommendedOpen(false)}
+                  aria-label="Close recommended playlists"
                 >
                   ×
                 </button>
               </div>
-
-              <div className="zuno-playlist-options">
-                <button
-                  type="button"
-                  className="zuno-playlist-option active"
-                  onClick={() => {}}
-                >
-                  <span className="zuno-playlist-option-icon" aria-hidden="true">♫</span>
-                  <span className="zuno-playlist-option-title">Recommended</span>
-                  <span className="zuno-playlist-option-text">ZUNO-curated playlists for every mood.</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="zuno-playlist-option"
-                  onClick={() => {
-                    setPlaylistHubOpen(false);
-                    setPlaylistOpen(true);
-                  }}
-                >
-                  <span className="zuno-playlist-option-icon" aria-hidden="true">♡</span>
-                  <span className="zuno-playlist-option-title">My Playlists</span>
-                  <span className="zuno-playlist-option-text">Create, edit, import and play your own.</span>
-                </button>
-              </div>
-
-              <div className="zuno-playlist-recommended">
-                <div className="zuno-playlist-recommended-head">
-                  <h3 className="zuno-playlist-recommended-title">Recommended playlists</h3>
-                  <p className="zuno-playlist-recommended-note">Curated by ZUNO · 5 moods</p>
-                </div>
-
-                <div className="zuno-recommended-grid">
-                  {RECOMMENDED_PLAYLISTS.map((playlist) => (
-                    <article
-                      key={playlist.id}
-                      className="zuno-recommended-card"
-                      style={{
-                        "--playlist-bg": `linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.08)),url(${playlist.background})`,
-                      }}
-                    >
-                      <div className="zuno-recommended-card-inner">
-                        <span className="zuno-recommended-mood">
-                          {playlist.mood}
-                        </span>
-                        <h3>{playlist.title}</h3>
-                        <p>{playlist.subtitle}</p>
-                      </div>
-                    </article>
-                  ))}
-                </div>
+              <p className="zuno-recommended-panel-label">5 curated moods</p>
+              <div className="zuno-recommended-grid">
+                {RECOMMENDED_PLAYLISTS.map((playlist) => (
+                  <article
+                    key={playlist.id}
+                    className="zuno-recommended-card"
+                    style={{
+                      "--playlist-bg": `linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.08)),url(${playlist.background})`,
+                    }}
+                  >
+                    <div className="zuno-recommended-card-inner">
+                      <span className="zuno-recommended-mood">{playlist.mood}</span>
+                      <h3>{playlist.title}</h3>
+                      <p>{playlist.subtitle}</p>
+                    </div>
+                  </article>
+                ))}
               </div>
             </div>
           </div>
