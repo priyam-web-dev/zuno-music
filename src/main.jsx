@@ -3982,15 +3982,8 @@ function App() {
           }
 
           .zuno-nav::after{
-            content:"";
-            position:absolute;
-            left:42px;
-            right:42px;
-            bottom:0;
-            height:1px;
-            background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
-            opacity:.7;
-            pointer-events:none;
+            content:none !important;
+            display:none !important;
           }
 
           .zuno-nav-brand{
@@ -4032,21 +4025,20 @@ function App() {
             display:flex;
             align-items:center;
             justify-content:flex-end;
-            gap:8px;
-            padding:5px;
-            border:1px solid rgba(255,255,255,.16);
-            border-radius:999px;
-            background:rgba(8,8,8,.18);
-            box-shadow:0 12px 35px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.08);
-            backdrop-filter:blur(14px) saturate(125%);
-            -webkit-backdrop-filter:blur(14px) saturate(125%);
-            transition:background .35s ease,border-color .35s ease,transform .35s ease;
+            gap:22px;
+            padding:0;
+            border:0;
+            border-radius:0;
+            background:transparent;
+            box-shadow:none;
+            backdrop-filter:none;
+            -webkit-backdrop-filter:none;
           }
 
           .zuno-nav-actions:hover{
-            background:rgba(8,8,8,.28);
-            border-color:rgba(255,255,255,.24);
-            transform:translateY(-1px);
+            background:transparent;
+            border-color:transparent;
+            transform:none;
           }
 
           .zuno-nav-action{
@@ -4055,9 +4047,9 @@ function App() {
             align-items:center;
             justify-content:center;
             min-height:36px;
-            padding:0 14px;
-            border:1px solid transparent;
-            border-radius:999px;
+            padding:0;
+            border:0;
+            border-radius:0;
             background:transparent;
             color:rgba(255,255,255,.9);
             cursor:pointer;
@@ -4065,13 +4057,14 @@ function App() {
             font-weight:800;
             letter-spacing:.1px;
             text-shadow:0 1px 10px rgba(0,0,0,.35);
-            transition:background .28s ease,border-color .28s ease,color .28s ease,transform .28s ease;
+            transition:color .28s ease,opacity .28s ease,transform .28s ease;
           }
 
           .zuno-nav-action:hover{
-            background:rgba(255,255,255,.11);
-            border-color:rgba(255,255,255,.18);
+            background:transparent;
+            border-color:transparent;
             color:#fff;
+            opacity:1;
             transform:translateY(-1px);
           }
 
@@ -4081,9 +4074,10 @@ function App() {
 
           .zuno-playlist-trigger{
             gap:7px;
-            border-color:rgba(255,255,255,.14);
-            background:rgba(255,255,255,.07);
-            box-shadow:0 0 0 1px rgba(255,255,255,.025),0 0 18px rgba(255,220,185,.08);
+            border:0;
+            background:transparent;
+            box-shadow:none;
+            text-shadow:0 0 14px rgba(255,225,195,.18);
           }
 
           .zuno-playlist-trigger-dot{
@@ -4096,9 +4090,10 @@ function App() {
           }
 
           .zuno-playlist-trigger:hover{
-            background:rgba(255,255,255,.13);
-            border-color:rgba(255,255,255,.25);
-            box-shadow:0 0 0 1px rgba(255,255,255,.035),0 0 24px rgba(255,220,185,.14);
+            background:transparent;
+            border-color:transparent;
+            box-shadow:none;
+            text-shadow:0 0 18px rgba(255,225,195,.28);
           }
 
           @keyframes zunoPlaylistDot{
@@ -4111,8 +4106,8 @@ function App() {
             align-items:center;
             min-height:36px;
             padding:0 15px;
-            border-left:1px solid rgba(255,255,255,.14);
-            border-radius:999px;
+            border-left:0;
+            border-radius:0;
             color:#fff;
             font-size:12px;
             font-weight:800;
@@ -4126,13 +4121,12 @@ function App() {
             }
 
             .zuno-nav::after{
-              left:16px;
-              right:16px;
+              display:none !important;
             }
 
             .zuno-nav-actions{
-              gap:3px;
-              padding:4px;
+              gap:12px;
+              padding:0;
             }
 
             .zuno-nav-action{
