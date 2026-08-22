@@ -1775,6 +1775,9 @@ function App() {
   const [volume, setVolume] =
     useState(80);
 
+  const previousVolumeRef =
+    useRef(80);
+
   const [queueOpen, setQueueOpen] =
     useState(false);
 
@@ -2837,6 +2840,78 @@ function App() {
     };
 
 
+  /* =======================================================
+     KEYBOARD CONTROLS
+     Space = play / pause
+     Left  = previous song
+     Right = next song
+     M     = mute / restore volume
+     Esc   = already handled above for closing panels
+     ======================================================= */
+
+  useEffect(() => {
+    const handleKeyboard = (event) => {
+      const target = event.target;
+      const tagName = target?.tagName?.toLowerCase();
+
+      // Never hijack typing inside inputs, textareas, selects,
+      // or contenteditable elements.
+      if (
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+
+      if (event.key === " ") {
+        event.preventDefault();
+        togglePlay();
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        changeTrack(indexRef.current - 1);
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        changeTrack(indexRef.current + 1);
+        return;
+      }
+
+      if (key === "m") {
+        event.preventDefault();
+
+        if (volume > 0) {
+          previousVolumeRef.current = volume;
+          setVolume(0);
+          playerRef.current?.setVolume(0);
+        } else {
+          const restoredVolume =
+            previousVolumeRef.current > 0
+              ? previousVolumeRef.current
+              : 80;
+
+          setVolume(restoredVolume);
+          playerRef.current?.setVolume(restoredVolume);
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyboard);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyboard);
+    };
+  }, [playing, ready, volume, tracks.length]);
+
+
   const seek =
     (event) => {
 
@@ -3670,6 +3745,10 @@ function App() {
                   setVolume(
                     value
                   );
+
+                  if (value > 0) {
+                    previousVolumeRef.current = value;
+                  }
 
                   playerRef.current?.setVolume(
                     value
