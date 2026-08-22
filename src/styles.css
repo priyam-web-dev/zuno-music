@@ -4994,3 +4994,78 @@ nav{
     font-size:11px !important;
   }
 }
+
+/* =========================================================
+   ZUNO — SUBTLE MUSICAL LIFE
+   1. Ambient player pulse while music is playing
+   2. Moving progress highlight / musical thread
+   ========================================================= */
+
+.player-card.is-playing{
+  animation:
+    zunoAmbientPulse
+    2.8s
+    ease-in-out
+    infinite !important;
+}
+
+@keyframes zunoAmbientPulse{
+  0%,100%{
+    filter:drop-shadow(0 18px 45px rgba(0,0,0,.34));
+  }
+  50%{
+    filter:drop-shadow(0 20px 52px rgba(255,218,176,.16));
+  }
+}
+
+.player-card .seek{
+  position:relative;
+}
+
+.player-card .seek-fill{
+  position:relative;
+  overflow:hidden;
+  background:#fff !important;
+}
+
+.player-card .seek-fill::after{
+  content:"";
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:-32%;
+  width:32%;
+  background:linear-gradient(90deg,transparent,rgba(255,226,190,.92),transparent);
+  opacity:0;
+  pointer-events:none;
+}
+
+.player-card.is-playing .seek-fill::after{
+  opacity:.9;
+  animation:zunoProgressThread 1.65s ease-in-out infinite;
+}
+
+@keyframes zunoProgressThread{
+  0%{
+    transform:translateX(0);
+  }
+  100%{
+    transform:translateX(410%);
+  }
+}
+
+@media(max-width:700px){
+  .player-card.is-playing{
+    animation-duration:2.6s;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .player-card.is-playing{
+    animation:none !important;
+  }
+
+  .player-card.is-playing .seek-fill::after{
+    animation:none !important;
+  }
+}
