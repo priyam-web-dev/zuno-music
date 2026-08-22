@@ -1733,6 +1733,33 @@ function getFirstName(profile) {
    MAIN APP
    ========================================================= */
 
+function getStoredNumber(key, fallback) {
+  try {
+    const value = Number(localStorage.getItem(key));
+    return Number.isFinite(value) ? value : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function getStoredPlayback() {
+  try {
+    const raw = localStorage.getItem("pf_playback_state");
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+
+    return {
+      trackId: String(parsed.trackId || ""),
+      position: Math.max(0, Number(parsed.position) || 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
 function App() {
 
   const [timePhrase, setTimePhrase] =
@@ -1773,7 +1800,15 @@ function App() {
     useState("0:00");
 
   const [volume, setVolume] =
-    useState(80);
+    useState(() =>
+      Math.min(
+        100,
+        Math.max(
+          0,
+          getStoredNumber("pf_volume", 80)
+        )
+      )
+    );
 
   const previousVolumeRef =
     useRef(80);
@@ -1786,6 +1821,15 @@ function App() {
 
   const [error, setError] =
     useState("");
+
+  const [queueFocusIndex, setQueueFocusIndex] =
+    useState(0);
+
+  const playbackRestoreRef =
+    useRef(getStoredPlayback());
+
+  const lastPlaybackSaveRef =
+    useRef(0);
 
 
   /* =======================================================
@@ -2381,8 +2425,23 @@ function App() {
               )
             : -1;
 
+        const storedPlayback =
+          playbackRestoreRef.current ||
+          getStoredPlayback();
+
+        const restoredIndex =
+          storedPlayback?.trackId
+            ? songs.findIndex(
+                (song) => song.id === storedPlayback.trackId
+              )
+            : -1;
+
         const safeIndex =
-          preservedIndex >= 0 ? preservedIndex : 0;
+          preservedIndex >= 0
+            ? preservedIndex
+            : restoredIndex >= 0
+              ? restoredIndex
+              : 0;
 
         const hadCurrentSong =
           Boolean(currentSongId) &&
@@ -2402,6 +2461,8 @@ function App() {
           safeIndex
         );
 
+        setQueueFocusIndex(safeIndex);
+
         /* If the currently playing song still exists, do NOT reload
            YouTube. This keeps playback and the visible song title in
            sync. Only load a song when the old one disappeared. */
@@ -2412,7 +2473,10 @@ function App() {
         ) {
           playerRef.current.loadVideoById({
             videoId: songs[safeIndex].id,
-            startSeconds: 0,
+            startSeconds:
+              restoredIndex === safeIndex && storedPlayback
+                ? storedPlayback.position
+                : 0,
           });
         }
 
@@ -2603,6 +2667,21 @@ function App() {
         safeIndex
       );
 
+      setQueueFocusIndex(safeIndex);
+
+      try {
+        localStorage.setItem(
+          "pf_playback_state",
+          JSON.stringify({
+            trackId: songs[safeIndex].id,
+            position: 0,
+          })
+        );
+      } catch {
+        // Ignore storage failures. Playback should continue normally.
+      }
+
+      playbackRestoreRef.current = null;
       setLiked(false);
 
       setProgress(0);
@@ -2703,6 +2782,28 @@ function App() {
             )
           );
 
+          // Persist the current song and position without hammering storage.
+          const now = Date.now();
+          if (now - lastPlaybackSaveRef.current >= 2000) {
+            const activeTrack =
+              tracksRef.current[indexRef.current];
+
+            if (activeTrack?.id) {
+              try {
+                localStorage.setItem(
+                  "pf_playback_state",
+                  JSON.stringify({
+                    trackId: activeTrack.id,
+                    position: current,
+                  })
+                );
+                lastPlaybackSaveRef.current = now;
+              } catch {
+                // Ignore storage failures.
+              }
+            }
+          }
+
         },
         500
       );
@@ -2725,7 +2826,7 @@ function App() {
             {
 
               videoId:
-                tracks[0].id,
+                tracks[indexRef.current]?.id || tracks[0].id,
 
               playerVars: {
                 playsinline: 1,
@@ -2750,6 +2851,24 @@ function App() {
                     event.target.setVolume(
                       volume
                     );
+
+                    const restored =
+                      playbackRestoreRef.current;
+                    const activeTrack =
+                      tracksRef.current[indexRef.current];
+
+                    if (
+                      restored?.trackId &&
+                      restored.trackId === activeTrack?.id &&
+                      restored.position > 0
+                    ) {
+                      event.target.seekTo(
+                        restored.position,
+                        true
+                      );
+                    }
+
+                    playbackRestoreRef.current = null;
                   },
 
 
@@ -2843,12 +2962,16 @@ function App() {
   /* =======================================================
      KEYBOARD CONTROLS
      Space = play / pause
-     Left  = previous song
-     Right = next song
-     M     = mute / restore volume
-     Esc   = already handled above for closing panels
+     Left / Right = previous / next song
+     Shift + Left / Right = seek 10 seconds
+     Up / Down = volume
+     M = mute / restore volume
+     0 = restart current song
+     F = open/focus playlists
+     P = open the queue
+     Queue open: Up / Down = select, Enter = play
+     Esc = already handled above for closing panels
      ======================================================= */
-
   useEffect(() => {
     const handleKeyboard = (event) => {
       const target = event.target;
@@ -2873,6 +2996,54 @@ function App() {
         return;
       }
 
+      // When the queue is open, arrow keys navigate the queue instead
+      // of changing the song immediately. Enter plays the highlighted one.
+      if (queueOpen) {
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          event.preventDefault();
+
+          if (!tracksRef.current.length) return;
+
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          const next =
+            (queueFocusIndex + direction + tracksRef.current.length) %
+            tracksRef.current.length;
+
+          setQueueFocusIndex(next);
+          return;
+        }
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          if (tracksRef.current[queueFocusIndex]) {
+            changeTrack(queueFocusIndex, true);
+          }
+          return;
+        }
+      }
+
+      if (event.key === "ArrowLeft" && event.shiftKey) {
+        event.preventDefault();
+        if (ready && playerRef.current?.getCurrentTime) {
+          const current = playerRef.current.getCurrentTime() || 0;
+          playerRef.current.seekTo(Math.max(0, current - 10), true);
+        }
+        return;
+      }
+
+      if (event.key === "ArrowRight" && event.shiftKey) {
+        event.preventDefault();
+        if (ready && playerRef.current?.getCurrentTime) {
+          const current = playerRef.current.getCurrentTime() || 0;
+          const total = playerRef.current.getDuration() || 0;
+          playerRef.current.seekTo(
+            Math.min(total || Infinity, current + 10),
+            true
+          );
+        }
+        return;
+      }
+
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         changeTrack(indexRef.current - 1);
@@ -2885,6 +3056,38 @@ function App() {
         return;
       }
 
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const nextVolume = Math.min(100, volume + 5);
+        setVolume(nextVolume);
+        playerRef.current?.setVolume(nextVolume);
+        if (nextVolume > 0) {
+          previousVolumeRef.current = nextVolume;
+        }
+        try {
+          localStorage.setItem("pf_volume", String(nextVolume));
+        } catch {
+          // Ignore storage failures.
+        }
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        const nextVolume = Math.max(0, volume - 5);
+        setVolume(nextVolume);
+        playerRef.current?.setVolume(nextVolume);
+        if (nextVolume > 0) {
+          previousVolumeRef.current = nextVolume;
+        }
+        try {
+          localStorage.setItem("pf_volume", String(nextVolume));
+        } catch {
+          // Ignore storage failures.
+        }
+        return;
+      }
+
       if (key === "m") {
         event.preventDefault();
 
@@ -2892,6 +3095,11 @@ function App() {
           previousVolumeRef.current = volume;
           setVolume(0);
           playerRef.current?.setVolume(0);
+          try {
+            localStorage.setItem("pf_volume", "0");
+          } catch {
+            // Ignore storage failures.
+          }
         } else {
           const restoredVolume =
             previousVolumeRef.current > 0
@@ -2900,7 +3108,33 @@ function App() {
 
           setVolume(restoredVolume);
           playerRef.current?.setVolume(restoredVolume);
+          try {
+            localStorage.setItem("pf_volume", String(restoredVolume));
+          } catch {
+            // Ignore storage failures.
+          }
         }
+        return;
+      }
+
+      if (key === "0") {
+        event.preventDefault();
+        if (ready && playerRef.current?.seekTo) {
+          playerRef.current.seekTo(0, true);
+        }
+        return;
+      }
+
+      if (key === "f") {
+        event.preventDefault();
+        setPlaylistOpen(true);
+        return;
+      }
+
+      if (key === "p") {
+        event.preventDefault();
+        setQueueFocusIndex(indexRef.current);
+        setQueueOpen(true);
       }
     };
 
@@ -2909,8 +3143,14 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyboard);
     };
-  }, [playing, ready, volume, tracks.length]);
-
+  }, [
+    playing,
+    ready,
+    volume,
+    queueOpen,
+    queueFocusIndex,
+    tracks.length,
+  ]);
 
   const seek =
     (event) => {
@@ -2994,6 +3234,20 @@ function App() {
         0;
 
       setIndex(0);
+      setQueueFocusIndex(0);
+      playbackRestoreRef.current = null;
+
+      try {
+        localStorage.setItem(
+          "pf_playback_state",
+          JSON.stringify({
+            trackId: mapped[0].id,
+            position: 0,
+          })
+        );
+      } catch {
+        // Ignore storage failures.
+      }
 
       setPlaylistOpen(
         false
@@ -3022,6 +3276,108 @@ function App() {
         100
       );
     };
+
+
+  /* =======================================================
+     SAVE PLAYBACK STATE ON PAGE EXIT
+     ======================================================= */
+  useEffect(() => {
+    const savePlaybackState = () => {
+      const activeTrack = tracksRef.current[indexRef.current];
+      const player = playerRef.current;
+
+      if (!activeTrack?.id) return;
+
+      const position =
+        player?.getCurrentTime?.() ||
+        getStoredPlayback()?.position ||
+        0;
+
+      try {
+        localStorage.setItem(
+          "pf_playback_state",
+          JSON.stringify({
+            trackId: activeTrack.id,
+            position,
+          })
+        );
+      } catch {
+        // Ignore storage failures.
+      }
+    };
+
+    window.addEventListener("pagehide", savePlaybackState);
+    window.addEventListener("beforeunload", savePlaybackState);
+
+    return () => {
+      window.removeEventListener("pagehide", savePlaybackState);
+      window.removeEventListener("beforeunload", savePlaybackState);
+    };
+  }, []);
+
+
+  /* =======================================================
+     MEDIA SESSION
+     Lets Chromebook / headset media keys control ZUNO.
+     ======================================================= */
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    const mediaSession = navigator.mediaSession;
+
+    try {
+      const activeTrack = tracksRef.current[indexRef.current];
+
+      if (activeTrack) {
+        mediaSession.metadata = new MediaMetadata({
+          title: activeTrack.title || "ZUNO",
+          artist: activeTrack.artist || "ZUNO",
+          album: "P's favourites",
+        });
+      }
+
+      mediaSession.playbackState = playing ? "playing" : "paused";
+
+      mediaSession.setActionHandler("play", () => {
+        playerRef.current?.playVideo?.();
+      });
+
+      mediaSession.setActionHandler("pause", () => {
+        playerRef.current?.pauseVideo?.();
+      });
+
+      mediaSession.setActionHandler("previoustrack", () => {
+        changeTrack(indexRef.current - 1);
+      });
+
+      mediaSession.setActionHandler("nexttrack", () => {
+        changeTrack(indexRef.current + 1);
+      });
+
+      mediaSession.setActionHandler("seekbackward", (details) => {
+        const current = playerRef.current?.getCurrentTime?.() || 0;
+        const offset = details.seekOffset || 10;
+        playerRef.current?.seekTo?.(
+          Math.max(0, current - offset),
+          true
+        );
+      });
+
+      mediaSession.setActionHandler("seekforward", (details) => {
+        const current = playerRef.current?.getCurrentTime?.() || 0;
+        const total = playerRef.current?.getDuration?.() || 0;
+        const offset = details.seekOffset || 10;
+        playerRef.current?.seekTo?.(
+          Math.min(total || Infinity, current + offset),
+          true
+        );
+      });
+    } catch {
+      // Some browsers expose Media Session but not every action handler.
+    }
+  }, [playing, tracks.length, index]);
 
 
   /* =======================================================
@@ -3582,7 +3938,16 @@ function App() {
 
           {/* PLAYER */}
 
-          <section className="player-card">
+          <section
+            className="player-card"
+            onDoubleClick={(event) => {
+              if (event.target.closest("button, input")) {
+                return;
+              }
+              togglePlay();
+            }}
+            title="Double-click to play / pause"
+          >
 
             <div className="player-heading">
 
@@ -3750,6 +4115,15 @@ function App() {
                     previousVolumeRef.current = value;
                   }
 
+                  try {
+                    localStorage.setItem(
+                      "pf_volume",
+                      String(value)
+                    );
+                  } catch {
+                    // Ignore storage failures.
+                  }
+
                   playerRef.current?.setVolume(
                     value
                   );
@@ -3760,11 +4134,10 @@ function App() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setQueueOpen(
-                    true
-                  )
-                }
+                onClick={() => {
+                  setQueueFocusIndex(indexRef.current);
+                  setQueueOpen(true);
+                }}
               >
                 आगे की सूची
               </button>
@@ -3843,6 +4216,14 @@ function App() {
                         ? "active"
                         : ""
                     }`}
+                    style={
+                      i === queueFocusIndex
+                        ? {
+                            outline: "1px solid rgba(255,255,255,.55)",
+                            outlineOffset: -1,
+                          }
+                        : undefined
+                    }
                     onClick={() =>
                       changeTrack(
                         i,
