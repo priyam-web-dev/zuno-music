@@ -1425,12 +1425,13 @@ function PlaylistPanel({
   return (
     <>
       <style>{`
-        /* The scene gives every direct child a relative stacking context.
-           This override must beat that rule so the playlist panel truly
-           sits above the cinematic background. */
+        /* =====================================================
+           ZUNO — MY PLAYLISTS
+           Quiet editorial UI. No dashboard-card treatment.
+           ===================================================== */
+
         .site .scene > .zuno-my-overlay{
           position:fixed !important;
-          font-family:"DM Sans",sans-serif !important;
           inset:0 !important;
           z-index:99999 !important;
           width:100vw !important;
@@ -1439,44 +1440,45 @@ function PlaylistPanel({
           align-items:center;
           justify-content:center;
           padding:24px;
-          background:rgba(0,0,0,.56);
-          backdrop-filter:blur(18px) saturate(115%);
-          -webkit-backdrop-filter:blur(18px) saturate(115%);
-          animation:zunoMyFade .28s ease both;
+          box-sizing:border-box;
+          background:rgba(7,6,5,.66);
+          backdrop-filter:blur(16px) saturate(105%);
+          -webkit-backdrop-filter:blur(16px) saturate(105%);
+          animation:zunoMyFade .22s ease both;
+          font-family:"DM Sans",sans-serif !important;
         }
 
         .zuno-my-modal{
           position:relative !important;
           z-index:100000 !important;
-          font-family:"DM Sans",sans-serif !important;
-          width:min(1000px,94vw);
+          width:min(940px,94vw);
           max-height:88vh;
           overflow:auto;
-          padding:30px;
-          border:1px solid rgba(255,255,255,.15);
-          border-radius:28px;
-          background:
-            radial-gradient(circle at 12% 0%,rgba(191,119,58,.13),transparent 30%),
-            linear-gradient(145deg,rgba(20,17,15,.94),rgba(11,11,11,.90));
+          box-sizing:border-box;
+          padding:34px 36px 30px;
+          border:1px solid rgba(255,255,255,.13);
+          border-radius:20px;
+          background:rgba(15,13,12,.91);
           color:#fff;
-          box-shadow:0 35px 110px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.06);
+          box-shadow:0 28px 90px rgba(0,0,0,.52);
           scrollbar-width:thin;
-          scrollbar-color:rgba(255,255,255,.18) transparent;
-          animation:zunoMyEnter .34s cubic-bezier(.2,.8,.2,1) both;
+          scrollbar-color:rgba(255,255,255,.16) transparent;
+          font-family:"DM Sans",sans-serif !important;
+          animation:zunoMyEnter .28s cubic-bezier(.2,.8,.2,1) both;
         }
 
-        .zuno-my-modal::-webkit-scrollbar{width:6px}
-        .zuno-my-modal::-webkit-scrollbar-track{background:transparent}
-        .zuno-my-modal::-webkit-scrollbar-thumb{
-          background:rgba(255,255,255,.16);
-          border-radius:999px;
-        }
-
-.zuno-my-modal,
+        .zuno-my-modal,
         .zuno-my-modal button,
         .zuno-my-modal input,
         .zuno-my-modal textarea{
           font-family:"DM Sans",sans-serif !important;
+        }
+
+        .zuno-my-modal::-webkit-scrollbar{width:5px}
+        .zuno-my-modal::-webkit-scrollbar-track{background:transparent}
+        .zuno-my-modal::-webkit-scrollbar-thumb{
+          background:rgba(255,255,255,.15);
+          border-radius:99px;
         }
 
         .zuno-my-head{
@@ -1484,132 +1486,94 @@ function PlaylistPanel({
           align-items:flex-start;
           justify-content:space-between;
           gap:20px;
-          margin-bottom:28px;
+          padding-bottom:24px;
+          border-bottom:1px solid rgba(255,255,255,.09);
         }
 
         .zuno-my-kicker{
-          margin:0 0 7px;
-          color:rgba(255,193,126,.82);
-          font-family:"DM Sans",sans-serif;
-          font-size:10px;
-          font-weight:900;
-          letter-spacing:2.6px;
+          margin:0 0 8px;
+          color:rgba(255,255,255,.38);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:9px;
+          font-weight:700;
+          letter-spacing:2.2px;
           text-transform:uppercase;
         }
 
         .zuno-my-title{
           margin:0;
-          font-family:"DM Sans",sans-serif;
-          font-size:clamp(30px,4vw,42px);
+          color:#fff;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:clamp(30px,4vw,40px);
           line-height:1;
-          letter-spacing:-1.5px;
-          font-weight:800;
+          letter-spacing:-1.4px;
+          font-weight:700;
         }
 
         .zuno-my-sub{
           margin:9px 0 0;
-          color:rgba(255,255,255,.48);
-          font-family:"DM Sans",sans-serif;
-          font-size:12px;
+          color:rgba(255,255,255,.40);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+          line-height:1.5;
         }
 
         .zuno-my-close{
-          width:40px;
-          height:40px;
+          width:34px;
+          height:34px;
           flex:0 0 auto;
-          border:1px solid rgba(255,255,255,.16);
+          display:grid;
+          place-items:center;
+          border:1px solid rgba(255,255,255,.13);
           border-radius:50%;
-          background:rgba(255,255,255,.055);
-          color:#fff;
-          font-size:22px;
+          background:transparent;
+          color:rgba(255,255,255,.72);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:18px;
           line-height:1;
           cursor:pointer;
-          transition:background .22s ease,border-color .22s ease,transform .22s ease;
+          transition:background .18s ease,color .18s ease,border-color .18s ease;
         }
 
         .zuno-my-close:hover{
-          background:rgba(255,255,255,.11);
-          border-color:rgba(255,255,255,.28);
-          transform:rotate(5deg);
+          background:rgba(255,255,255,.07);
+          color:#fff;
+          border-color:rgba(255,255,255,.24);
         }
 
         .zuno-my-layout{
           display:grid;
-          grid-template-columns:290px minmax(0,1fr);
-          gap:18px;
+          grid-template-columns:260px minmax(0,1fr);
+          gap:38px;
           align-items:start;
+          padding-top:26px;
         }
 
         .zuno-my-sidebar{
           display:flex;
           flex-direction:column;
-          gap:10px;
+          gap:24px;
         }
 
+        /* Remove the "three feature cards" look. These are now quiet
+           functional areas separated by hairlines. */
+        .zuno-my-create,
+        .zuno-my-import,
         .zuno-my-action{
-          width:100%;
-          border:1px solid rgba(255,255,255,.10);
-          border-radius:17px;
-          background:rgba(255,255,255,.035);
-          color:#fff;
-          padding:16px;
-          text-align:left;
-          cursor:pointer;
-          transition:transform .22s ease,background .22s ease,border-color .22s ease;
+          padding:0 0 20px;
+          border:0;
+          border-bottom:1px solid rgba(255,255,255,.08);
+          border-radius:0;
+          background:transparent;
         }
 
-        .zuno-my-action:hover{
-          transform:translateY(-2px);
-          background:rgba(255,255,255,.065);
-          border-color:rgba(255,255,255,.18);
-        }
-
-        .zuno-my-action-top{
-          display:flex;
-          align-items:center;
-          gap:12px;
-        }
-
-        .zuno-my-action-icon{
-          width:38px;
-          height:38px;
-          display:grid;
-          place-items:center;
-          flex:0 0 auto;
-          border:1px solid rgba(255,177,91,.22);
-          border-radius:12px;
-          background:rgba(190,104,35,.10);
-          color:rgba(255,194,124,.95);
-          font-size:20px;
-        }
-
-        .zuno-my-action-title{
-          font-family:"DM Sans",sans-serif;
-          font-size:13px;
-          font-weight:800;
-        }
-
-        .zuno-my-action-copy{
-          margin-top:3px;
-          color:rgba(255,255,255,.42);
-          font-family:"DM Sans",sans-serif;
-          font-size:10px;
-          line-height:1.45;
-        }
-
-        .zuno-my-create{
-          padding:15px;
-          border:1px solid rgba(255,255,255,.09);
-          border-radius:17px;
-          background:rgba(255,255,255,.025);
-        }
-
-        .zuno-my-create-label{
-          margin:0 0 9px;
-          color:rgba(255,255,255,.45);
-          font-family:"DM Sans",sans-serif;
+        .zuno-my-create-label,
+        .zuno-my-section-label{
+          margin:0 0 10px;
+          color:rgba(255,255,255,.36);
+          font-family:"DM Sans",sans-serif !important;
           font-size:9px;
-          font-weight:900;
+          font-weight:700;
           letter-spacing:1.8px;
           text-transform:uppercase;
         }
@@ -1622,215 +1586,254 @@ function PlaylistPanel({
         .zuno-my-input{
           min-width:0;
           width:100%;
+          height:38px;
           box-sizing:border-box;
-          border:1px solid rgba(255,255,255,.12);
-          border-radius:11px;
-          background:rgba(255,255,255,.055);
+          border:1px solid rgba(255,255,255,.11);
+          border-radius:9px;
+          background:rgba(255,255,255,.045);
           color:#fff;
           outline:none;
-          padding:11px 12px;
-          font-family:"DM Sans",sans-serif;
-          font-size:12px;
+          padding:0 11px;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
         }
 
-        .zuno-my-input::placeholder{color:rgba(255,255,255,.32)}
+        .zuno-my-input::placeholder{
+          color:rgba(255,255,255,.29);
+        }
 
         .zuno-my-input:focus{
-          border-color:rgba(255,185,106,.42);
-          box-shadow:0 0 0 3px rgba(210,122,51,.08);
+          border-color:rgba(255,255,255,.25);
+          box-shadow:none;
+          background:rgba(255,255,255,.06);
         }
 
         .zuno-my-create-btn{
           flex:0 0 auto;
-          border:0;
-          border-radius:11px;
-          padding:0 14px;
-          background:#fff;
-          color:#111;
-          font-family:"DM Sans",sans-serif;
+          height:38px;
+          border:1px solid rgba(255,255,255,.14);
+          border-radius:9px;
+          padding:0 13px;
+          background:#f2f0ec;
+          color:#171513;
+          font-family:"DM Sans",sans-serif !important;
           font-size:11px;
-          font-weight:900;
+          font-weight:700;
           cursor:pointer;
         }
 
-        .zuno-my-section-label{
-          margin:0 0 10px;
-          color:rgba(255,255,255,.43);
-          font-family:"DM Sans",sans-serif;
-          font-size:9px;
-          font-weight:900;
-          letter-spacing:1.8px;
-          text-transform:uppercase;
+        .zuno-my-create-btn:hover{
+          background:#fff;
         }
 
-        .zuno-my-import{
-          padding:15px;
-          border:1px solid rgba(255,255,255,.09);
-          border-radius:17px;
-          background:rgba(255,255,255,.025);
+        .zuno-my-action-top{
+          display:flex;
+          align-items:center;
+          gap:10px;
+        }
+
+        .zuno-my-action-icon{
+          width:30px;
+          height:30px;
+          flex:0 0 auto;
+          display:grid;
+          place-items:center;
+          border:1px solid rgba(255,255,255,.12);
+          border-radius:8px;
+          background:rgba(255,255,255,.045);
+          color:rgba(255,255,255,.70);
+          font-size:12px;
+        }
+
+        .zuno-my-action-title{
+          color:rgba(255,255,255,.84);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+          font-weight:700;
+        }
+
+        .zuno-my-action-copy{
+          margin-top:2px;
+          color:rgba(255,255,255,.34);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:9px;
+          line-height:1.4;
         }
 
         .zuno-my-import-row{
           display:flex;
           gap:7px;
+          margin-top:10px;
         }
 
         .zuno-my-import-btn,
         .zuno-my-add-btn{
           width:100%;
-          margin-top:8px;
+          margin-top:7px;
+          height:34px;
           border:1px solid rgba(255,255,255,.10);
-          border-radius:11px;
-          padding:10px 12px;
-          background:rgba(255,255,255,.07);
-          color:#fff;
-          font-family:"DM Sans",sans-serif;
-          font-size:11px;
-          font-weight:800;
+          border-radius:8px;
+          padding:0 10px;
+          background:transparent;
+          color:rgba(255,255,255,.70);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:10px;
+          font-weight:600;
           cursor:pointer;
         }
 
         .zuno-my-import-btn:hover,
         .zuno-my-add-btn:hover{
-          background:rgba(255,255,255,.12);
+          background:rgba(255,255,255,.055);
+          color:#fff;
         }
 
         .zuno-my-hint{
-          margin-top:8px;
-          color:rgba(255,255,255,.34);
-          font-family:"DM Sans",sans-serif;
-          font-size:9px;
+          margin-top:7px;
+          color:rgba(255,255,255,.27);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:8px;
           line-height:1.45;
         }
 
         .zuno-my-list-head{
           display:flex;
-          align-items:center;
+          align-items:baseline;
           justify-content:space-between;
           gap:12px;
-          margin-bottom:10px;
+          padding-bottom:9px;
+          border-bottom:1px solid rgba(255,255,255,.09);
         }
 
         .zuno-my-count{
-          color:rgba(255,255,255,.35);
-          font-family:"DM Sans",sans-serif;
-          font-size:10px;
+          color:rgba(255,255,255,.27);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:9px;
         }
 
         .zuno-my-playlists{
-          display:grid;
-          gap:8px;
+          display:block;
         }
 
+        /* Actual playlist list: no fake album art, no colored gradients,
+           no rounded SaaS cards. Just a clean music-library row. */
         .zuno-my-playlist{
           position:relative;
           display:grid;
-          grid-template-columns:58px minmax(0,1fr) auto;
+          grid-template-columns:42px minmax(0,1fr) auto;
           align-items:center;
           gap:13px;
           width:100%;
-          min-height:76px;
-          padding:9px 10px;
+          min-height:70px;
+          padding:9px 0;
           box-sizing:border-box;
-          border:1px solid rgba(255,255,255,.09);
-          border-radius:17px;
-          background:rgba(255,255,255,.035);
+          border:0;
+          border-bottom:1px solid rgba(255,255,255,.075);
+          border-radius:0;
+          background:transparent;
           color:#fff;
           text-align:left;
           cursor:pointer;
-          transition:transform .22s ease,background .22s ease,border-color .22s ease;
+          transition:background .18s ease,padding-left .18s ease;
         }
 
         .zuno-my-playlist:hover{
-          transform:translateX(2px);
-          background:rgba(255,255,255,.065);
-          border-color:rgba(255,255,255,.17);
+          background:rgba(255,255,255,.025);
+          padding-left:7px;
         }
 
         .zuno-my-playlist.is-selected{
-          background:linear-gradient(90deg,rgba(184,105,46,.15),rgba(255,255,255,.055));
-          border-color:rgba(231,164,96,.35);
-          box-shadow:inset 3px 0 0 rgba(235,164,91,.82);
+          background:rgba(255,255,255,.035);
+          box-shadow:inset 2px 0 0 rgba(255,255,255,.72);
+          padding-left:7px;
         }
 
         .zuno-my-art{
-          width:58px;
-          height:58px;
+          width:42px;
+          height:42px;
           overflow:hidden;
-          border-radius:13px;
+          border:1px solid rgba(255,255,255,.10);
+          border-radius:8px;
           display:grid;
           place-items:center;
-          background:linear-gradient(135deg,var(--art-one),var(--art-two));
-          color:rgba(255,255,255,.86);
-          font-family:"DM Sans",sans-serif;
-          font-size:22px;
-          box-shadow:inset 0 1px 0 rgba(255,255,255,.12);
+          background:rgba(255,255,255,.055) !important;
+          color:rgba(255,255,255,.68);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:14px;
+          box-shadow:none;
         }
 
         .zuno-my-playlist-name{
           min-width:0;
-          font-family:"DM Sans",sans-serif;
-          font-size:13px;
-          font-weight:800;
-          line-height:1.3;
+          color:rgba(255,255,255,.88);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:12px;
+          font-weight:600;
+          line-height:1.35;
           white-space:nowrap;
           overflow:hidden;
           text-overflow:ellipsis;
         }
 
         .zuno-my-playlist-meta{
-          margin-top:4px;
-          color:rgba(255,255,255,.38);
-          font-family:"DM Sans",sans-serif;
-          font-size:10px;
+          margin-top:3px;
+          color:rgba(255,255,255,.30);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:9px;
         }
 
         .zuno-my-card-actions{
           display:flex;
           align-items:center;
-          gap:5px;
+          gap:8px;
         }
 
         .zuno-my-play{
-          width:38px;
-          height:38px;
-          border:1px solid rgba(232,166,98,.45);
-          border-radius:50%;
-          background:rgba(190,104,35,.08);
-          color:#ffd09c;
+          width:auto;
+          height:auto;
+          padding:5px 2px;
+          border:0;
+          border-radius:0;
+          background:transparent;
+          color:rgba(255,255,255,.58);
           display:grid;
           place-items:center;
           cursor:pointer;
-          transition:transform .2s ease,background .2s ease;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
+          transition:color .18s ease,transform .18s ease;
         }
 
         .zuno-my-play:hover{
-          transform:scale(1.06);
-          background:rgba(190,104,35,.16);
+          transform:none;
+          background:transparent;
+          color:#fff;
         }
 
         .zuno-my-delete{
-          width:34px;
-          height:34px;
+          width:24px;
+          height:24px;
           border:0;
           background:transparent;
-          color:rgba(255,255,255,.30);
-          border-radius:50%;
+          color:rgba(255,255,255,.22);
+          border-radius:0;
           cursor:pointer;
-          font-size:17px;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
         }
 
         .zuno-my-delete:hover{
-          color:#ff9b8d;
-          background:rgba(255,90,70,.08);
+          color:rgba(255,255,255,.70);
+          background:transparent;
         }
 
         .zuno-my-detail{
-          margin-top:12px;
-          padding:15px;
-          border:1px solid rgba(255,255,255,.09);
-          border-radius:18px;
-          background:rgba(0,0,0,.16);
+          margin-top:18px;
+          padding:0;
+          border:0;
+          border-top:1px solid rgba(255,255,255,.09);
+          border-radius:0;
+          background:transparent;
         }
 
         .zuno-my-detail-head{
@@ -1838,15 +1841,15 @@ function PlaylistPanel({
           align-items:center;
           justify-content:space-between;
           gap:10px;
-          margin-bottom:9px;
+          padding:13px 0 8px;
         }
 
         .zuno-my-detail-title{
           min-width:0;
-          color:#fff;
-          font-family:"DM Sans",sans-serif;
-          font-size:13px;
-          font-weight:800;
+          color:rgba(255,255,255,.82);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+          font-weight:600;
           overflow:hidden;
           text-overflow:ellipsis;
           white-space:nowrap;
@@ -1863,17 +1866,17 @@ function PlaylistPanel({
           align-items:center;
           justify-content:space-between;
           gap:10px;
-          padding:8px 0;
-          border-bottom:1px solid rgba(255,255,255,.06);
+          padding:7px 0;
+          border-bottom:1px solid rgba(255,255,255,.055);
         }
 
         .zuno-my-song:last-child{border-bottom:0}
 
         .zuno-my-song-name{
           min-width:0;
-          color:rgba(255,255,255,.82);
-          font-family:"DM Sans",sans-serif;
-          font-size:11px;
+          color:rgba(255,255,255,.72);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:10px;
           white-space:nowrap;
           overflow:hidden;
           text-overflow:ellipsis;
@@ -1881,71 +1884,103 @@ function PlaylistPanel({
 
         .zuno-my-song-artist{
           margin-top:2px;
-          color:rgba(255,255,255,.33);
-          font-family:"DM Sans",sans-serif;
-          font-size:9px;
+          color:rgba(255,255,255,.28);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:8px;
         }
 
         .zuno-my-song-remove{
           border:0;
           background:transparent;
-          color:rgba(255,255,255,.28);
+          color:rgba(255,255,255,.24);
           cursor:pointer;
-          font-size:15px;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
         }
 
         .zuno-my-empty{
-          padding:22px 12px;
+          padding:25px 10px;
           text-align:center;
-          color:rgba(255,255,255,.34);
-          font-family:"DM Sans",sans-serif;
-          font-size:11px;
+          color:rgba(255,255,255,.28);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:10px;
         }
 
         .zuno-my-message{
-          margin-top:12px;
-          color:#ffc0ad;
-          font-family:"DM Sans",sans-serif;
-          font-size:10px;
+          margin-top:11px;
+          color:rgba(255,190,170,.78);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:9px;
           line-height:1.4;
         }
 
-        @keyframes zunoMyFade{from{opacity:0}to{opacity:1}}
+        @keyframes zunoMyFade{
+          from{opacity:0}
+          to{opacity:1}
+        }
+
         @keyframes zunoMyEnter{
-          from{opacity:0;transform:translateY(14px) scale(.985)}
-          to{opacity:1;transform:translateY(0) scale(1)}
+          from{opacity:0;transform:translateY(9px)}
+          to{opacity:1;transform:translateY(0)}
         }
 
         @media(max-width:780px){
-          .zuno-my-overlay{padding:12px;align-items:flex-end}
+          .zuno-my-overlay{
+            padding:12px;
+            align-items:flex-end;
+          }
+
           .zuno-my-modal{
             width:100%;
             max-height:92vh;
-            padding:21px 17px 20px;
-            border-radius:25px 25px 0 0;
+            padding:23px 18px 22px;
+            border-radius:18px 18px 0 0;
           }
-          .zuno-my-layout{grid-template-columns:1fr}
-          .zuno-my-sidebar{display:grid;grid-template-columns:1fr 1fr}
-          .zuno-my-create{grid-column:1/-1}
-          .zuno-my-import{grid-column:1/-1}
+
+          .zuno-my-layout{
+            grid-template-columns:1fr;
+            gap:25px;
+          }
+
+          .zuno-my-sidebar{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:18px;
+          }
+
+          .zuno-my-create{
+            grid-column:1/-1;
+          }
+
+          .zuno-my-import{
+            grid-column:1/-1;
+          }
         }
 
         @media(max-width:500px){
-          .zuno-my-head{margin-bottom:20px}
-          .zuno-my-title{font-size:30px}
+          .zuno-my-modal{padding:20px 15px 18px}
+          .zuno-my-title{font-size:29px}
           .zuno-my-sidebar{display:flex}
           .zuno-my-playlist{
-            grid-template-columns:52px minmax(0,1fr) auto;
-            min-height:68px;
+            grid-template-columns:38px minmax(0,1fr) auto;
+            min-height:64px;
           }
-          .zuno-my-art{width:52px;height:52px}
-          .zuno-my-play{width:34px;height:34px}
-          .zuno-my-delete{width:30px;height:30px}
+          .zuno-my-art{
+            width:38px;
+            height:38px;
+          }
         }
 
         @media(prefers-reduced-motion:reduce){
-          .zuno-my-overlay,.zuno-my-modal{animation:none !important}
-          .zuno-my-action,.zuno-my-playlist,.zuno-my-play{transition:none !important}
+          .zuno-my-overlay,
+          .zuno-my-modal{
+            animation:none !important;
+          }
+          .zuno-my-action,
+          .zuno-my-playlist,
+          .zuno-my-play{
+            transition:none !important;
+          }
         }
       `}</style>
 
