@@ -1741,6 +1741,9 @@ function App() {
   const playerRef =
     useRef(null);
 
+  const sceneRef =
+    useRef(null);
+
   const indexRef =
     useRef(0);
 
@@ -1778,11 +1781,122 @@ function App() {
   const [liked, setLiked] =
     useState(false);
 
-  const [loading, setLoading] =
-    useState(false);
-
   const [error, setError] =
     useState("");
+
+
+  /* =======================================================
+     BACKGROUND MOTION
+     - Very slow cinematic zoom
+     - Subtle mouse parallax on desktop
+     - No layout movement
+     ======================================================= */
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+
+    if (!scene) {
+      return;
+    }
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+    const finePointer =
+      window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+      );
+
+    if (
+      reducedMotion.matches ||
+      !finePointer.matches
+    ) {
+      scene.style.setProperty(
+        "--parallax-x",
+        "0px"
+      );
+
+      scene.style.setProperty(
+        "--parallax-y",
+        "0px"
+      );
+
+      return;
+    }
+
+    let frame = null;
+
+    const handlePointerMove = (event) => {
+      const x =
+        ((event.clientX / window.innerWidth) - 0.5) * 10;
+
+      const y =
+        ((event.clientY / window.innerHeight) - 0.5) * 7;
+
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      frame = requestAnimationFrame(() => {
+        scene.style.setProperty(
+          "--parallax-x",
+          `${x.toFixed(2)}px`
+        );
+
+        scene.style.setProperty(
+          "--parallax-y",
+          `${y.toFixed(2)}px`
+        );
+      });
+    };
+
+    const resetPointer = () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      frame = requestAnimationFrame(() => {
+        scene.style.setProperty(
+          "--parallax-x",
+          "0px"
+        );
+
+        scene.style.setProperty(
+          "--parallax-y",
+          "0px"
+        );
+      });
+    };
+
+    window.addEventListener(
+      "pointermove",
+      handlePointerMove,
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "blur",
+      resetPointer
+    );
+
+    return () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+
+      window.removeEventListener(
+        "blur",
+        resetPointer
+      );
+    };
+  }, []);
 
 
   /* AUTH */
@@ -1818,9 +1932,6 @@ function App() {
         background_id: 5,
       }
     : null;
-
-  const [sessionLoading, setSessionLoading] =
-    useState(false);
 
   const [user, setUser] =
     useState(storedUser);
@@ -2164,12 +2275,7 @@ function App() {
           );
 
         }
-
-
-        setSessionLoading(
-          false
-        );
-      };
+};
 
 
     boot();
@@ -2316,29 +2422,69 @@ function App() {
         } else {
           setError("");
         }
-
-        setLoading(false);
-
-      } catch (err) {
+} catch (err) {
         console.error(err);
 
         setError(
           err?.message ||
           "Tumhari playlists se songs load nahi ho sake."
         );
-
-        setLoading(false);
-      }
+}
     };
 
 
   useEffect(() => {
 
-    if (!user)
+    if (!user || !token)
       return;
 
 
-    refreshSongs();
+    /* Let the first ZUNO UI paint before fetching playlist data. */
+    const runInitialSongLoad =
+      () => {
+        refreshSongs();
+      };
+
+
+    let cleanupInitialLoad;
+
+
+    if (
+      "requestIdleCallback" in window
+    ) {
+
+      const idleId =
+        window.requestIdleCallback(
+          runInitialSongLoad,
+          {
+            timeout: 1200,
+          }
+        );
+
+
+      cleanupInitialLoad =
+        () =>
+          window.cancelIdleCallback(
+            idleId
+          );
+
+    }
+
+    else {
+
+      const frameId =
+        window.requestAnimationFrame(
+          runInitialSongLoad
+        );
+
+
+      cleanupInitialLoad =
+        () =>
+          window.cancelAnimationFrame(
+            frameId
+          );
+
+    }
 
 
     const interval =
@@ -2348,10 +2494,15 @@ function App() {
       );
 
 
-    return () =>
+    return () => {
+
+      cleanupInitialLoad?.();
+
       clearInterval(
         interval
       );
+
+    };
 
   }, [user, token]);
 
@@ -2398,7 +2549,6 @@ function App() {
       queueOpen ||
       profileOpen ||
       playlistOpen ||
-      sessionLoading ||
       !user
         ? "hidden"
         : "";
@@ -2413,7 +2563,6 @@ function App() {
     queueOpen,
     profileOpen,
     playlistOpen,
-    sessionLoading,
     user,
   ]);
 
@@ -2861,8 +3010,9 @@ function App() {
     return (
       <div
         className="scene"
+        ref={sceneRef}
         style={{
-          backgroundImage:
+          "--scene-background":
             `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
         }}
       >
@@ -2898,20 +3048,6 @@ function App() {
 
   const currentTrack =
     tracks[index];
-
-  const currentCoverUrl =
-    currentTrack?.id
-      ? `https://i.ytimg.com/vi/${currentTrack.id}/hqdefault.jpg`
-      : "";
-
-  const coverFallbackUrls = currentTrack?.id
-    ? [
-        `https://i.ytimg.com/vi/${currentTrack.id}/maxresdefault.jpg`,
-        `https://i.ytimg.com/vi/${currentTrack.id}/hqdefault.jpg`,
-        `https://i.ytimg.com/vi/${currentTrack.id}/mqdefault.jpg`,
-        `https://i.ytimg.com/vi/${currentTrack.id}/default.jpg`,
-      ]
-    : [];
 
 
   /* =======================================================
@@ -2984,121 +3120,17 @@ function App() {
             animation:pfParticleFloat var(--particle-duration) ease-in-out var(--particle-delay) infinite;
           }
 
-          /* =====================================================
-             PLAYER COVER + LARGER PILL OVERRIDES
-             ===================================================== */
-
-          .player-card{
-            width:min(720px, calc(100vw - 40px)) !important;
-            height:104px !important;
-            min-height:104px !important;
-            padding:12px 18px !important;
-            gap:14px !important;
-            border-radius:999px !important;
-          }
-
-          .player-track-meta{
-            display:flex !important;
-            align-items:center !important;
-            gap:14px !important;
-            min-width:0 !important;
-            flex:1 1 auto !important;
-          }
-
-          .player-cover{
-            width:72px !important;
-            height:72px !important;
-            min-width:72px !important;
-            min-height:72px !important;
-            aspect-ratio:1 / 1 !important;
-            border-radius:50% !important;
-            overflow:hidden !important;
-            display:grid !important;
-            place-items:center !important;
-            flex:0 0 72px !important;
-            position:relative !important;
-            isolation:isolate !important;
-            background:rgba(255,255,255,.10) !important;
-            border:1px solid rgba(255,255,255,.42) !important;
-            box-shadow:0 8px 24px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.10) !important;
-            color:rgba(255,255,255,.78) !important;
-          }
-
-          .player-cover img{
-            position:absolute !important;
-            inset:-2px !important;
-            width:calc(100% + 4px) !important;
-            height:calc(100% + 4px) !important;
-            min-width:0 !important;
-            min-height:0 !important;
-            display:block !important;
-            object-fit:cover !important;
-            object-position:center !important;
-            border-radius:50% !important;
-            transform-origin:center center !important;
-            backface-visibility:hidden !important;
-            -webkit-backface-visibility:hidden !important;
-          }
-
-          .player-cover.is-playing img{
-            animation:zunoCoverSpin 8s linear infinite !important;
-          }
-
-          .player-song-label{
-            min-width:0 !important;
-            overflow:hidden !important;
-            text-overflow:ellipsis !important;
-            white-space:nowrap !important;
-            font-size:15px !important;
-            line-height:1.25 !important;
-          }
-
-          .player-card .heart{
-            width:40px !important;
-            height:40px !important;
-            min-width:40px !important;
-            flex:0 0 40px !important;
-            font-size:20px !important;
-          }
-
-          .player-card .controls{
-            gap:4px !important;
-          }
-
-          .player-card .control{
-            width:38px !important;
-            height:38px !important;
-            min-width:38px !important;
-            font-size:19px !important;
-          }
-
-          .player-card .control.play{
-            width:54px !important;
-            height:54px !important;
-            min-width:54px !important;
-            font-size:17px !important;
-          }
-
-          .player-card .music-visualizer{
-            width:56px !important;
-            height:30px !important;
-            margin:0 5px !important;
-          }
-
-          .player-card .utility button{
-            height:38px !important;
-            padding:0 14px !important;
-            font-size:11px !important;
-          }
-
-          .player-cover-fallback{
-            font-size:20px;
-            line-height:1;
-          }
-
-          @keyframes zunoCoverSpin{
-            from{transform:rotate(0deg);}
-            to{transform:rotate(360deg);}
+          .music-visualizer{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:3px;
+            width:58px;
+            height:30px;
+            margin:0 2px;
+            opacity:.48;
+            transition:opacity .35s ease,transform .35s ease;
+            flex-shrink:0;
           }
 
           .music-visualizer.is-playing{
@@ -3190,64 +3222,6 @@ function App() {
             }
           }
 
-          @media (max-width:700px){
-            .player-card{
-              width:calc(100vw - 20px) !important;
-              height:82px !important;
-              min-height:82px !important;
-              padding:8px 10px !important;
-              gap:8px !important;
-            }
-
-            .player-track-meta{
-              gap:9px !important;
-            }
-
-            .player-cover{
-              width:58px !important;
-              height:58px !important;
-              min-width:58px !important;
-              min-height:58px !important;
-              flex-basis:58px !important;
-            }
-
-            .player-song-label{
-              font-size:12px !important;
-            }
-
-            .player-card .heart{
-              width:32px !important;
-              height:32px !important;
-              min-width:32px !important;
-              flex-basis:32px !important;
-              font-size:17px !important;
-            }
-
-            .player-card .music-visualizer{
-              display:none !important;
-            }
-
-            .player-card .control{
-              width:30px !important;
-              height:30px !important;
-              min-width:30px !important;
-              font-size:15px !important;
-            }
-
-            .player-card .control.play{
-              width:44px !important;
-              height:44px !important;
-              min-width:44px !important;
-              font-size:14px !important;
-            }
-
-            .player-card .utility button{
-              height:31px !important;
-              padding:0 9px !important;
-              font-size:9px !important;
-            }
-          }
-
           @media (prefers-reduced-motion:reduce){
             .ambient-glow-one,
             .ambient-glow-two,
@@ -3265,8 +3239,9 @@ function App() {
 
       <div
         className="scene"
+        ref={sceneRef}
         style={{
-          backgroundImage:
+          "--scene-background":
             `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
         }}
       >
@@ -3295,65 +3270,216 @@ function App() {
 
         {/* NAV */}
 
-        <header className="nav">
+        <style>{`
+          .zuno-nav{
+            position:relative !important;
+            z-index:20 !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:space-between !important;
+            gap:24px !important;
+            width:100% !important;
+            box-sizing:border-box !important;
+            padding:18px 42px !important;
+          }
 
-          <div className="brand-mark" aria-label="ZUNO">
+          .zuno-nav::after{
+            content:"";
+            position:absolute;
+            left:42px;
+            right:42px;
+            bottom:0;
+            height:1px;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+            opacity:.7;
+            pointer-events:none;
+          }
+
+          .zuno-nav-brand{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            color:#fff;
+            text-decoration:none;
+            letter-spacing:3px;
+            font-size:20px;
+            font-weight:900;
+            text-shadow:0 2px 18px rgba(0,0,0,.45);
+            transition:transform .35s ease,letter-spacing .35s ease,opacity .35s ease;
+          }
+
+          .zuno-nav-brand::after{
+            content:"";
+            position:absolute;
+            left:0;
+            bottom:-7px;
+            width:0;
+            height:2px;
+            border-radius:999px;
+            background:#fff;
+            box-shadow:0 0 12px rgba(255,255,255,.55);
+            transition:width .35s ease;
+          }
+
+          .zuno-nav-brand:hover{
+            transform:translateY(-1px);
+            letter-spacing:3.6px;
+          }
+
+          .zuno-nav-brand:hover::after{
+            width:100%;
+          }
+
+          .zuno-nav-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:8px;
+            padding:5px;
+            border:1px solid rgba(255,255,255,.16);
+            border-radius:999px;
+            background:rgba(8,8,8,.18);
+            box-shadow:0 12px 35px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.08);
+            backdrop-filter:blur(14px) saturate(125%);
+            -webkit-backdrop-filter:blur(14px) saturate(125%);
+            transition:background .35s ease,border-color .35s ease,transform .35s ease;
+          }
+
+          .zuno-nav-actions:hover{
+            background:rgba(8,8,8,.28);
+            border-color:rgba(255,255,255,.24);
+            transform:translateY(-1px);
+          }
+
+          .zuno-nav-action{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            min-height:36px;
+            padding:0 14px;
+            border:1px solid transparent;
+            border-radius:999px;
+            background:transparent;
+            color:rgba(255,255,255,.9);
+            cursor:pointer;
+            font-size:12px;
+            font-weight:800;
+            letter-spacing:.1px;
+            text-shadow:0 1px 10px rgba(0,0,0,.35);
+            transition:background .28s ease,border-color .28s ease,color .28s ease,transform .28s ease;
+          }
+
+          .zuno-nav-action:hover{
+            background:rgba(255,255,255,.11);
+            border-color:rgba(255,255,255,.18);
+            color:#fff;
+            transform:translateY(-1px);
+          }
+
+          .zuno-nav-action:active{
+            transform:translateY(0) scale(.97);
+          }
+
+          .zuno-nav-count{
+            display:inline-flex;
+            align-items:center;
+            min-height:36px;
+            padding:0 15px;
+            border-left:1px solid rgba(255,255,255,.14);
+            border-radius:999px;
+            color:#fff;
+            font-size:12px;
+            font-weight:800;
+            white-space:nowrap;
+            text-shadow:0 1px 10px rgba(0,0,0,.4);
+          }
+
+          @media (max-width:700px){
+            .zuno-nav{
+              padding:14px 16px !important;
+            }
+
+            .zuno-nav::after{
+              left:16px;
+              right:16px;
+            }
+
+            .zuno-nav-actions{
+              gap:3px;
+              padding:4px;
+            }
+
+            .zuno-nav-action{
+              min-height:34px;
+              padding:0 9px;
+              font-size:11px;
+            }
+
+            .zuno-nav-count{
+              min-height:34px;
+              padding:0 9px;
+              font-size:11px;
+            }
+
+            .zuno-nav-brand{
+              font-size:17px;
+              letter-spacing:2.5px;
+            }
+          }
+
+          @media (max-width:470px){
+            .zuno-nav{
+              gap:8px !important;
+            }
+
+            .zuno-nav-count{
+              display:none;
+            }
+
+            .zuno-nav-actions{
+              margin-left:auto;
+            }
+          }
+        `}</style>
+
+        <header
+          className="nav zuno-nav"
+          style={{
+            background: "transparent",
+          }}
+        >
+
+          <div
+            className="brand-mark zuno-nav-brand"
+            aria-label="ZUNO"
+          >
             <div className="brand-copy brand-zuno">
               <strong>ZUNO</strong>
             </div>
           </div>
 
-
-          <div
-            style={{
-              display:
-                "flex",
-
-              alignItems:
-                "center",
-
-              gap:
-                10,
-            }}
-          >
+          <div className="zuno-nav-actions">
 
             <button
               type="button"
-              onClick={() =>
-                setPlaylistOpen(
-                  true
-                )
-              }
-              style={
-                topButton
-              }
+              className="zuno-nav-action"
+              onClick={() => setPlaylistOpen(true)}
             >
               ♫ Playlists
             </button>
 
-
             <button
               type="button"
-              onClick={() =>
-                setProfileOpen(
-                  true
-                )
-              }
-              style={
-                topButton
-              }
+              className="zuno-nav-action"
+              onClick={() => setProfileOpen(true)}
             >
               Hi,{" "}
-              {
-                profile.display_name ||
-                profile.username
-              }
+              {profile.display_name || profile.username}
             </button>
 
-
-            <div className="badge">
-              मेरी पसंद ·{" "}
-              {tracks.length} गीत
+            <div className="zuno-nav-count">
+              मेरी पसंद · {tracks.length} गीत
             </div>
 
           </div>
@@ -3397,50 +3523,11 @@ function App() {
 
 
             <div className="now-row">
-
-              <div className="player-track-meta">
-                <div
-                  key={currentTrack?.id || "empty-cover"}
-                  className={`player-cover ${
-                    playing && currentTrack ? "is-playing" : ""
-                  }`}
-                  aria-label={
-                    currentTrack
-                      ? `Cover art for ${currentTrack.title}`
-                      : "No song selected"
-                  }
-                >
-                  {currentCoverUrl ? (
-                    <img
-                      src={currentCoverUrl}
-                      alt=""
-                      loading="eager"
-                      decoding="async"
-                      data-cover-index="0"
-                      onError={(event) => {
-                        const image = event.currentTarget;
-                        const nextIndex =
-                          Number(image.dataset.coverIndex || 0) + 1;
-
-                        if (nextIndex < coverFallbackUrls.length) {
-                          image.dataset.coverIndex = String(nextIndex);
-                          image.src = coverFallbackUrls[nextIndex];
-                        } else {
-                          image.style.display = "none";
-                        }
-                      }}
-                    />
-                  ) : (
-                    <span className="player-cover-fallback">♪</span>
-                  )}
-                </div>
-
-                <div className="player-song-label">
-                  {
-                    currentTrack?.title ||
-                    "अपनी पसंद से कोई गीत चुनें"
-                  }
-                </div>
+              <div className="player-song-label">
+                {
+                  currentTrack?.title ||
+                  "अपनी पसंद से कोई गीत चुनें"
+                }
               </div>
 
               <button
@@ -3833,10 +3920,10 @@ const authStyles = {
       20,
 
     background:
-      "radial-gradient(circle at 20% 10%,rgba(245,223,183,.18),transparent 30%),linear-gradient(135deg,#111,#25221d)",
+      "#000",
 
     color:
-      "#f5dfb7",
+      "#fff",
 
     fontFamily:
       '"DM Sans",sans-serif',
@@ -3858,7 +3945,7 @@ const authStyles = {
       26,
 
     background:
-      "rgba(255,255,255,.09)",
+      "rgba(8,8,8,.94)",
 
     backdropFilter:
       "blur(24px) saturate(140%)",
@@ -3889,7 +3976,7 @@ const authStyles = {
       "center",
 
     background:
-      "rgba(255,255,255,.13)",
+      "rgba(255,255,255,.08)",
 
     fontSize:
       22,
@@ -3962,7 +4049,7 @@ const authStyles = {
       14,
 
     background:
-      "rgba(0,0,0,.18)",
+      "rgba(255,255,255,.05)",
 
     marginBottom:
       18,
@@ -4000,7 +4087,7 @@ const authStyles = {
   activeTab: {
 
     background:
-      "rgba(255,255,255,.15)",
+      "rgba(255,255,255,.10)",
 
     color:
       "#fff",
@@ -4038,7 +4125,7 @@ const authStyles = {
       "none",
 
     background:
-      "rgba(255,255,255,.09)",
+      "rgba(255,255,255,.04)",
 
     color:
       "#fff",
@@ -4082,10 +4169,10 @@ const authStyles = {
       14,
 
     background:
-      "#f5dfb7",
+      "#fff",
 
     color:
-      "#171411",
+      "#000",
 
     fontWeight:
       800,
@@ -4151,13 +4238,13 @@ const panelStyles = {
       20,
 
     background:
-      "rgba(0,0,0,.38)",
+      "rgba(0,0,0,.46)",
 
     backdropFilter:
-      "blur(9px)",
+      "blur(12px)",
 
     WebkitBackdropFilter:
-      "blur(9px)",
+      "blur(12px)",
   },
 
 
@@ -4179,22 +4266,22 @@ const panelStyles = {
       22,
 
     border:
-      "1px solid rgba(255,255,255,.48)",
+      "1px solid rgba(255,255,255,.22)",
 
     background:
-      "rgba(247,239,221,.78)",
+      "rgba(18,18,18,.42)",
 
     color:
-      "#171411",
+      "#fff",
 
     backdropFilter:
-      "blur(26px) saturate(140%)",
+      "blur(24px) saturate(125%)",
 
     WebkitBackdropFilter:
-      "blur(26px) saturate(140%)",
+      "blur(24px) saturate(125%)",
 
     boxShadow:
-      "0 30px 90px rgba(0,0,0,.28)",
+      "0 30px 90px rgba(0,0,0,.42)",
   },
 
 
@@ -4223,7 +4310,7 @@ const panelStyles = {
       2,
 
     opacity:
-      0.5,
+      0.58,
 
     fontWeight:
       800,
@@ -4240,13 +4327,16 @@ const panelStyles = {
 
     fontSize:
       32,
+
+    color:
+      "#fff",
   },
 
 
   close: {
 
     border:
-      "1px solid rgba(20,20,20,.18)",
+      "1px solid rgba(255,255,255,.22)",
 
     width:
       38,
@@ -4258,10 +4348,10 @@ const panelStyles = {
       "50%",
 
     background:
-      "rgba(255,255,255,.25)",
+      "rgba(255,255,255,.10)",
 
     color:
-      "#111",
+      "#fff",
 
     cursor:
       "pointer",
@@ -4289,7 +4379,7 @@ const panelStyles = {
       "14px 0 6px",
 
     opacity:
-      0.65,
+      0.68,
   },
 
 
@@ -4302,10 +4392,13 @@ const panelStyles = {
       11,
 
     background:
-      "rgba(255,255,255,.35)",
+      "rgba(255,255,255,.09)",
 
     border:
-      "1px solid rgba(20,20,20,.08)",
+      "1px solid rgba(255,255,255,.13)",
+
+    color:
+      "#fff",
   },
 
 
@@ -4324,13 +4417,13 @@ const panelStyles = {
       11,
 
     border:
-      "1px solid rgba(20,20,20,.14)",
+      "1px solid rgba(255,255,255,.15)",
 
     background:
-      "rgba(255,255,255,.45)",
+      "rgba(255,255,255,.09)",
 
     color:
-      "#111",
+      "#fff",
 
     outline:
       "none",
@@ -4399,10 +4492,10 @@ const panelStyles = {
   bgActive: {
 
     borderColor:
-      "#111",
+      "rgba(255,255,255,.85)",
 
     boxShadow:
-      "0 0 0 2px rgba(255,255,255,.7) inset",
+      "0 0 0 2px rgba(255,255,255,.22) inset",
   },
 
 
@@ -4425,7 +4518,7 @@ const panelStyles = {
   logout: {
 
     border:
-      "1px solid rgba(150,30,20,.25)",
+      "1px solid rgba(255,255,255,.16)",
 
     borderRadius:
       11,
@@ -4434,10 +4527,10 @@ const panelStyles = {
       "11px 15px",
 
     background:
-      "rgba(180,50,40,.08)",
+      "rgba(255,255,255,.07)",
 
     color:
-      "#8a2e24",
+      "rgba(255,255,255,.86)",
 
     cursor:
       "pointer",
@@ -4459,10 +4552,10 @@ const panelStyles = {
       "11px 17px",
 
     background:
-      "#171411",
+      "rgba(255,255,255,.92)",
 
     color:
-      "#fff",
+      "#111",
 
     cursor:
       "pointer",
@@ -4513,7 +4606,7 @@ const panelStyles = {
       "uppercase",
 
     opacity:
-      0.55,
+      0.58,
 
     marginBottom:
       8,
@@ -4535,13 +4628,13 @@ const panelStyles = {
       "center",
 
     border:
-      "1px solid rgba(20,20,20,.1)",
+      "1px solid rgba(255,255,255,.12)",
 
     borderRadius:
       11,
 
     background:
-      "rgba(255,255,255,.3)",
+      "rgba(255,255,255,.08)",
 
     padding:
       "12px 13px",
@@ -4556,7 +4649,7 @@ const panelStyles = {
       "left",
 
     color:
-      "#111",
+      "#fff",
 
     fontWeight:
       700,
@@ -4566,10 +4659,10 @@ const panelStyles = {
   playlistActive: {
 
     background:
-      "rgba(20,20,20,.09)",
+      "rgba(255,255,255,.16)",
 
     borderColor:
-      "rgba(20,20,20,.3)",
+      "rgba(255,255,255,.32)",
   },
 
 
@@ -4579,7 +4672,7 @@ const panelStyles = {
       15,
 
     opacity:
-      0.55,
+      0.58,
 
     fontSize:
       13,
@@ -4595,7 +4688,7 @@ const panelStyles = {
       "100%",
 
     border:
-      "1px solid rgba(20,20,20,.16)",
+      "1px solid rgba(255,255,255,.14)",
 
     borderRadius:
       10,
@@ -4604,7 +4697,10 @@ const panelStyles = {
       11,
 
     background:
-      "rgba(255,255,255,.35)",
+      "rgba(255,255,255,.08)",
+
+    color:
+      "#fff",
 
     cursor:
       "pointer",
@@ -4623,7 +4719,10 @@ const panelStyles = {
       "9px 10px",
 
     borderBottom:
-      "1px solid rgba(20,20,20,.08)",
+      "1px solid rgba(255,255,255,.09)",
+
+    color:
+      "rgba(255,255,255,.92)",
   },
 
 
@@ -4645,10 +4744,10 @@ const panelStyles = {
       12,
 
     background:
-      "#171411",
+      "rgba(255,255,255,.92)",
 
     color:
-      "#fff",
+      "#111",
 
     cursor:
       "pointer",
@@ -4664,7 +4763,7 @@ const panelStyles = {
       12,
 
     color:
-      "#8a2e24",
+      "#ffb7aa",
 
     fontSize:
       12,
