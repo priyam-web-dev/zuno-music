@@ -85,6 +85,50 @@ const BACKGROUNDS = [
   },
 ];
 
+/* =========================================================
+   ZUNO — RECOMMENDED PLAYLISTS
+   Public curated playlists shown to every user.
+   YouTube links will be added after the UI is approved.
+   ========================================================= */
+const RECOMMENDED_PLAYLISTS = [
+  {
+    id: "late-night",
+    title: "Late Night",
+    subtitle: "For quiet roads & 2 AM thoughts",
+    mood: "रात वाली vibe",
+    background: "/assets/bg8.png",
+  },
+  {
+    id: "punjabi-vibes",
+    title: "Punjabi Vibes",
+    subtitle: "Bass, beats & full desi energy",
+    mood: "दिल से loud",
+    background: "/assets/bg6.png",
+  },
+  {
+    id: "soft-hours",
+    title: "Soft Hours",
+    subtitle: "Slow songs for slower moments",
+    mood: "थोड़ा ठहरो",
+    background: "/assets/bg4.png",
+  },
+  {
+    id: "bollywood-mood",
+    title: "Bollywood Mood",
+    subtitle: "Songs that already know the story",
+    mood: "एक scene और",
+    background: "/assets/bg10.png",
+  },
+  {
+    id: "desi-chill",
+    title: "Desi Chill",
+    subtitle: "Easy listening, Indian soul",
+    mood: "बस चलने दो",
+    background: "/assets/bg5.png",
+  },
+];
+
+
 
 /* =========================================================
    YOUTUBE API
@@ -3874,6 +3918,180 @@ function App() {
           }
         `}</style>
 
+        <style>{`
+          .zuno-recommended{
+            width:min(1040px,92vw);
+            margin:4px auto 0;
+          }
+
+          .zuno-recommended-head{
+            display:flex;
+            align-items:flex-end;
+            justify-content:space-between;
+            gap:20px;
+            margin-bottom:14px;
+          }
+
+          .zuno-recommended-kicker{
+            margin:0 0 5px;
+            font-size:10px;
+            font-weight:800;
+            letter-spacing:2px;
+            text-transform:uppercase;
+            color:rgba(255,255,255,.64);
+          }
+
+          .zuno-recommended-title{
+            margin:0;
+            color:#fff;
+            font-family:"DM Sans",sans-serif;
+            font-size:22px;
+            line-height:1.05;
+            font-weight:800;
+            letter-spacing:-.6px;
+            text-shadow:0 2px 18px rgba(0,0,0,.28);
+          }
+
+          .zuno-recommended-note{
+            margin:0;
+            max-width:280px;
+            text-align:right;
+            font-size:11px;
+            line-height:1.45;
+            color:rgba(255,255,255,.62);
+          }
+
+          .zuno-recommended-grid{
+            display:grid;
+            grid-template-columns:repeat(5,minmax(0,1fr));
+            gap:10px;
+          }
+
+          .zuno-recommended-card{
+            position:relative;
+            min-height:158px;
+            overflow:hidden;
+            border:1px solid rgba(255,255,255,.17);
+            border-radius:16px;
+            background:#211b17;
+            box-shadow:0 14px 34px rgba(0,0,0,.18);
+            isolation:isolate;
+          }
+
+          .zuno-recommended-card::before{
+            content:"";
+            position:absolute;
+            inset:0;
+            z-index:-2;
+            background-image:var(--playlist-bg);
+            background-size:cover;
+            background-position:center;
+            transform:scale(1.02);
+            transition:transform .35s ease;
+          }
+
+          .zuno-recommended-card::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            z-index:-1;
+            background:linear-gradient(180deg,rgba(0,0,0,.05) 5%,rgba(0,0,0,.16) 42%,rgba(0,0,0,.82) 100%);
+          }
+
+          .zuno-recommended-card-inner{
+            min-height:158px;
+            padding:13px;
+            display:flex;
+            flex-direction:column;
+            justify-content:flex-end;
+          }
+
+          .zuno-recommended-mood{
+            align-self:flex-start;
+            margin-bottom:auto;
+            padding:5px 8px;
+            border:1px solid rgba(255,255,255,.20);
+            border-radius:999px;
+            background:rgba(0,0,0,.22);
+            backdrop-filter:blur(8px);
+            color:rgba(255,255,255,.90);
+            font-size:9px;
+            font-weight:700;
+          }
+
+          .zuno-recommended-card h3{
+            margin:0;
+            color:#fff;
+            font-family:"DM Sans",sans-serif;
+            font-size:16px;
+            line-height:1.05;
+            font-weight:800;
+            letter-spacing:-.3px;
+            text-shadow:0 2px 10px rgba(0,0,0,.34);
+          }
+
+          .zuno-recommended-card p{
+            margin:5px 0 0;
+            color:rgba(255,255,255,.78);
+            font-size:9.5px;
+            line-height:1.35;
+          }
+
+          @media (hover:hover) and (pointer:fine){
+            .zuno-recommended-card:hover::before{
+              transform:scale(1.07);
+            }
+          }
+
+          @media(max-width:900px){
+            .zuno-recommended-grid{
+              display:flex;
+              overflow-x:auto;
+              gap:10px;
+              padding-bottom:5px;
+              scrollbar-width:none;
+            }
+
+            .zuno-recommended-grid::-webkit-scrollbar{
+              display:none;
+            }
+
+            .zuno-recommended-card{
+              flex:0 0 190px;
+            }
+          }
+
+          @media(max-width:600px){
+            .zuno-recommended{
+              width:calc(100vw - 28px);
+              margin-top:0;
+            }
+
+            .zuno-recommended-head{
+              align-items:flex-start;
+              margin-bottom:11px;
+            }
+
+            .zuno-recommended-title{
+              font-size:19px;
+            }
+
+            .zuno-recommended-note{
+              display:none;
+            }
+
+            .zuno-recommended-card{
+              flex-basis:72vw;
+              max-width:260px;
+              min-height:145px;
+            }
+
+            .zuno-recommended-card-inner{
+              min-height:145px;
+            }
+          }
+        `}</style>
+
         <header
           className="nav zuno-nav"
           style={{
@@ -3928,6 +4146,49 @@ function App() {
               <span className="hero-name">{getFirstName(profile)}</span>
               <span className="hero-time">{timePhrase}</span>
             </h1>
+          </section>
+
+          {/* RECOMMENDED PLAYLISTS */}
+          <section
+            className="zuno-recommended"
+            aria-labelledby="zuno-recommended-title"
+          >
+            <div className="zuno-recommended-head">
+              <div>
+                <p className="zuno-recommended-kicker">Curated by ZUNO</p>
+                <h2
+                  id="zuno-recommended-title"
+                  className="zuno-recommended-title"
+                >
+                  Recommended playlists
+                </h2>
+              </div>
+
+              <p className="zuno-recommended-note">
+                Public playlists for everyone. Pick a mood and let the music do the rest.
+              </p>
+            </div>
+
+            <div className="zuno-recommended-grid">
+              {RECOMMENDED_PLAYLISTS.map((playlist) => (
+                <article
+                  key={playlist.id}
+                  className="zuno-recommended-card"
+                  style={{
+                    "--playlist-bg": `linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.08)),url(${playlist.background})`,
+                  }}
+                >
+                  <div className="zuno-recommended-card-inner">
+                    <span className="zuno-recommended-mood">
+                      {playlist.mood}
+                    </span>
+
+                    <h3>{playlist.title}</h3>
+                    <p>{playlist.subtitle}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
           </section>
 
           {/* HIDDEN YOUTUBE HOST
