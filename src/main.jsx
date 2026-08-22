@@ -92,42 +92,32 @@ const BACKGROUNDS = [
    ========================================================= */
 const RECOMMENDED_PLAYLISTS = [
   {
-    id: "late-night",
-    title: "Late Night",
-    subtitle: "For quiet roads & 2 AM thoughts",
-    mood: "रात वाली vibe",
+    id: "arijit-singh",
+    title: "Arijit Singh songs",
     background: "/assets/bg8.png",
     url: "https://music.youtube.com/playlist?list=RDCLAK5uy_lSaqe-XXsDL1jXiSYdfKKuWDU2vnU6uaE&playnext=1&si=KINii4VhVIA6Y9-p",
   },
   {
-    id: "punjabi-vibes",
-    title: "Punjabi Vibes",
-    subtitle: "Bass, beats & full desi energy",
-    mood: "दिल से loud",
+    id: "punjabi-dance-hits",
+    title: "Punjabi Dance Hits",
     background: "/assets/bg6.png",
     url: "https://music.youtube.com/playlist?list=RDCLAK5uy_l1tvprsrxf2EDE9pHKetlLGn8yq7XSECo&playnext=1&si=xMsn_7tGzbH1_584",
   },
   {
-    id: "soft-hours",
-    title: "Soft Hours",
-    subtitle: "Slow songs for slower moments",
-    mood: "थोड़ा ठहरो",
+    id: "old-songs",
+    title: "Old Songs",
     background: "/assets/bg4.png",
     url: "https://music.youtube.com/playlist?list=OLAK5uy_mUHTqhykunmVYqcjnlr_Vr-C3SlsvA2L4&si=qh0DD7NoyVZMRXgZ",
   },
   {
-    id: "bollywood-mood",
-    title: "Bollywood Mood",
-    subtitle: "Songs that already know the story",
-    mood: "एक scene और",
+    id: "karan-aujla",
+    title: "Karan Aujla songs",
     background: "/assets/bg10.png",
     url: "https://music.youtube.com/playlist?list=RDCLAK5uy_lnJEMm7nZ6wPjGFPgDGWJoiz0dpUsgFQ8&playnext=1&si=SObjGwYSSBBgO_UG",
   },
   {
-    id: "desi-chill",
-    title: "Desi Chill",
-    subtitle: "Easy listening, Indian soul",
-    mood: "बस चलने दो",
+    id: "night-retro-hindi",
+    title: "Night Retro: Hindi",
     background: "/assets/bg5.png",
     url: "https://music.youtube.com/playlist?list=RDCLAK5uy_m4cVudgAhYmFlK-tudPAijltqK9DaYAOs&playnext=1&si=cVYEWZpWfyTTJQV9",
   },
@@ -4649,10 +4639,7 @@ function App() {
                     }}
                   >
                     <div className="zuno-recommended-card-inner">
-                      <span className="zuno-recommended-mood">{playlist.mood}</span>
                       <h3>{playlist.title}</h3>
-                      <p>{playlist.subtitle}</p>
-                      <span className="zuno-recommended-open">Play in ZUNO ▶</span>
                     </div>
                   </button>
                 ))}
