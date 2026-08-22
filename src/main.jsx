@@ -1870,6 +1870,12 @@ function App() {
   const lastPlaybackSaveRef =
     useRef(0);
 
+  const playerErrorSkipRef =
+    useRef(0);
+
+  const playerErrorAttemptsRef =
+    useRef(0);
+
 
   /* =======================================================
      BACKGROUND MOTION
@@ -2923,15 +2929,26 @@ function App() {
                 onStateChange:
                   (event) => {
 
+                    const state =
+                      event.data;
+
                     setPlaying(
-                      event.data ===
+                      state ===
                         YT.PlayerState
                           .PLAYING
                     );
 
+                    if (
+                      state ===
+                      YT.PlayerState.PLAYING
+                    ) {
+                      playerErrorAttemptsRef.current = 0;
+                      setError("");
+                    }
+
 
                     if (
-                      event.data ===
+                      state ===
                         YT.PlayerState
                           .ENDED &&
                       tracksRef.current
@@ -2949,6 +2966,75 @@ function App() {
                         true
                       );
                     }
+
+                  },
+
+                onError:
+                  (event) => {
+
+                    const songs =
+                      tracksRef.current;
+
+                    if (!songs.length) {
+                      return;
+                    }
+
+                    const now =
+                      Date.now();
+
+                    if (
+                      now -
+                        playerErrorSkipRef.current <
+                      900
+                    ) {
+                      return;
+                    }
+
+                    playerErrorSkipRef.current =
+                      now;
+
+                    playerErrorAttemptsRef.current += 1;
+
+                    /*
+                      Recommended YouTube Music mixes can contain
+                      videos that are unavailable, region blocked,
+                      age restricted, or not embeddable.
+
+                      Instead of letting the ZUNO player silently
+                      stop, automatically move to the next playable
+                      track.
+                    */
+                    if (
+                      playerErrorAttemptsRef.current >=
+                      songs.length
+                    ) {
+                      setPlaying(false);
+                      setError(
+                        "Is playlist ke available songs finish ho gaye."
+                      );
+                      return;
+                    }
+
+                    const nextIndex =
+                      (
+                        indexRef.current +
+                        1
+                      ) %
+                      songs.length;
+
+                    setError(
+                      "Skipping unavailable song…"
+                    );
+
+                    setTimeout(
+                      () => {
+                        changeTrack(
+                          nextIndex,
+                          true
+                        );
+                      },
+                      120
+                    );
 
                   },
 
@@ -4113,16 +4199,67 @@ function App() {
           .zuno-recommended-card{
             appearance:none;
             -webkit-appearance:none;
-            border:0;
+            position:relative;
+            min-height:138px;
+            border:1px solid rgba(255,255,255,.13);
+            border-radius:18px;
             padding:0;
             width:100%;
             font:inherit;
             text-align:left;
             cursor:pointer;
+            overflow:hidden;
             text-decoration:none;
             color:#fff;
-            background:none;
+            background:var(--playlist-bg) center/cover no-repeat;
+            box-shadow:0 16px 35px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.08);
+            transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease;
           }
+
+          .zuno-recommended-card::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:linear-gradient(
+              180deg,
+              rgba(0,0,0,.04) 0%,
+              rgba(0,0,0,.08) 38%,
+              rgba(0,0,0,.72) 100%
+            );
+            pointer-events:none;
+          }
+
+          .zuno-recommended-card:hover{
+            transform:translateY(-4px);
+            border-color:rgba(255,255,255,.28);
+            box-shadow:0 22px 42px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.12);
+          }
+
+          .zuno-recommended-card:active{
+            transform:translateY(-1px) scale(.99);
+          }
+
+          .zuno-recommended-card-inner{
+            position:relative;
+            z-index:1;
+            min-height:138px;
+            display:flex;
+            align-items:flex-end;
+            padding:16px 15px;
+          }
+
+          .zuno-recommended-card-inner h3{
+            margin:0;
+            max-width:100%;
+            color:#fff;
+            font-family:"DM Sans",sans-serif;
+            font-size:15px;
+            line-height:1.12;
+            font-weight:800;
+            letter-spacing:-.2px;
+            text-shadow:0 2px 12px rgba(0,0,0,.55);
+          }
+
           .zuno-recommended-card:hover .zuno-recommended-open{
             transform:translateY(0); opacity:1;
           }
@@ -4136,7 +4273,7 @@ function App() {
           @media(max-width:900px){
             .zuno-recommended-grid{display:flex;overflow-x:auto;gap:10px;padding-bottom:5px;scrollbar-width:none}
             .zuno-recommended-grid::-webkit-scrollbar{display:none}
-            .zuno-recommended-card{flex:0 0 190px}
+            .zuno-recommended-card{flex:0 0 190px;min-height:138px}
 
           }
           @media(max-width:700px){
@@ -4148,7 +4285,7 @@ function App() {
             .zuno-recommended-panel-title{font-size:30px}
             .zuno-recommended-panel-sub{font-size:11px}
             .zuno-recommended-card{flex-basis:72vw;max-width:260px;min-height:150px}
-            .zuno-recommended-card-inner{min-height:150px}
+            .zuno-recommended-card-inner{min-height:150px;padding:17px}
           }
           @media(max-width:470px){
             .zuno-recommended-trigger,.zuno-my-playlists-trigger{padding:0 6px !important;font-size:8.5px !important}
