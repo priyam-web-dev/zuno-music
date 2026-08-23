@@ -1000,75 +1000,58 @@ async function loadUserSongs(
       token
     );
 
-  if (
-    !Array.isArray(playlists) ||
-    !playlists.length
-  ) {
+  if (!Array.isArray(playlists) || !playlists.length) {
     return [];
   }
 
-  /*
-    Performance:
-    Fetch all playlist songs in one request instead of making one
-    playlist_songs request for every playlist.
-  */
-  const playlistIds =
-    playlists
-      .map((playlist) => playlist?.id)
-      .filter(Boolean);
+  const results =
+    await Promise.all(
+      playlists.map(async (playlist) => {
+        const songs =
+          await getPlaylistSongs(
+            playlist.id,
+            token
+          );
 
-  if (!playlistIds.length) {
-    return [];
-  }
-
-  const inList =
-    playlistIds
-      .map((id) => `"${String(id).replace(/"/g, '\\"')}"`)
-      .join(",");
-
-  const songs =
-    await supabaseRequest(
-      `/rest/v1/playlist_songs?playlist_id=in.(${inList})&select=id,playlist_id,youtube_id,song_name,artist,position&order=position.asc`,
-      {
-        method: "GET",
-      },
-      token
+        return Array.isArray(songs)
+          ? songs
+          : [];
+      })
     );
 
   const seen = new Set();
   const tracks = [];
 
-  for (
-    const song of
-    Array.isArray(songs)
-      ? songs
-      : []
-  ) {
-    const id =
-      String(
-        song?.youtube_id || ""
-      ).trim();
+  for (const songs of results) {
+    for (const song of songs) {
+      const id =
+        String(song?.youtube_id || "").trim();
 
-    if (!id || seen.has(id)) {
-      continue;
+      if (!id || seen.has(id)) {
+        continue;
+      }
+
+      seen.add(id);
+
+      tracks.push({
+        id,
+        title:
+          song?.song_name ||
+          "Unknown song",
+        artist:
+          song?.artist ||
+          "Unknown artist",
+      });
     }
-
-    seen.add(id);
-
-    tracks.push({
-      id,
-      title:
-        song?.song_name ||
-        "Unknown song",
-      artist:
-        song?.artist ||
-        "Unknown artist",
-    });
   }
 
   return tracks;
 }
 
+
+/* =========================================================
+   PLAYLIST PANEL
+   ========================================================= */
 
 function PlaylistPanel({
   user,
@@ -2381,6 +2364,15 @@ function App() {
   const playerRef =
     useRef(null);
 
+  // The YouTube iframe can take a moment to initialize on a cold visit.
+  // Keep user playback requests until the player is genuinely ready so the
+  // first click is not lost.
+  const playerReadyRef =
+    useRef(false);
+
+  const pendingPlaybackRef =
+    useRef(null);
+
   const sceneRef =
     useRef(null);
 
@@ -2389,22 +2381,6 @@ function App() {
 
   const tracksRef =
     useRef([]);
-
-  /*
-    Library performance cache:
-    - Per-user, so accounts never share song data.
-    - Avoids repeated Supabase reads while the library is unchanged.
-    - Prevents duplicate refresh requests.
-  */
-  const libraryCacheRef =
-    useRef({
-      userId: null,
-      tracks: [],
-      savedAt: 0,
-    });
-
-  const libraryRefreshInFlightRef =
-    useRef(false);
 
   // Which source currently owns the player queue.
   // "recommended" must never be overwritten by the background
@@ -2471,10 +2447,6 @@ function App() {
 
   const playerErrorAttemptsRef =
     useRef(0);
-
-  const playerErrorTrackRef = useRef("");
-  const playerRetryTimerRef = useRef(null);
-  const autoplayIntentRef = useRef(false);
 
 
   /* =======================================================
@@ -3048,52 +3020,11 @@ function App() {
      ======================================================= */
 
   const refreshSongs =
-    async (
-      force = false
-    ) => {
+    async () => {
 
       if (!user || !token) {
         return;
       }
-
-      // Recommended playlists own the player while they are active.
-      // Never let a background library refresh interfere with them.
-      if (
-        playbackSourceRef.current ===
-        "recommended"
-      ) {
-        return;
-      }
-
-      if (
-        libraryRefreshInFlightRef.current
-      ) {
-        return;
-      }
-
-      const CACHE_TTL =
-        5 * 60 * 1000;
-
-      const cache =
-        libraryCacheRef.current;
-
-      const cacheIsFresh =
-        cache.userId === user.id &&
-        Array.isArray(cache.tracks) &&
-        cache.savedAt > 0 &&
-        Date.now() - cache.savedAt <
-          CACHE_TTL;
-
-      // Normal background refreshes use the cache.
-      if (
-        !force &&
-        cacheIsFresh
-      ) {
-        return;
-      }
-
-      libraryRefreshInFlightRef.current =
-        true;
 
       try {
         const songs =
@@ -3102,25 +3033,25 @@ function App() {
             token
           );
 
-        if (
-          playbackSourceRef.current ===
-          "recommended"
-        ) {
+        // A library refresh can finish after the user has already
+        // started a recommended playlist. Never let that stale async
+        // result replace the recommended queue or stop its player.
+        if (playbackSourceRef.current === "recommended") {
           return;
         }
 
+        /* Preserve the song that is currently playing when the
+           playlist is refreshed. The old code always forced index 0,
+           which made the player jump back to the first song after a
+           refresh even though another song was still playing. */
         const currentSongId =
-          tracksRef.current?.[
-            indexRef.current
-          ]?.id ||
+          tracksRef.current?.[indexRef.current]?.id ||
           null;
 
         const preservedIndex =
           currentSongId
             ? songs.findIndex(
-                (song) =>
-                  song.id ===
-                  currentSongId
+                (song) => song.id === currentSongId
               )
             : -1;
 
@@ -3131,9 +3062,7 @@ function App() {
         const restoredIndex =
           storedPlayback?.trackId
             ? songs.findIndex(
-                (song) =>
-                  song.id ===
-                  storedPlayback.trackId
+                (song) => song.id === storedPlayback.trackId
               )
             : -1;
 
@@ -3147,31 +3076,6 @@ function App() {
         const hadCurrentSong =
           Boolean(currentSongId) &&
           preservedIndex >= 0;
-
-        const oldIds =
-          tracksRef.current
-            .map((track) => track?.id)
-            .join("|");
-
-        const newIds =
-          songs
-            .map((track) => track?.id)
-            .join("|");
-
-        libraryCacheRef.current = {
-          userId: user.id,
-          tracks: songs,
-          savedAt: Date.now(),
-        };
-
-        // Don't cause a React queue update if nothing actually changed.
-        if (
-          oldIds === newIds &&
-          tracksRef.current.length ===
-            songs.length
-        ) {
-          return;
-        }
 
         tracksRef.current =
           songs;
@@ -3187,49 +3091,42 @@ function App() {
           safeIndex
         );
 
-        setQueueFocusIndex(
-          safeIndex
-        );
+        setQueueFocusIndex(safeIndex);
 
-        // Do not reload YouTube if the current song still exists.
+        /* If the currently playing song still exists, do NOT reload
+           YouTube. This keeps playback and the visible song title in
+           sync. Only load a song when the old one disappeared. */
         if (
           !hadCurrentSong &&
           songs.length &&
           playerRef.current
         ) {
           playerRef.current.loadVideoById({
-            videoId:
-              songs[safeIndex].id,
+            videoId: songs[safeIndex].id,
             startSeconds:
-              restoredIndex ===
-                safeIndex &&
-              storedPlayback
+              restoredIndex === safeIndex && storedPlayback
                 ? storedPlayback.position
                 : 0,
           });
         }
 
         if (!songs.length) {
+          // An empty playlist is a normal state for a new account.
+          // Keep the complete website UI visible and show the instruction
+          // only inside the video player area.
           setError("");
           playerRef.current?.stopVideo?.();
         } else {
           setError("");
         }
-
-      } catch (err) {
+} catch (err) {
         console.error(err);
 
-        // Keep already-loaded songs playable if a refresh fails.
-        if (!tracksRef.current.length) {
-          setError(
-            err?.message ||
-            "Tumhari playlists se songs load nahi ho sake."
-          );
-        }
-      } finally {
-        libraryRefreshInFlightRef.current =
-          false;
-      }
+        setError(
+          err?.message ||
+          "Tumhari playlists se songs load nahi ho sake."
+        );
+}
     };
 
 
@@ -3238,17 +3135,21 @@ function App() {
     if (!user || !token)
       return;
 
+
     /* Let the first ZUNO UI paint before fetching playlist data. */
     const runInitialSongLoad =
       () => {
-        refreshSongs(true);
+        refreshSongs();
       };
 
+
     let cleanupInitialLoad;
+
 
     if (
       "requestIdleCallback" in window
     ) {
+
       const idleId =
         window.requestIdleCallback(
           runInitialSongLoad,
@@ -3257,56 +3158,38 @@ function App() {
           }
         );
 
+
       cleanupInitialLoad =
         () =>
           window.cancelIdleCallback(
             idleId
           );
 
-    } else {
+    }
+
+    else {
+
       const frameId =
         window.requestAnimationFrame(
           runInitialSongLoad
         );
+
 
       cleanupInitialLoad =
         () =>
           window.cancelAnimationFrame(
             frameId
           );
+
     }
 
-    /*
-      Personal playlists do not need a database request every minute.
-      Refresh at most every five minutes, and only while the tab is visible.
-    */
+
     const interval =
       setInterval(
-        () => {
-          if (
-            document.visibilityState ===
-            "visible"
-          ) {
-            refreshSongs(false);
-          }
-        },
-        5 * 60 * 1000
+        refreshSongs,
+        60000
       );
 
-    const handleVisibility =
-      () => {
-        if (
-          document.visibilityState ===
-          "visible"
-        ) {
-          refreshSongs(false);
-        }
-      };
-
-    document.addEventListener(
-      "visibilitychange",
-      handleVisibility
-    );
 
     return () => {
 
@@ -3315,19 +3198,11 @@ function App() {
       clearInterval(
         interval
       );
-      if (playerRetryTimerRef.current) {
-        clearTimeout(playerRetryTimerRef.current);
-        playerRetryTimerRef.current = null;
-      }
-
-      document.removeEventListener(
-        "visibilitychange",
-        handleVisibility
-      );
 
     };
 
   }, [user, token]);
+
 
   /* =======================================================
      ESCAPE / BODY LOCK
@@ -3447,47 +3322,42 @@ function App() {
       setDuration("0:00");
 
 
+      const track =
+        songs[safeIndex];
+
+      // Never drop a play request just because the YouTube iframe is still
+      // warming up. The request is consumed by onReady if necessary.
+      pendingPlaybackRef.current = {
+        videoId: track.id,
+        autoplay,
+      };
+
       const player =
         playerRef.current;
 
-      if (!player)
-        return;
+      if (player && playerReadyRef.current) {
+        pendingPlaybackRef.current = null;
 
-      if (playerRetryTimerRef.current) {
-        clearTimeout(playerRetryTimerRef.current);
-        playerRetryTimerRef.current = null;
-      }
+        try {
+          player.setVolume(volume);
 
-      const nextVideoId = songs[safeIndex]?.id;
-      if (!nextVideoId) return;
+          if (volume > 0) {
+            player.unMute?.();
+          }
 
-      playerErrorTrackRef.current = nextVideoId;
-      playerErrorAttemptsRef.current = 0;
-      autoplayIntentRef.current = Boolean(autoplay);
+          player.loadVideoById({
+            videoId: track.id,
+            startSeconds: 0,
+          });
 
-      try {
-        player.loadVideoById({
-          videoId: nextVideoId,
-          startSeconds: 0,
-        });
-
-        if (autoplay) {
-          window.setTimeout(() => {
-            try {
-              if (playerRef.current === player) {
-                if (volume > 0) {
-                  player.setVolume(volume);
-                  player.unMute?.();
-                }
-                player.playVideo();
-              }
-            } catch {}
-          }, 80);
-        } else {
-          player.pauseVideo();
+          if (autoplay) {
+            player.playVideo?.();
+          } else {
+            player.pauseVideo?.();
+          }
+        } catch (playbackError) {
+          console.warn("ZUNO playback request failed:", playbackError);
         }
-      } catch (loadError) {
-        console.warn("ZUNO playback load failed:", loadError);
       }
 
       setQueueOpen(false);
@@ -3500,117 +3370,68 @@ function App() {
 
   useEffect(() => {
 
-    if (
-      !tracks.length ||
-      !user
-    ) {
+    if (!user) {
       return;
     }
 
-
-    let cancelled =
-      false;
-
+    let cancelled = false;
 
     const interval =
-      setInterval(
-        () => {
+      setInterval(() => {
+        const player = playerRef.current;
 
-          const player =
-            playerRef.current;
+        if (!player?.getDuration) {
+          return;
+        }
 
+        const total =
+          player.getDuration() || 0;
 
-          if (
-            !player?.getDuration
-          ) {
-            return;
-          }
+        const current =
+          player.getCurrentTime() || 0;
 
+        setProgress(
+          total
+            ? (current / total) * 100
+            : 0
+        );
 
-          const total =
-            player.getDuration() ||
-            0;
+        setElapsed(
+          formatTime(current)
+        );
 
-          const current =
-            player.getCurrentTime() ||
-            0;
+        setDuration(
+          formatTime(total)
+        );
 
+        const now = Date.now();
 
-          const nextProgress =
-            total
-              ? (
-                  current /
-                  total
-                ) *
-                100
-              : 0;
+        if (
+          now - lastPlaybackSaveRef.current >= 2000
+        ) {
+          const activeTrack =
+            tracksRef.current[indexRef.current];
 
-          const nextElapsed =
-            formatTime(
-              current
-            );
+          if (activeTrack?.id) {
+            try {
+              localStorage.setItem(
+                "pf_playback_state",
+                JSON.stringify({
+                  trackId: activeTrack.id,
+                  position: current,
+                })
+              );
 
-          const nextDuration =
-            formatTime(
-              total
-            );
-
-          setProgress(
-            (previous) =>
-              Math.abs(
-                previous -
-                nextProgress
-              ) < 0.15
-                ? previous
-                : nextProgress
-          );
-
-          setElapsed(
-            (previous) =>
-              previous ===
-              nextElapsed
-                ? previous
-                : nextElapsed
-          );
-
-          setDuration(
-            (previous) =>
-              previous ===
-              nextDuration
-                ? previous
-                : nextDuration
-          );
-
-          // Persist the current song and position without hammering storage.
-          const now = Date.now();
-          if (now - lastPlaybackSaveRef.current >= 2000) {
-            const activeTrack =
-              tracksRef.current[indexRef.current];
-
-            if (activeTrack?.id) {
-              try {
-                localStorage.setItem(
-                  "pf_playback_state",
-                  JSON.stringify({
-                    trackId: activeTrack.id,
-                    position: current,
-                  })
-                );
-                lastPlaybackSaveRef.current = now;
-              } catch {
-                // Ignore storage failures.
-              }
+              lastPlaybackSaveRef.current = now;
+            } catch {
+              // Ignore storage failures.
             }
           }
-
-        },
-        1000
-      );
-
+        }
+      }, 500);
 
     loadYouTubeAPI()
       .then((YT) => {
-
         if (
           cancelled ||
           playerRef.current
@@ -3618,14 +3439,16 @@ function App() {
           return;
         }
 
-
         playerRef.current =
           new YT.Player(
             "youtube-player",
             {
-
-              videoId:
-                tracks[indexRef.current]?.id || tracks[0].id,
+              // Do not wait for the song catalogue here. The player is
+              // intentionally pre-warmed on the first visit so a user's
+              // first click can directly call loadVideoById/playVideo.
+              ...(tracksRef.current[0]?.id
+                ? { videoId: tracksRef.current[0].id }
+                : {}),
 
               playerVars: {
                 playsinline: 1,
@@ -3633,29 +3456,56 @@ function App() {
                 rel: 0,
                 iv_load_policy: 3,
                 modestbranding: 1,
-
                 origin:
-                  window.location
-                    .origin,
+                  window.location.origin,
               },
 
-
               events: {
+                onReady: (event) => {
+                  playerReadyRef.current = true;
+                  setReady(true);
 
-                onReady:
-                  (event) => {
-
-                    setReady(true);
+                  try {
+                    event.target.setVolume(volume);
 
                     if (volume > 0) {
-                      event.target.setVolume(volume);
                       event.target.unMute?.();
-                    } else {
-                      event.target.setVolume(0);
                     }
+                  } catch {
+                    // Ignore volume API timing failures.
+                  }
 
+                  const pending =
+                    pendingPlaybackRef.current;
+
+                  if (pending?.videoId) {
+                    pendingPlaybackRef.current = null;
+
+                    try {
+                      event.target.loadVideoById({
+                        videoId: pending.videoId,
+                        startSeconds: 0,
+                      });
+
+                      if (volume > 0) {
+                        event.target.unMute?.();
+                      }
+
+                      if (pending.autoplay) {
+                        event.target.playVideo?.();
+                      } else {
+                        event.target.pauseVideo?.();
+                      }
+                    } catch (playbackError) {
+                      console.warn(
+                        "ZUNO pending playback failed:",
+                        playbackError
+                      );
+                    }
+                  } else {
                     const restored =
                       playbackRestoreRef.current;
+
                     const activeTrack =
                       tracksRef.current[indexRef.current];
 
@@ -3664,170 +3514,195 @@ function App() {
                       restored.trackId === activeTrack?.id &&
                       restored.position > 0
                     ) {
-                      event.target.seekTo(
-                        restored.position,
-                        true
-                      );
+                      try {
+                        event.target.seekTo(
+                          restored.position,
+                          true
+                        );
+                      } catch {
+                        // Ignore restore timing failures.
+                      }
                     }
 
                     playbackRestoreRef.current = null;
+                  }
+                },
 
-                    if (autoplayIntentRef.current) {
-                      window.setTimeout(() => {
-                        try {
-                          if (playerRef.current === event.target) {
-                            if (volume > 0) {
-                              event.target.setVolume(volume);
-                              event.target.unMute?.();
-                            }
-                            event.target.playVideo();
-                          }
-                        } catch {}
-                      }, 60);
-                    }
-                  },
+                onStateChange: (event) => {
+                  const state = event.data;
 
-
-                onStateChange:
-                  (event) => {
-
-                    const state =
-                      event.data;
-
-                    setPlaying(
-                      state ===
-                        YT.PlayerState
-                          .PLAYING
-                    );
-
-                    if (
-                      state ===
+                  setPlaying(
+                    state ===
                       YT.PlayerState.PLAYING
-                    ) {
-                      playerErrorAttemptsRef.current = 0;
-                      playerErrorTrackRef.current =
-                        tracksRef.current[indexRef.current]?.id || "";
-                      if (playerRetryTimerRef.current) {
-                        clearTimeout(playerRetryTimerRef.current);
-                        playerRetryTimerRef.current = null;
-                      }
-                      setError("");
-                    }
+                  );
 
+                  if (
+                    state ===
+                    YT.PlayerState.PLAYING
+                  ) {
+                    playerErrorAttemptsRef.current = 0;
+                    setError("");
+                  }
 
-                    if (
-                      state ===
-                        YT.PlayerState
-                          .ENDED &&
-                      tracksRef.current
-                        .length
-                    ) {
+                  if (
+                    state ===
+                      YT.PlayerState.ENDED &&
+                    tracksRef.current.length
+                  ) {
+                    changeTrack(
+                      (
+                        indexRef.current + 1
+                      ) % tracksRef.current.length,
+                      true
+                    );
+                  }
+                },
 
-                      changeTrack(
-                        (
-                          indexRef.current +
-                          1
-                        ) %
-                          tracksRef.current
-                            .length,
+                onError: (event) => {
+                  const songs =
+                    tracksRef.current;
 
-                        true
-                      );
-                    }
+                  if (!songs.length) {
+                    return;
+                  }
 
-                  },
+                  const now = Date.now();
 
-                onError:
-                  (event) => {
-                    const songs = tracksRef.current;
-                    if (!songs.length) return;
+                  if (
+                    now - playerErrorSkipRef.current < 900
+                  ) {
+                    return;
+                  }
 
-                    const currentId = songs[indexRef.current]?.id || "";
-                    if (!currentId) return;
+                  playerErrorSkipRef.current = now;
+                  playerErrorAttemptsRef.current += 1;
 
-                    if (playerErrorTrackRef.current !== currentId) {
-                      playerErrorTrackRef.current = currentId;
-                      playerErrorAttemptsRef.current = 0;
-                    }
+                  /*
+                    Retry the current song once before treating a YouTube
+                    error as a permanently unavailable track. This protects
+                    against cold-start/network/player timing errors where
+                    the video is actually playable.
+                  */
+                  if (
+                    playerErrorAttemptsRef.current === 1
+                  ) {
+                    const currentTrack =
+                      songs[indexRef.current];
 
-                    playerErrorAttemptsRef.current += 1;
-                    const attempts = playerErrorAttemptsRef.current;
-                    const hardUnavailable = [2, 100, 101, 150].includes(event.data);
+                    if (currentTrack?.id) {
+                      setError("Song reconnect ho raha hai…");
 
-                    if (hardUnavailable || attempts >= 3) {
-                      if (playerRetryTimerRef.current) {
-                        clearTimeout(playerRetryTimerRef.current);
-                        playerRetryTimerRef.current = null;
-                      }
+                      pendingPlaybackRef.current = {
+                        videoId: currentTrack.id,
+                        autoplay: true,
+                      };
 
-                      const nextIndex =
-                        (indexRef.current + 1) % songs.length;
+                      setTimeout(() => {
+                        const player = playerRef.current;
 
-                      setError("Skipping unavailable song…");
-                      playerErrorTrackRef.current = songs[nextIndex]?.id || "";
-                      playerErrorAttemptsRef.current = 0;
+                        if (
+                          !player ||
+                          !playerReadyRef.current
+                        ) {
+                          return;
+                        }
 
-                      playerRetryTimerRef.current = window.setTimeout(() => {
-                        playerRetryTimerRef.current = null;
-                        changeTrack(nextIndex, true);
-                      }, 140);
+                        pendingPlaybackRef.current = null;
+
+                        try {
+                          player.setVolume(volume);
+
+                          if (volume > 0) {
+                            player.unMute?.();
+                          }
+
+                          player.loadVideoById({
+                            videoId: currentTrack.id,
+                            startSeconds: 0,
+                          });
+
+                          player.playVideo?.();
+                        } catch {
+                          // The next error event will move to the next track.
+                        }
+                      }, 350);
+
                       return;
                     }
+                  }
 
-                    setError("Trying to restore playback…");
+                  if (
+                    playerErrorAttemptsRef.current >= songs.length
+                  ) {
+                    setPlaying(false);
+                    setError(
+                      "Is playlist ke available songs finish ho gaye."
+                    );
+                    return;
+                  }
 
-                    if (playerRetryTimerRef.current) {
-                      clearTimeout(playerRetryTimerRef.current);
-                    }
+                  const nextIndex =
+                    (
+                      indexRef.current + 1
+                    ) % songs.length;
 
-                    const retryDelay = attempts === 1 ? 250 : 700;
-                    playerRetryTimerRef.current = window.setTimeout(() => {
-                      playerRetryTimerRef.current = null;
-                      const player = playerRef.current;
+                  setError(
+                    "Skipping unavailable song…"
+                  );
 
-                      if (!player || tracksRef.current[indexRef.current]?.id !== currentId) {
-                        return;
-                      }
+                  setTimeout(() => {
+                    changeTrack(
+                      nextIndex,
+                      true
+                    );
+                  }, 120);
+                },
 
-                      try {
-                        if (volume > 0) {
-                          player.setVolume(volume);
-                          player.unMute?.();
-                        }
-                        autoplayIntentRef.current = true;
-                        player.loadVideoById({
-                          videoId: currentId,
-                          startSeconds: 0,
-                        });
-                        player.playVideo();
-                      } catch (retryError) {
-                        console.warn("ZUNO playback retry failed:", retryError);
-                      }
-                    }, retryDelay);
-                  },
+                onAutoplayBlocked: () => {
+                  // This event is emitted by YouTube when browser autoplay
+                  // policy blocks an automatic start. Keep the requested song
+                  // pending so the next explicit play action starts it rather
+                  // than silently losing the request.
+                  const activeTrack =
+                    tracksRef.current[indexRef.current];
 
+                  if (activeTrack?.id) {
+                    pendingPlaybackRef.current = {
+                      videoId: activeTrack.id,
+                      autoplay: true,
+                    };
+                  }
+
+                  setPlaying(false);
+                  setError("Play dabao, song ready hai.");
+                },
               },
-
             }
           );
-
+      })
+      .catch((error) => {
+        console.error("YouTube API failed to initialize:", error);
+        setError("Music player load नहीं हो पाया. Please try again.");
       });
 
-
     return () => {
-
       cancelled = true;
+      clearInterval(interval);
 
-      clearInterval(
-        interval
-      );
+      playerReadyRef.current = false;
+      pendingPlaybackRef.current = null;
 
+      try {
+        playerRef.current?.destroy?.();
+      } catch {
+        // Ignore player cleanup failures.
+      }
+
+      playerRef.current = null;
+      setReady(false);
+      setPlaying(false);
     };
-
-  }, [
-    tracks.length,
-    user,
-  ]);
+  }, [user]);
 
 
   /* =======================================================
@@ -3836,23 +3711,51 @@ function App() {
 
   const togglePlay =
     () => {
-      if (!ready || !playerRef.current) return;
 
-      if (playing) {
-        autoplayIntentRef.current = false;
-        playerRef.current.pauseVideo();
+      const player = playerRef.current;
+
+      if (!player || !playerReadyRef.current) {
         return;
       }
 
-      autoplayIntentRef.current = true;
-      if (volume > 0) {
-        playerRef.current.setVolume(volume);
-        playerRef.current.unMute?.();
+      if (pendingPlaybackRef.current?.videoId) {
+        const pending = pendingPlaybackRef.current;
+        pendingPlaybackRef.current = null;
+
+        try {
+          player.setVolume(volume);
+
+          if (volume > 0) {
+            player.unMute?.();
+          }
+
+          player.loadVideoById({
+            videoId: pending.videoId,
+            startSeconds: 0,
+          });
+
+          player.playVideo?.();
+        } catch {
+          // Let YouTube's next state/error event handle recovery.
+        }
+
+        return;
       }
 
-      try {
-        playerRef.current.playVideo();
-      } catch {}
+
+      if (playing) {
+
+        playerRef.current
+          .pauseVideo();
+
+      }
+
+      else {
+
+        playerRef.current
+          .playVideo();
+
+      }
     };
 
 
@@ -4163,23 +4066,39 @@ function App() {
       );
 
 
-      setTimeout(
-        () => {
+      // Start immediately when the pre-warmed player is ready. If the first
+      // visit is still initializing YouTube, changeTrack-style pending
+      // playback is used instead of dropping the user's click.
+      pendingPlaybackRef.current = {
+        videoId: mapped[0].id,
+        autoplay: true,
+      };
 
-          if (
-            playerRef.current
-          ) {
+      const player = playerRef.current;
 
-            playerRef.current
-              .loadVideoById(
-                mapped[0].id
-              );
+      if (player && playerReadyRef.current) {
+        pendingPlaybackRef.current = null;
 
+        try {
+          player.setVolume(volume);
+
+          if (volume > 0) {
+            player.unMute?.();
           }
 
-        },
-        100
-      );
+          player.loadVideoById({
+            videoId: mapped[0].id,
+            startSeconds: 0,
+          });
+
+          player.playVideo?.();
+        } catch (playbackError) {
+          console.warn(
+            "ZUNO playlist playback failed:",
+            playbackError
+          );
+        }
+      }
     };
 
 
@@ -4269,20 +4188,37 @@ function App() {
           // Ignore storage failures.
         }
 
-        const startPlayback = () => {
-          const player = playerRef.current;
-          if (!player) return false;
-
-          player.loadVideoById({
-            videoId: mapped[0].id,
-            startSeconds: 0,
-          });
-
-          return true;
+        // The player is pre-warmed independently of the catalogue, so this
+        // can play immediately on a cold visit whenever the iframe is ready.
+        pendingPlaybackRef.current = {
+          videoId: mapped[0].id,
+          autoplay: true,
         };
 
-        if (!startPlayback()) {
-          setTimeout(startPlayback, 200);
+        const player = playerRef.current;
+
+        if (player && playerReadyRef.current) {
+          pendingPlaybackRef.current = null;
+
+          try {
+            player.setVolume(volume);
+
+            if (volume > 0) {
+              player.unMute?.();
+            }
+
+            player.loadVideoById({
+              videoId: mapped[0].id,
+              startSeconds: 0,
+            });
+
+            player.playVideo?.();
+          } catch (playbackError) {
+            console.warn(
+              "ZUNO recommended playback failed:",
+              playbackError
+            );
+          }
         }
 
       } catch (err) {
@@ -5567,8 +5503,8 @@ function App() {
             onPlayPlaylist={
               playPlaylist
             }
-            onLibraryChanged={() =>
-              refreshSongs(true)
+            onLibraryChanged={
+              refreshSongs
             }
             onClose={() =>
               setPlaylistOpen(
