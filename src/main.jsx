@@ -3,28 +3,6 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 
 /* =========================================================
-   GOOGLE SHEET
-   ========================================================= */
-
-const SHEET_ID =
-  "1Owb2596w3vp_JWOtKGkpiR94OUO73CMRYANDZbBKHYw";
-
-const SHEET_GID = "0";
-
-const SHEET_URL =
-  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${SHEET_GID}`;
-
-const SONG_CACHE_KEY =
-  "zuno_song_catalog_v1";
-
-const SONG_CACHE_TTL =
-  10 * 60 * 1000;
-
-const SONG_REFRESH_INTERVAL =
-  10 * 60 * 1000;
-
-
-/* =========================================================
    SUPABASE
    ========================================================= */
 
@@ -57,353 +35,94 @@ const AUTH_EMAIL_DOMAIN =
 const BACKGROUNDS = [
   {
     id: 1,
-    name: "गाँव",
-    value: "/assets/village-background.png",
+    name: "शाम की गली",
+    value: "/assets/bg1.png",
   },
-
   {
     id: 2,
     name: "सूरज ढलना",
-    value:
-      "https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=2400&q=90",
+    value: "/assets/bg2.png",
   },
-
   {
     id: 3,
-    name: "पहाड़",
-    value:
-      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2400&q=90",
+    name: "सूर्यनगर स्टेशन",
+    value: "/assets/bg3.png",
   },
-
   {
     id: 4,
-    name: "शहर",
-    value:
-      "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=2400&q=90",
+    name: "पहाड़ी घाटी",
+    value: "/assets/bg4.png",
+  },
+  {
+    id: 5,
+    name: "गाँव",
+    value: "/assets/bg5.png",
+  },
+  {
+    id: 6,
+    name: "रंगीन बाज़ार",
+    value: "/assets/bg6.png",
+  },
+  {
+    id: 7,
+    name: "पुरानी हवेली",
+    value: "/assets/bg7.png",
+  },
+  {
+    id: 8,
+    name: "शहर की शाम",
+    value: "/assets/bg8.png",
+  },
+  {
+    id: 9,
+    name: "देसी गली",
+    value: "/assets/bg9.png",
+  },
+  {
+    id: 10,
+    name: "सुनहरी शाम",
+    value: "/assets/bg10.png",
   },
 ];
 
-
 /* =========================================================
-   CSV PARSER
+   ZUNO — RECOMMENDED PLAYLISTS
+   Public curated playlists shown to every user.
+   YouTube Music links for the five curated playlists.
    ========================================================= */
+const RECOMMENDED_PLAYLISTS = [
+  {
+    id: "arijit-singh",
+    title: "Arijit Singh songs",
+    background: "/assets/bg8.png",
+    url: "https://music.youtube.com/playlist?list=RDCLAK5uy_lSaqe-XXsDL1jXiSYdfKKuWDU2vnU6uaE&playnext=1&si=KINii4VhVIA6Y9-p",
+  },
+  {
+    id: "punjabi-dance-hits",
+    title: "Punjabi Dance Hits",
+    background: "/assets/bg6.png",
+    url: "https://music.youtube.com/playlist?list=RDCLAK5uy_l1tvprsrxf2EDE9pHKetlLGn8yq7XSECo&playnext=1&si=xMsn_7tGzbH1_584",
+  },
+  {
+    id: "old-songs",
+    title: "Old Songs",
+    background: "/assets/bg4.png",
+    url: "https://music.youtube.com/playlist?list=OLAK5uy_mUHTqhykunmVYqcjnlr_Vr-C3SlsvA2L4&si=qh0DD7NoyVZMRXgZ",
+  },
+  {
+    id: "karan-aujla",
+    title: "Karan Aujla songs",
+    background: "/assets/bg10.png",
+    url: "https://music.youtube.com/playlist?list=RDCLAK5uy_lnJEMm7nZ6wPjGFPgDGWJoiz0dpUsgFQ8&playnext=1&si=SObjGwYSSBBgO_UG",
+  },
+  {
+    id: "night-retro-hindi",
+    title: "Night Retro: Hindi",
+    background: "/assets/bg5.png",
+    url: "https://music.youtube.com/playlist?list=RDCLAK5uy_m4cVudgAhYmFlK-tudPAijltqK9DaYAOs&playnext=1&si=cVYEWZpWfyTTJQV9",
+  },
+];
 
-function parseCSV(text) {
-  const rows = [];
-
-  let row = [];
-  let cell = "";
-  let insideQuotes = false;
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const next = text[i + 1];
-
-    if (
-      char === '"' &&
-      insideQuotes &&
-      next === '"'
-    ) {
-      cell += '"';
-      i++;
-    }
-
-    else if (char === '"') {
-      insideQuotes = !insideQuotes;
-    }
-
-    else if (
-      char === "," &&
-      !insideQuotes
-    ) {
-      row.push(cell.trim());
-      cell = "";
-    }
-
-    else if (
-      (char === "\n" || char === "\r") &&
-      !insideQuotes
-    ) {
-      if (
-        char === "\r" &&
-        next === "\n"
-      ) {
-        i++;
-      }
-
-      row.push(cell.trim());
-
-      if (
-        row.some(
-          (value) => value !== ""
-        )
-      ) {
-        rows.push(row);
-      }
-
-      row = [];
-      cell = "";
-    }
-
-    else {
-      cell += char;
-    }
-  }
-
-  if (cell || row.length) {
-    row.push(cell.trim());
-
-    if (
-      row.some(
-        (value) => value !== ""
-      )
-    ) {
-      rows.push(row);
-    }
-  }
-
-  return rows;
-}
-
-
-/* =========================================================
-   YOUTUBE ID
-   ========================================================= */
-
-function getYouTubeId(url) {
-  if (!url) return null;
-
-  try {
-    const parsed = new URL(url);
-
-    if (
-      parsed.hostname.includes("youtu.be")
-    ) {
-      return parsed.pathname.replace(
-        "/",
-        ""
-      );
-    }
-
-    if (
-      parsed.hostname.includes("youtube.com") ||
-      parsed.hostname.includes("music.youtube.com")
-    ) {
-      return parsed.searchParams.get("v");
-    }
-
-    return null;
-  }
-
-  catch {
-    return null;
-  }
-}
-
-
-/* =========================================================
-   LOAD GOOGLE SHEET SONGS
-   ========================================================= */
-
-function getCachedSongs() {
-  try {
-    const raw =
-      localStorage.getItem(
-        SONG_CACHE_KEY
-      );
-
-    if (!raw) return null;
-
-    const parsed =
-      JSON.parse(raw);
-
-    if (
-      !parsed ||
-      !Array.isArray(parsed.songs) ||
-      !parsed.savedAt
-    ) {
-      return null;
-    }
-
-    return parsed;
-  }
-
-  catch {
-    return null;
-  }
-}
-
-const INITIAL_CACHED_SONGS =
-  typeof window !== "undefined"
-    ? getCachedSongs()?.songs || []
-    : [];
-
-
-function saveCachedSongs(songs) {
-  try {
-    localStorage.setItem(
-      SONG_CACHE_KEY,
-      JSON.stringify({
-        savedAt: Date.now(),
-        songs,
-      })
-    );
-  }
-
-  catch {
-    // Cache is only an optimization.
-  }
-}
-
-function songsAreEqual(
-  first,
-  second
-) {
-  if (first === second) return true;
-
-  if (
-    !Array.isArray(first) ||
-    !Array.isArray(second) ||
-    first.length !== second.length
-  ) {
-    return false;
-  }
-
-  for (let i = 0; i < first.length; i++) {
-    if (
-      first[i]?.id !== second[i]?.id ||
-      first[i]?.title !== second[i]?.title ||
-      first[i]?.artist !== second[i]?.artist ||
-      first[i]?.url !== second[i]?.url
-    ) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-async function loadSongs(
-  options = {}
-) {
-  const { forceRefresh = false } =
-    options;
-
-  const cached =
-    getCachedSongs();
-
-  if (
-    !forceRefresh &&
-    cached &&
-    Date.now() - cached.savedAt <
-      SONG_CACHE_TTL
-  ) {
-    return cached.songs;
-  }
-
-  try {
-    const response = await fetch(
-      SHEET_URL,
-      {
-        cache: "default",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        "Google Sheet load failed"
-      );
-    }
-
-    const csv =
-      await response.text();
-
-    const rows =
-      parseCSV(csv);
-
-  if (rows.length < 2) {
-    return [];
-  }
-
-  const headers =
-    rows[0].map((header) =>
-      header.toLowerCase().trim()
-    );
-
-  const songIndex =
-    headers.indexOf("song name");
-
-  const artistIndex =
-    headers.indexOf("artist");
-
-  const urlIndex =
-    headers.indexOf("url");
-
-  if (
-    songIndex === -1 ||
-    artistIndex === -1 ||
-    urlIndex === -1
-  ) {
-    throw new Error(
-      "Sheet must contain Song Name, Artist and URL columns"
-    );
-  }
-
-    const songs =
-      rows
-        .slice(1)
-        .map((row) => {
-          const songName =
-            row[songIndex]?.trim();
-
-          const artist =
-            row[artistIndex]?.trim();
-
-          const url =
-            row[urlIndex]?.trim();
-
-          return {
-            id: getYouTubeId(url),
-
-            title:
-              songName ||
-              "अज्ञात गीत",
-
-            artist:
-              artist ||
-              "अज्ञात कलाकार",
-
-            url,
-          };
-        })
-
-        .filter(
-          (song) =>
-            song.id &&
-            song.title &&
-            song.artist
-        );
-
-    if (songs.length) {
-      saveCachedSongs(songs);
-    }
-
-    return songs;
-  }
-
-  catch (error) {
-    if (cached?.songs?.length) {
-      console.warn(
-        "Using cached ZUNO songs after a refresh failed.",
-        error
-      );
-
-      return cached.songs;
-    }
-
-    throw error;
-  }
-}
 
 
 /* =========================================================
@@ -1031,7 +750,7 @@ function ProfilePanel({
   ] = useState(
     Number(
       profile?.background_id
-    ) || 1
+    ) || 5
   );
 
   const [busy, setBusy] =
@@ -1268,6 +987,69 @@ function ProfilePanel({
 
 
 /* =========================================================
+   LOAD SONGS FROM THE LOGGED-IN USER'S PLAYLISTS
+   ========================================================= */
+
+async function loadUserSongs(
+  userId,
+  token
+) {
+  const playlists =
+    await getPlaylists(
+      userId,
+      token
+    );
+
+  if (!Array.isArray(playlists) || !playlists.length) {
+    return [];
+  }
+
+  const results =
+    await Promise.all(
+      playlists.map(async (playlist) => {
+        const songs =
+          await getPlaylistSongs(
+            playlist.id,
+            token
+          );
+
+        return Array.isArray(songs)
+          ? songs
+          : [];
+      })
+    );
+
+  const seen = new Set();
+  const tracks = [];
+
+  for (const songs of results) {
+    for (const song of songs) {
+      const id =
+        String(song?.youtube_id || "").trim();
+
+      if (!id || seen.has(id)) {
+        continue;
+      }
+
+      seen.add(id);
+
+      tracks.push({
+        id,
+        title:
+          song?.song_name ||
+          "Unknown song",
+        artist:
+          song?.artist ||
+          "Unknown artist",
+      });
+    }
+  }
+
+  return tracks;
+}
+
+
+/* =========================================================
    PLAYLIST PANEL
    ========================================================= */
 
@@ -1276,491 +1058,1330 @@ function PlaylistPanel({
   token,
   currentTrack,
   onPlayPlaylist,
+  onLibraryChanged,
   onClose,
 }) {
-  const [playlists, setPlaylists] =
-    useState([]);
+  const [playlists, setPlaylists] = useState([]);
+  const [newName, setNewName] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [songs, setSongs] = useState([]);
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [onlineUrl, setOnlineUrl] = useState("");
+  const [onlineMode, setOnlineMode] = useState("");
 
-  const [newName, setNewName] =
-    useState("");
-
-  const [selected, setSelected] =
-    useState(null);
-
-  const [songs, setSongs] =
-    useState([]);
-
-  const [message, setMessage] =
-    useState("");
-
-  const [busy, setBusy] =
-    useState(false);
-
-
-  const refresh =
-    async () => {
-      try {
-        const data =
-          await getPlaylists(
-            user.id,
-            token
-          );
-
-        setPlaylists(data);
-      }
-
-      catch (e) {
-        setMessage(
-          e.message ||
-            "Playlists load नहीं हुईं।"
-        );
-      }
-    };
-
+  const refresh = async () => {
+    try {
+      const data = await getPlaylists(user.id, token);
+      setPlaylists(data || []);
+    } catch (e) {
+      setMessage(e.message || "Playlists load नहीं हुईं।");
+    }
+  };
 
   useEffect(() => {
     refresh();
   }, []);
 
+  const create = async () => {
+    if (!newName.trim()) return;
 
-  const create =
-    async () => {
-      if (!newName.trim())
-        return;
+    setBusy(true);
+    setMessage("");
 
-      setBusy(true);
-      setMessage("");
+    try {
+      await createPlaylist(user.id, newName.trim(), token);
+      setNewName("");
+      await refresh();
+    } catch (e) {
+      setMessage(e.message || "Playlist create नहीं हुई।");
+    } finally {
+      setBusy(false);
+    }
+  };
 
-      try {
-        await createPlaylist(
+  const openPlaylist = async (playlist) => {
+    setSelected(playlist);
+    setMessage("");
+
+    try {
+      const data = await getPlaylistSongs(playlist.id, token);
+      setSongs(data || []);
+    } catch (e) {
+      setMessage(e.message || "Songs load नहीं हुए।");
+    }
+  };
+
+  const addCurrentSong = async () => {
+    if (!selected) {
+      setMessage("Pehle playlist select karo.");
+      return;
+    }
+
+    if (!currentTrack) {
+      setMessage("Abhi koi song selected नहीं है।");
+      return;
+    }
+
+    setBusy(true);
+    setMessage("");
+
+    try {
+      await addSongToPlaylist(
+        selected.id,
+        currentTrack,
+        songs.length,
+        token
+      );
+
+      const updated = await getPlaylistSongs(
+        selected.id,
+        token
+      );
+
+      setSongs(updated || []);
+      await onLibraryChanged?.();
+    } catch (e) {
+      setMessage(e.message || "Song add नहीं हुआ।");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const addOnlineSong = async () => {
+    if (!onlineUrl.trim()) {
+      setMessage("YouTube URL paste karo.");
+      return;
+    }
+
+    if (!selected) {
+      setMessage("Pehle playlist select karo.");
+      return;
+    }
+
+    setBusy(true);
+    setOnlineMode("song");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/youtube", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: onlineUrl.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Song resolve नहीं हुआ।"
+        );
+      }
+
+      const song = data?.songs?.[0];
+
+      if (!song?.id) {
+        throw new Error(
+          "Valid YouTube song नहीं मिला।"
+        );
+      }
+
+      await addSongToPlaylist(
+        selected.id,
+        {
+          id: song.id,
+          title: song.title || "Unknown song",
+          artist: song.artist || "Unknown artist",
+        },
+        songs.length,
+        token
+      );
+
+      const updated = await getPlaylistSongs(
+        selected.id,
+        token
+      );
+
+      setSongs(updated || []);
+      setOnlineUrl("");
+      await onLibraryChanged?.();
+      setMessage(`"${song.title}" added.`);
+    } catch (e) {
+      setMessage(e.message || "Song add नहीं हुआ।");
+    } finally {
+      setBusy(false);
+      setOnlineMode("");
+    }
+  };
+
+  const importOnlinePlaylist = async () => {
+    if (!onlineUrl.trim()) {
+      setMessage("YouTube playlist URL paste karo.");
+      return;
+    }
+
+    setBusy(true);
+    setOnlineMode("playlist");
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/youtube", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          url: onlineUrl.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Playlist import नहीं हुई।"
+        );
+      }
+
+      if (
+        data?.type !== "playlist" ||
+        !Array.isArray(data?.songs) ||
+        !data.songs.length
+      ) {
+        throw new Error(
+          "Ye valid public YouTube playlist नहीं है।"
+        );
+      }
+
+      let target = selected;
+
+      if (!target) {
+        const created = await createPlaylist(
           user.id,
-          newName.trim(),
+          data.title || "Imported Playlist",
           token
         );
 
-        setNewName("");
+        target = created?.[0];
 
         await refresh();
       }
 
-      catch (e) {
-        setMessage(
-          e.message ||
-            "Playlist create नहीं हुई।"
+      if (!target?.id) {
+        throw new Error(
+          "Target playlist create नहीं हो सकी।"
         );
       }
 
-      finally {
-        setBusy(false);
-      }
-    };
-
-
-  const openPlaylist =
-    async (playlist) => {
-      setSelected(
-        playlist
+      const existingSongs = await getPlaylistSongs(
+        target.id,
+        token
       );
 
-      setMessage("");
+      let position = existingSongs?.length || 0;
 
-      try {
-        const data =
-          await getPlaylistSongs(
-            playlist.id,
-            token
-          );
+      for (const song of data.songs) {
+        if (!song?.id) continue;
 
-        setSongs(data);
-      }
-
-      catch (e) {
-        setMessage(
-          e.message ||
-            "Songs load नहीं हुए।"
-        );
-      }
-    };
-
-
-  const addCurrentSong =
-    async () => {
-      if (
-        !selected ||
-        !currentTrack
-      ) {
-        return;
-      }
-
-      setBusy(true);
-      setMessage("");
-
-      try {
         await addSongToPlaylist(
-          selected.id,
-          currentTrack,
-          songs.length,
+          target.id,
+          {
+            id: song.id,
+            title: song.title || "Unknown song",
+            artist: song.artist || "Unknown artist",
+          },
+          position,
           token
         );
 
-        const updated =
-          await getPlaylistSongs(
-            selected.id,
-            token
-          );
-
-        setSongs(updated);
+        position += 1;
       }
 
-      catch (e) {
-        setMessage(
-          e.message ||
-            "Song add नहीं हुआ।"
+      setSelected(target);
+
+      const updated = await getPlaylistSongs(
+        target.id,
+        token
+      );
+
+      setSongs(updated || []);
+      setOnlineUrl("");
+      await onLibraryChanged?.();
+
+      setMessage(
+        `${data.songs.length} songs imported successfully.`
+      );
+
+      await refresh();
+    } catch (e) {
+      setMessage(
+        e.message || "Playlist import नहीं हुई।"
+      );
+    } finally {
+      setBusy(false);
+      setOnlineMode("");
+    }
+  };
+
+  const removeSong = async (song) => {
+    if (!song?.id || !selected) return;
+
+    const confirmed = window.confirm(
+      `Remove "${song.song_name}" from this playlist?`
+    );
+
+    if (!confirmed) return;
+
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const response = await supabaseRequest(
+        `/rest/v1/playlist_songs?id=eq.${encodeURIComponent(
+          song.id
+        )}`,
+        {
+          method: "DELETE",
+        },
+        token
+      );
+
+      void response;
+
+      const updated = await getPlaylistSongs(
+        selected.id,
+        token
+      );
+
+      setSongs(updated || []);
+      await onLibraryChanged?.();
+    } catch (e) {
+      setMessage(
+        e.message || "Song delete नहीं हुआ।"
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const removePlaylist = async (playlist) => {
+    const confirmed = window.confirm(
+      `Delete playlist "${playlist.name}"?`
+    );
+
+    if (!confirmed) return;
+
+    setBusy(true);
+    setMessage("");
+
+    try {
+      const playlistSongs = await getPlaylistSongs(
+        playlist.id,
+        token
+      );
+
+      for (const song of playlistSongs || []) {
+        await supabaseRequest(
+          `/rest/v1/playlist_songs?id=eq.${encodeURIComponent(
+            song.id
+          )}`,
+          {
+            method: "DELETE",
+          },
+          token
         );
       }
 
-      finally {
-        setBusy(false);
-      }
-    };
+      await supabaseRequest(
+        `/rest/v1/playlists?id=eq.${encodeURIComponent(
+          playlist.id
+        )}`,
+        {
+          method: "DELETE",
+        },
+        token
+      );
 
+      if (selected?.id === playlist.id) {
+        setSelected(null);
+        setSongs([]);
+      }
+
+      await refresh();
+      await onLibraryChanged?.();
+    } catch (e) {
+      setMessage(
+        e.message || "Playlist delete नहीं हुई।"
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
-    <div
-      style={
-        panelStyles.backdrop
-      }
-      onClick={onClose}
-    >
+    <>
+      <style>{`
+        /* =====================================================
+           ZUNO — MY PLAYLISTS
+           Quiet editorial UI. No dashboard-card treatment.
+           ===================================================== */
+
+        .site .scene > .zuno-my-overlay{
+          position:fixed !important;
+          inset:0 !important;
+          z-index:99999 !important;
+          width:100vw !important;
+          height:100vh !important;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          padding:24px;
+          box-sizing:border-box;
+          background:rgba(7,6,5,.66);
+          backdrop-filter:blur(16px) saturate(105%);
+          -webkit-backdrop-filter:blur(16px) saturate(105%);
+          animation:zunoMyFade .22s ease both;
+          font-family:"DM Sans",sans-serif !important;
+        }
+
+        .zuno-my-modal{
+          position:relative !important;
+          z-index:100000 !important;
+          width:min(940px,94vw);
+          max-height:88vh;
+          overflow:auto;
+          box-sizing:border-box;
+          padding:34px 36px 30px;
+          border:1px solid rgba(255,255,255,.13);
+          border-radius:20px;
+          background:rgba(15,13,12,.91);
+          color:#fff;
+          box-shadow:0 28px 90px rgba(0,0,0,.52);
+          scrollbar-width:thin;
+          scrollbar-color:rgba(255,255,255,.16) transparent;
+          font-family:"DM Sans",sans-serif !important;
+          animation:zunoMyEnter .28s cubic-bezier(.2,.8,.2,1) both;
+        }
+
+        .zuno-my-modal,
+        .zuno-my-modal button,
+        .zuno-my-modal input,
+        .zuno-my-modal textarea{
+          font-family:"DM Sans",sans-serif !important;
+        }
+
+        .zuno-my-modal::-webkit-scrollbar{width:5px}
+        .zuno-my-modal::-webkit-scrollbar-track{background:transparent}
+        .zuno-my-modal::-webkit-scrollbar-thumb{
+          background:rgba(255,255,255,.15);
+          border-radius:99px;
+        }
+
+        .zuno-my-head{
+          display:flex;
+          align-items:flex-start;
+          justify-content:space-between;
+          gap:20px;
+          padding-bottom:24px;
+          border-bottom:1px solid rgba(255,255,255,.09);
+        }
+
+        .zuno-my-kicker{
+          margin:0 0 8px;
+          color:rgba(255,255,255,.38);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:9px;
+          font-weight:700;
+          letter-spacing:2.2px;
+          text-transform:uppercase;
+        }
+
+        .zuno-my-title{
+          margin:0;
+          color:#fff;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:clamp(32px,4vw,42px);
+          line-height:1;
+          letter-spacing:-1.4px;
+          font-weight:700;
+        }
+
+        .zuno-my-sub{
+          margin:9px 0 0;
+          color:rgba(255,255,255,.58);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
+          line-height:1.5;
+        }
+
+        .zuno-my-close{
+          width:34px;
+          height:34px;
+          flex:0 0 auto;
+          display:grid;
+          place-items:center;
+          border:1px solid rgba(255,255,255,.13);
+          border-radius:50%;
+          background:transparent;
+          color:rgba(255,255,255,.72);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:18px;
+          line-height:1;
+          cursor:pointer;
+          transition:background .18s ease,color .18s ease,border-color .18s ease;
+        }
+
+        .zuno-my-close:hover{
+          background:rgba(255,255,255,.07);
+          color:#fff;
+          border-color:rgba(255,255,255,.24);
+        }
+
+        .zuno-my-layout{
+          display:grid;
+          grid-template-columns:260px minmax(0,1fr);
+          gap:38px;
+          align-items:start;
+          padding-top:26px;
+        }
+
+        .zuno-my-sidebar{
+          display:flex;
+          flex-direction:column;
+          gap:24px;
+        }
+
+        /* Remove the "three feature cards" look. These are now quiet
+           functional areas separated by hairlines. */
+        .zuno-my-create,
+        .zuno-my-import,
+        .zuno-my-action{
+          padding:0 0 20px;
+          border:0;
+          border-bottom:1px solid rgba(255,255,255,.08);
+          border-radius:0;
+          background:transparent;
+        }
+
+        .zuno-my-create-label,
+        .zuno-my-section-label{
+          margin:0 0 10px;
+          color:rgba(255,255,255,.62);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+          font-weight:700;
+          letter-spacing:1.8px;
+          text-transform:uppercase;
+        }
+
+        .zuno-my-create-row{
+          display:flex;
+          gap:7px;
+        }
+
+        .zuno-my-input{
+          min-width:0;
+          width:100%;
+          height:38px;
+          box-sizing:border-box;
+          border:1px solid rgba(255,255,255,.11);
+          border-radius:9px;
+          background:rgba(255,255,255,.045);
+          color:#fff;
+          outline:none;
+          padding:0 11px;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
+        }
+
+        .zuno-my-input::placeholder{
+          color:rgba(255,255,255,.48);
+        }
+
+        .zuno-my-input:focus{
+          border-color:rgba(255,255,255,.25);
+          box-shadow:none;
+          background:rgba(255,255,255,.06);
+        }
+
+        .zuno-my-create-btn{
+          flex:0 0 auto;
+          height:38px;
+          border:1px solid rgba(255,255,255,.14);
+          border-radius:9px;
+          padding:0 13px;
+          background:#f2f0ec;
+          color:#171513;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
+          font-weight:700;
+          cursor:pointer;
+        }
+
+        .zuno-my-create-btn:hover{
+          background:#fff;
+        }
+
+        .zuno-my-action-top{
+          display:flex;
+          align-items:center;
+          gap:10px;
+        }
+
+        .zuno-my-action-icon{
+          width:30px;
+          height:30px;
+          flex:0 0 auto;
+          display:grid;
+          place-items:center;
+          border:1px solid rgba(255,255,255,.12);
+          border-radius:8px;
+          background:rgba(255,255,255,.045);
+          color:rgba(255,255,255,.70);
+          font-size:12px;
+        }
+
+        .zuno-my-action-title{
+          color:rgba(255,255,255,.84);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
+          font-weight:700;
+        }
+
+        .zuno-my-action-copy{
+          margin-top:2px;
+          color:rgba(255,255,255,.52);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+          line-height:1.4;
+        }
+
+        .zuno-my-import-row{
+          display:flex;
+          gap:7px;
+          margin-top:10px;
+        }
+
+        .zuno-my-import-btn,
+        .zuno-my-add-btn{
+          width:100%;
+          margin-top:7px;
+          height:34px;
+          border:1px solid rgba(255,255,255,.10);
+          border-radius:8px;
+          padding:0 10px;
+          background:transparent;
+          color:rgba(255,255,255,.70);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:12px;
+          font-weight:600;
+          cursor:pointer;
+        }
+
+        .zuno-my-import-btn:hover,
+        .zuno-my-add-btn:hover{
+          background:rgba(255,255,255,.055);
+          color:#fff;
+        }
+
+        .zuno-my-hint{
+          color:rgba(255,255,255,.48) !important;
+          font-size:11px !important;
+          line-height:1.45;
+          margin-top:7px;
+          color:rgba(255,255,255,.27);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:8px;
+          line-height:1.45;
+        }
+
+        .zuno-my-list-head{
+          display:flex;
+          align-items:baseline;
+          justify-content:space-between;
+          gap:12px;
+          padding-bottom:9px;
+          border-bottom:1px solid rgba(255,255,255,.09);
+        }
+
+        .zuno-my-count{
+          color:rgba(255,255,255,.55);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+        }
+
+        .zuno-my-playlists{
+          display:block;
+        }
+
+        /* Actual playlist list: no fake album art, no colored gradients,
+           no rounded SaaS cards. Just a clean music-library row. */
+        .zuno-my-playlist{
+          position:relative;
+          display:grid;
+          grid-template-columns:42px minmax(0,1fr) auto;
+          align-items:center;
+          gap:13px;
+          width:100%;
+          min-height:70px;
+          padding:9px 0;
+          box-sizing:border-box;
+          border:0;
+          border-bottom:1px solid rgba(255,255,255,.075);
+          border-radius:0;
+          background:transparent;
+          color:#fff;
+          text-align:left;
+          cursor:pointer;
+          transition:background .18s ease,padding-left .18s ease;
+        }
+
+        .zuno-my-playlist:hover{
+          background:rgba(255,255,255,.025);
+          padding-left:7px;
+        }
+
+        .zuno-my-playlist.is-selected{
+          background:rgba(255,255,255,.035);
+          box-shadow:inset 2px 0 0 rgba(255,255,255,.72);
+          padding-left:7px;
+        }
+
+        .zuno-my-art{
+          width:42px;
+          height:42px;
+          overflow:hidden;
+          border:1px solid rgba(255,255,255,.10);
+          border-radius:8px;
+          display:grid;
+          place-items:center;
+          background:rgba(255,255,255,.055) !important;
+          color:rgba(255,255,255,.68);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:14px;
+          box-shadow:none;
+        }
+
+        .zuno-my-playlist-name{
+          min-width:0;
+          color:rgba(255,255,255,.96);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:14px;
+          font-weight:600;
+          line-height:1.35;
+          white-space:nowrap;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        }
+
+        .zuno-my-playlist-meta{
+          margin-top:3px;
+          color:rgba(255,255,255,.48);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+        }
+
+        .zuno-my-card-actions{
+          display:flex;
+          align-items:center;
+          gap:8px;
+        }
+
+        .zuno-my-play{
+          width:auto;
+          height:auto;
+          padding:5px 2px;
+          border:0;
+          border-radius:0;
+          background:transparent;
+          color:rgba(255,255,255,.58);
+          display:grid;
+          place-items:center;
+          cursor:pointer;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
+          transition:color .18s ease,transform .18s ease;
+        }
+
+        .zuno-my-play:hover{
+          transform:none;
+          background:transparent;
+          color:#fff;
+        }
+
+        .zuno-my-delete{
+          width:24px;
+          height:24px;
+          border:0;
+          background:transparent;
+          color:rgba(255,255,255,.22);
+          border-radius:0;
+          cursor:pointer;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
+        }
+
+        .zuno-my-delete:hover{
+          color:rgba(255,255,255,.70);
+          background:transparent;
+        }
+
+        .zuno-my-detail{
+          margin-top:18px;
+          padding:0;
+          border:0;
+          border-top:1px solid rgba(255,255,255,.09);
+          border-radius:0;
+          background:transparent;
+        }
+
+        .zuno-my-detail-head{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:10px;
+          padding:13px 0 8px;
+        }
+
+        .zuno-my-detail-title{
+          min-width:0;
+          color:rgba(255,255,255,.82);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+          font-weight:600;
+          overflow:hidden;
+          text-overflow:ellipsis;
+          white-space:nowrap;
+        }
+
+        .zuno-my-songs{
+          max-height:150px;
+          overflow:auto;
+          scrollbar-width:thin;
+        }
+
+        .zuno-my-song{
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:10px;
+          padding:7px 0;
+          border-bottom:1px solid rgba(255,255,255,.055);
+        }
+
+        .zuno-my-song:last-child{border-bottom:0}
+
+        .zuno-my-song-name{
+          min-width:0;
+          color:rgba(255,255,255,.88);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:14px;
+          white-space:nowrap;
+          overflow:hidden;
+          text-overflow:ellipsis;
+        }
+
+        .zuno-my-song-artist{
+          margin-top:2px;
+          color:rgba(255,255,255,.46);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:10px;
+        }
+
+        .zuno-my-song-remove{
+          border:0;
+          background:transparent;
+          color:rgba(255,255,255,.24);
+          cursor:pointer;
+          font-family:"DM Sans",sans-serif !important;
+          font-size:13px;
+        }
+
+        .zuno-my-empty{
+          padding:25px 10px;
+          text-align:center;
+          color:rgba(255,255,255,.52);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:12px;
+        }
+
+        .zuno-my-message{
+          margin-top:11px;
+          color:rgba(255,190,170,.78);
+          font-family:"DM Sans",sans-serif !important;
+          font-size:11px;
+          line-height:1.4;
+        }
+
+        @keyframes zunoMyFade{
+          from{opacity:0}
+          to{opacity:1}
+        }
+
+        @keyframes zunoMyEnter{
+          from{opacity:0;transform:translateY(9px)}
+          to{opacity:1;transform:translateY(0)}
+        }
+
+        @media(max-width:780px){
+          .zuno-my-overlay{
+            padding:12px;
+            align-items:flex-end;
+          }
+
+          .zuno-my-modal{
+            width:100%;
+            max-height:92vh;
+            padding:23px 18px 22px;
+            border-radius:18px 18px 0 0;
+          }
+
+          .zuno-my-layout{
+            grid-template-columns:1fr;
+            gap:25px;
+          }
+
+          .zuno-my-sidebar{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:18px;
+          }
+
+          .zuno-my-create{
+            grid-column:1/-1;
+          }
+
+          .zuno-my-import{
+            grid-column:1/-1;
+          }
+        }
+
+        @media(max-width:500px){
+          .zuno-my-modal{padding:20px 15px 18px}
+          .zuno-my-title{font-size:29px}
+          .zuno-my-sidebar{display:flex}
+          .zuno-my-playlist{
+            grid-template-columns:38px minmax(0,1fr) auto;
+            min-height:64px;
+          }
+          .zuno-my-art{
+            width:38px;
+            height:38px;
+          }
+        }
+
+        @media(prefers-reduced-motion:reduce){
+          .zuno-my-overlay,
+          .zuno-my-modal{
+            animation:none !important;
+          }
+          .zuno-my-action,
+          .zuno-my-playlist,
+          .zuno-my-play{
+            transition:none !important;
+          }
+        }
+      `}</style>
 
       <div
-        style={{
-          ...panelStyles.card,
-          maxWidth: 720,
-        }}
-        onClick={(e) =>
-          e.stopPropagation()
-        }
+        className="zuno-my-overlay"
+        onClick={onClose}
       >
-
         <div
-          style={
-            panelStyles.head
-          }
+          className="zuno-my-modal"
+          onClick={(e) => e.stopPropagation()}
         >
-
-          <div>
-
-            <div
-              style={
-                panelStyles.eyebrow
-              }
-            >
-              YOUR MUSIC
+          <div className="zuno-my-head">
+            <div>
+              <div className="zuno-my-kicker">YOUR MUSIC</div>
+              <h2 className="zuno-my-title">My Playlists</h2>
+              <p className="zuno-my-sub">
+                Create, manage and play your playlists.
+              </p>
             </div>
 
-            <h2
-              style={
-                panelStyles.title
-              }
+            <button
+              type="button"
+              className="zuno-my-close"
+              onClick={onClose}
+              aria-label="Close playlists"
             >
-              Playlists
-            </h2>
-
+              ×
+            </button>
           </div>
 
+          <div className="zuno-my-layout">
 
-          <button
-            type="button"
-            onClick={onClose}
-            style={
-              panelStyles.close
-            }
-          >
-            ×
-          </button>
+            <aside className="zuno-my-sidebar">
 
-        </div>
+              <div className="zuno-my-create">
+                <div className="zuno-my-create-label">CREATE</div>
 
-
-        <div
-          style={
-            panelStyles.createRow
-          }
-        >
-
-          <input
-            style={{
-              ...panelStyles.input,
-              margin: 0,
-            }}
-            placeholder="New playlist name"
-            value={newName}
-            onChange={(e) =>
-              setNewName(
-                e.target.value
-              )
-            }
-            onKeyDown={(e) => {
-              if (
-                e.key === "Enter"
-              ) {
-                create();
-              }
-            }}
-          />
-
-
-          <button
-            type="button"
-            onClick={create}
-            disabled={busy}
-            style={
-              panelStyles.save
-            }
-          >
-            Create
-          </button>
-
-        </div>
-
-
-        <div
-          style={
-            panelStyles.playlistGrid
-          }
-        >
-
-          <div>
-
-            <div
-              style={
-                panelStyles.sectionTitle
-              }
-            >
-              Your playlists
-            </div>
-
-
-            {playlists.length === 0 ? (
-
-              <div
-                style={
-                  panelStyles.empty
-                }
-              >
-                Abhi koi playlist nahi hai.
-              </div>
-
-            ) : (
-
-              playlists.map(
-                (playlist) => (
+                <div className="zuno-my-create-row">
+                  <input
+                    className="zuno-my-input"
+                    placeholder="New playlist name"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") create();
+                    }}
+                  />
 
                   <button
                     type="button"
-                    key={playlist.id}
-                    onClick={() =>
-                      openPlaylist(
-                        playlist
-                      )
-                    }
-                    style={{
-                      ...panelStyles.playlistItem,
-
-                      ...(selected?.id ===
-                      playlist.id
-                        ? panelStyles.playlistActive
-                        : {}),
-                    }}
+                    className="zuno-my-create-btn"
+                    onClick={create}
+                    disabled={busy}
                   >
-
-                    <span>
-                      ♫
-                    </span>
-
-                    <span>
-                      {playlist.name}
-                    </span>
-
+                    Create
                   </button>
-
-                )
-              )
-
-            )}
-
-          </div>
-
-
-          <div>
-
-            <div
-              style={
-                panelStyles.sectionTitle
-              }
-            >
-              {
-                selected
-                  ? selected.name
-                  : "Select a playlist"
-              }
-            </div>
-
-
-            {selected ? (
-
-              <>
-                <button
-                  type="button"
-                  onClick={
-                    addCurrentSong
-                  }
-                  disabled={busy}
-                  style={{
-                    ...panelStyles.addSong,
-                    opacity:
-                      busy ? 0.6 : 1,
-                  }}
-                >
-                  + Add current song
-                </button>
-
-
-                {songs.length ? (
-
-                  songs.map(
-                    (song) => (
-
-                      <div
-                        key={song.id}
-                        style={
-                          panelStyles.songItem
-                        }
-                      >
-
-                        <strong>
-                          {
-                            song.song_name
-                          }
-                        </strong>
-
-                        <small
-                          style={{
-                            display:
-                              "block",
-                            opacity:
-                              0.55,
-                            marginTop: 3,
-                          }}
-                        >
-                          {
-                            song.artist
-                          }
-                        </small>
-
-                      </div>
-
-                    )
-                  )
-
-                ) : (
-
-                  <div
-                    style={
-                      panelStyles.empty
-                    }
-                  >
-                    Playlist empty hai.
-                  </div>
-
-                )}
-
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    onPlayPlaylist(
-                      songs
-                    )
-                  }
-                  disabled={
-                    !songs.length
-                  }
-                  style={
-                    panelStyles.playPlaylist
-                  }
-                >
-                  ▶ Play this playlist
-                </button>
-
-              </>
-
-            ) : (
-
-              <div
-                style={
-                  panelStyles.empty
-                }
-              >
-                Left side se playlist choose karo.
+                </div>
               </div>
 
-            )}
+              <div className="zuno-my-import">
+                <div className="zuno-my-section-label">IMPORT</div>
 
+                <div className="zuno-my-action-top">
+                  <div className="zuno-my-action-icon">▶</div>
+                  <div>
+                    <div className="zuno-my-action-title">
+                      Import from YouTube
+                    </div>
+                    <div className="zuno-my-action-copy">
+                      Paste a YouTube playlist link
+                    </div>
+                  </div>
+                </div>
+
+                <div className="zuno-my-import-row" style={{marginTop:10}}>
+                  <input
+                    className="zuno-my-input"
+                    placeholder="YouTube / YouTube Music URL"
+                    value={onlineUrl}
+                    onChange={(e) => setOnlineUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") addOnlineSong();
+                    }}
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  className="zuno-my-import-btn"
+                  onClick={addOnlineSong}
+                  disabled={busy}
+                >
+                  {onlineMode === "song" ? "Adding…" : "+ Add song"}
+                </button>
+
+                <button
+                  type="button"
+                  className="zuno-my-import-btn"
+                  onClick={importOnlinePlaylist}
+                  disabled={busy}
+                >
+                  {onlineMode === "playlist" ? "Importing…" : "Import playlist"}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                className="zuno-my-action"
+                onClick={addCurrentSong}
+                disabled={busy || !selected || !currentTrack}
+              >
+                <div className="zuno-my-action-top">
+                  <div className="zuno-my-action-icon">♪</div>
+                  <div>
+                    <div className="zuno-my-action-title">Add current song</div>
+                    <div className="zuno-my-action-copy">
+                      Save the song currently playing
+                    </div>
+                  </div>
+                </div>
+              </button>
+
+              <div className="zuno-my-hint">
+                Select a playlist to manage its songs.
+              </div>
+            </aside>
+
+            <section>
+              <div className="zuno-my-list-head">
+                <div className="zuno-my-section-label" style={{margin:0}}>
+                  YOUR PLAYLISTS
+                </div>
+
+                <div className="zuno-my-count">
+                  {playlists.length} {playlists.length === 1 ? "playlist" : "playlists"}
+                </div>
+              </div>
+
+              {playlists.length === 0 ? (
+                <div className="zuno-my-empty">
+                  No playlists yet. Create your first one.
+                </div>
+              ) : (
+                <div className="zuno-my-playlists">
+                  {playlists.map((playlist, playlistIndex) => (
+                    <div
+                      key={playlist.id}
+                      className={`zuno-my-playlist ${
+                        selected?.id === playlist.id ? "is-selected" : ""
+                      }`}
+                      style={{
+                        "--art-one": [
+                          "#4a2c20",
+                          "#3a2948",
+                          "#21433f",
+                          "#493327",
+                          "#2e3650",
+                        ][playlistIndex % 5],
+                        "--art-two": [
+                          "#b06d3c",
+                          "#7661a6",
+                          "#4c887b",
+                          "#a25a38",
+                          "#6876a6",
+                        ][playlistIndex % 5],
+                      }}
+                      onClick={() => openPlaylist(playlist)}
+                    >
+                      <div className="zuno-my-art" aria-hidden="true">
+                        ♪
+                      </div>
+
+                      <div>
+                        <div className="zuno-my-playlist-name">
+                          {playlist.name}
+                        </div>
+                        <div className="zuno-my-playlist-meta">
+                          {selected?.id === playlist.id
+                            ? `${songs.length} ${songs.length === 1 ? "song" : "songs"}`
+                            : "Click to open"}
+                        </div>
+                      </div>
+
+                      <div className="zuno-my-card-actions">
+                        <button
+                          type="button"
+                          className="zuno-my-play"
+                          title="Play playlist"
+                          onClick={async (event) => {
+                            event.stopPropagation();
+
+                            try {
+                              const data = await getPlaylistSongs(
+                                playlist.id,
+                                token
+                              );
+
+                              if (data?.length) {
+                                onPlayPlaylist(data);
+                                onClose();
+                              } else {
+                                setMessage("Playlist empty hai.");
+                              }
+                            } catch (e) {
+                              setMessage(
+                                e.message || "Playlist play नहीं हुई।"
+                              );
+                            }
+                          }}
+                        >
+                          ▶
+                        </button>
+
+                        <button
+                          type="button"
+                          className="zuno-my-delete"
+                          title="Delete playlist"
+                          disabled={busy}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            removePlaylist(playlist);
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {selected && (
+                <div className="zuno-my-detail">
+                  <div className="zuno-my-detail-head">
+                    <div className="zuno-my-detail-title">
+                      {selected.name}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="zuno-my-play"
+                      onClick={() => {
+                        if (songs.length) {
+                          onPlayPlaylist(songs);
+                          onClose();
+                        }
+                      }}
+                      disabled={!songs.length}
+                      title="Play this playlist"
+                    >
+                      ▶
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="zuno-my-add-btn"
+                    onClick={addCurrentSong}
+                    disabled={busy || !currentTrack}
+                  >
+                    + Add current song
+                  </button>
+
+                  {songs.length ? (
+                    <div className="zuno-my-songs">
+                      {songs.map((song) => (
+                        <div key={song.id} className="zuno-my-song">
+                          <div style={{minWidth:0}}>
+                            <div className="zuno-my-song-name">
+                              {song.song_name}
+                            </div>
+                            <div className="zuno-my-song-artist">
+                              {song.artist}
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            className="zuno-my-song-remove"
+                            onClick={() => removeSong(song)}
+                            disabled={busy}
+                            title="Remove song"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="zuno-my-empty">
+                      This playlist is empty.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {message && (
+                <div className="zuno-my-message">
+                  {message}
+                </div>
+              )}
+            </section>
           </div>
-
         </div>
-
-
-        {message && (
-          <div
-            style={
-              panelStyles.error
-            }
-          >
-            {message}
-          </div>
-        )}
-
       </div>
-
-    </div>
+    </>
   );
 }
 
 
 /* =========================================================
+   TIME-BASED HERO TEXT
+   ========================================================= */
+
+function getTimePhrase() {
+  const hour = new Date().getHours();
+
+  if (hour >= 5 && hour < 12) {
+    return "की सुबह";
+  }
+
+  if (hour >= 12 && hour < 17) {
+    return "की दोपहर";
+  }
+
+  if (hour >= 17 && hour < 21) {
+    return "की शाम";
+  }
+
+  return "की रात";
+}
+
+function getFirstName(profile) {
+  const value =
+    profile?.display_name ||
+    profile?.username ||
+    "Priyam";
+
+  return String(value).trim().split(/\s+/)[0] || "Priyam";
+}
+
+/* =========================================================
    MAIN APP
    ========================================================= */
 
+function getStoredNumber(key, fallback) {
+  try {
+    const value = Number(localStorage.getItem(key));
+    return Number.isFinite(value) ? value : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function getStoredPlayback() {
+  try {
+    const raw = localStorage.getItem("pf_playback_state");
+    const parsed = raw ? JSON.parse(raw) : null;
+
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+
+    return {
+      trackId: String(parsed.trackId || ""),
+      position: Math.max(0, Number(parsed.position) || 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
 function App() {
 
-  const initialTracks =
-    INITIAL_CACHED_SONGS;
+  const [timePhrase, setTimePhrase] =
+    useState(getTimePhrase);
 
   const playerRef =
+    useRef(null);
+
+  const sceneRef =
     useRef(null);
 
   const indexRef =
     useRef(0);
 
   const tracksRef =
-    useRef(initialTracks);
+    useRef([]);
 
-  const songRefreshInFlightRef =
-    useRef(false);
-
-  const progressSnapshotRef =
-    useRef({
-      progress: null,
-      elapsed: "",
-      duration: "",
-    });
+  // Which source currently owns the player queue.
+  // "recommended" must never be overwritten by the background
+  // refresh of the user's personal playlists.
+  const playbackSourceRef =
+    useRef("library");
 
 
   const [tracks, setTracks] =
-    useState(initialTracks);
+    useState([]);
 
   const [index, setIndex] =
     useState(0);
@@ -1781,7 +2402,18 @@ function App() {
     useState("0:00");
 
   const [volume, setVolume] =
-    useState(80);
+    useState(() =>
+      Math.min(
+        100,
+        Math.max(
+          0,
+          getStoredNumber("pf_volume", 80)
+        )
+      )
+    );
+
+  const previousVolumeRef =
+    useRef(80);
 
   const [queueOpen, setQueueOpen] =
     useState(false);
@@ -1789,30 +2421,181 @@ function App() {
   const [liked, setLiked] =
     useState(false);
 
-  const [loading, setLoading] =
-    useState(
-      initialTracks.length === 0
-    );
-
   const [error, setError] =
     useState("");
+
+  const [queueFocusIndex, setQueueFocusIndex] =
+    useState(0);
+
+  const playbackRestoreRef =
+    useRef(getStoredPlayback());
+
+  const lastPlaybackSaveRef =
+    useRef(0);
+
+  const playerErrorSkipRef =
+    useRef(0);
+
+  const playerErrorAttemptsRef =
+    useRef(0);
+
+
+  /* =======================================================
+     BACKGROUND MOTION
+     - Very slow cinematic zoom
+     - Subtle mouse parallax on desktop
+     - No layout movement
+     ======================================================= */
+
+  useEffect(() => {
+    const scene = sceneRef.current;
+
+    if (!scene) {
+      return;
+    }
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+    const finePointer =
+      window.matchMedia(
+        "(hover: hover) and (pointer: fine)"
+      );
+
+    if (
+      reducedMotion.matches ||
+      !finePointer.matches
+    ) {
+      scene.style.setProperty(
+        "--parallax-x",
+        "0px"
+      );
+
+      scene.style.setProperty(
+        "--parallax-y",
+        "0px"
+      );
+
+      return;
+    }
+
+    let frame = null;
+
+    const handlePointerMove = (event) => {
+      const x =
+        ((event.clientX / window.innerWidth) - 0.5) * 10;
+
+      const y =
+        ((event.clientY / window.innerHeight) - 0.5) * 7;
+
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      frame = requestAnimationFrame(() => {
+        scene.style.setProperty(
+          "--parallax-x",
+          `${x.toFixed(2)}px`
+        );
+
+        scene.style.setProperty(
+          "--parallax-y",
+          `${y.toFixed(2)}px`
+        );
+      });
+    };
+
+    const resetPointer = () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      frame = requestAnimationFrame(() => {
+        scene.style.setProperty(
+          "--parallax-x",
+          "0px"
+        );
+
+        scene.style.setProperty(
+          "--parallax-y",
+          "0px"
+        );
+      });
+    };
+
+    window.addEventListener(
+      "pointermove",
+      handlePointerMove,
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "blur",
+      resetPointer
+    );
+
+    return () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+      }
+
+      window.removeEventListener(
+        "pointermove",
+        handlePointerMove
+      );
+
+      window.removeEventListener(
+        "blur",
+        resetPointer
+      );
+    };
+  }, []);
 
 
   /* AUTH */
 
-  const [
-    sessionLoading,
-    setSessionLoading,
-  ] = useState(true);
+  // Restore the last known account immediately so the main UI
+  // can render without showing a separate loading screen.
+  const getStoredUser = () => {
+    try {
+      return JSON.parse(
+        localStorage.getItem("pf_user") || "null"
+      );
+    } catch {
+      return null;
+    }
+  };
+
+  const storedUser = getStoredUser();
+
+  const storedToken =
+    localStorage.getItem("pf_access_token") || "";
+
+  const initialProfile = storedUser
+    ? {
+        id: storedUser.id,
+        username:
+          storedUser.user_metadata?.username ||
+          storedUser.email?.split("@")[0] ||
+          "user",
+        display_name:
+          storedUser.user_metadata?.display_name ||
+          storedUser.user_metadata?.username ||
+          "Priyam",
+        background_id: 5,
+      }
+    : null;
 
   const [user, setUser] =
-    useState(null);
+    useState(storedUser);
 
   const [token, setToken] =
-    useState("");
+    useState(storedToken);
 
   const [profile, setProfile] =
-    useState(null);
+    useState(initialProfile);
 
 
   /* PANELS */
@@ -1826,6 +2609,27 @@ function App() {
     playlistOpen,
     setPlaylistOpen,
   ] = useState(false);
+
+  const [
+    recommendedOpen,
+    setRecommendedOpen,
+  ] = useState(false);
+
+
+  useEffect(() => {
+    const updateTimePhrase = () => {
+      setTimePhrase(getTimePhrase());
+    };
+
+    updateTimePhrase();
+
+    const timer = setInterval(
+      updateTimePhrase,
+      60000
+    );
+
+    return () => clearInterval(timer);
+  }, []);
 
 
   /* =======================================================
@@ -1863,20 +2667,6 @@ function App() {
       accessToken
     ) => {
 
-      const metadata =
-        accountUser?.user_metadata || {};
-
-      const username =
-        metadata.username ||
-        accountUser?.email?.split("@")[0] ||
-        "user";
-
-      const authDisplayName =
-        String(
-          metadata.display_name ||
-          ""
-        ).trim();
-
       try {
 
         let existing =
@@ -1885,96 +2675,99 @@ function App() {
             accessToken
           );
 
+
         if (!existing) {
 
           const created =
             await saveProfile(
               {
-                id: accountUser.id,
-                username,
+                id:
+                  accountUser.id,
+
+                username:
+                  accountUser
+                    .user_metadata
+                    ?.username ||
+                  accountUser.email
+                    ?.split("@")[0] ||
+                  "user",
+
                 display_name:
-                  authDisplayName ||
-                  username,
-                background_id: 1,
+                  accountUser
+                    .user_metadata
+                    ?.display_name ||
+                  accountUser
+                    .user_metadata
+                    ?.username ||
+                  "Priyam",
+
+                background_id:
+                  5,
               },
               accessToken
             );
 
           existing =
-            created?.[0] || null;
+            created?.[0];
         }
 
-        /*
-          IMPORTANT:
-          Older profiles could contain the old hard-coded
-          fallback name "Priyam" / "Priyam Mishra".
-          If Supabase Auth has the real signup name, repair
-          that old value automatically.
 
-          A genuinely customized profile name is preserved.
-        */
-        const oldFallbackNames = [
-          "Priyam",
-          "Priyam Mishra",
-        ];
 
+        // Old background IDs belonged to the removed background set.
+        // Keep the new village (bg5) as the safe primary background.
         if (
           existing &&
-          authDisplayName &&
-          oldFallbackNames.includes(
-            String(existing.display_name || "").trim()
-          ) &&
-          authDisplayName !==
-            String(existing.display_name || "").trim()
+          Number(existing.background_id) >= 1 &&
+          Number(existing.background_id) <= 4
         ) {
           try {
-            const repaired =
-              await saveProfile(
-                {
-                  id: accountUser.id,
-                  username:
-                    existing.username ||
-                    username,
-                  display_name:
-                    authDisplayName,
-                  background_id:
-                    Number(existing.background_id) || 1,
-                },
-                accessToken
-              );
-
-            existing =
-              repaired?.[0] || {
-                ...existing,
-                display_name:
-                  authDisplayName,
-              };
-          }
-          catch (repairError) {
-            console.warn(
-              "Profile name repair failed; using Auth name locally.",
-              repairError
+            const migrated = await saveProfile(
+              {
+                id: accountUser.id,
+                username: existing.username,
+                display_name: existing.display_name,
+                background_id: 5,
+              },
+              accessToken
             );
 
+            existing = migrated?.[0] || {
+              ...existing,
+              background_id: 5,
+            };
+          } catch (migrationError) {
+            console.warn(
+              "Background migration failed:",
+              migrationError
+            );
             existing = {
               ...existing,
-              display_name:
-                authDisplayName,
+              background_id: 5,
             };
           }
         }
 
-        const finalProfile =
+        setProfile(
           existing || {
-            id: accountUser.id,
-            username,
-            display_name:
-              authDisplayName ||
-              username,
-            background_id: 1,
-          };
+            id:
+              accountUser.id,
 
-        setProfile(finalProfile);
+            username:
+              accountUser
+                .user_metadata
+                ?.username ||
+              "user",
+
+            display_name:
+              accountUser
+                .user_metadata
+                ?.display_name ||
+              "Priyam",
+
+            background_id:
+              5,
+          }
+        );
 
       }
 
@@ -1983,12 +2776,23 @@ function App() {
         console.error(e);
 
         setProfile({
-          id: accountUser.id,
-          username,
+          id:
+            accountUser.id,
+
+          username:
+            accountUser
+              .user_metadata
+              ?.username ||
+            "user",
+
           display_name:
-            authDisplayName ||
-            username,
-          background_id: 1,
+            accountUser
+              .user_metadata
+              ?.display_name ||
+            "Priyam",
+
+          background_id:
+            5,
         });
       }
     };
@@ -2131,12 +2935,7 @@ function App() {
           );
 
         }
-
-
-        setSessionLoading(
-          false
-        );
-      };
+};
 
 
     boot();
@@ -2170,6 +2969,7 @@ function App() {
 
       setProfileOpen(false);
       setPlaylistOpen(false);
+      setRecommendedOpen(false);
     };
 
 
@@ -2207,129 +3007,192 @@ function App() {
 
 
   /* =======================================================
-     LOAD SONGS
+     LOAD SONGS FROM THIS USER'S PLAYLISTS
      ======================================================= */
 
   const refreshSongs =
     async () => {
 
-      if (songRefreshInFlightRef.current) {
+      if (!user || !token) {
         return;
       }
 
-      songRefreshInFlightRef.current =
-        true;
-
       try {
-
         const songs =
-          await loadSongs();
+          await loadUserSongs(
+            user.id,
+            token
+          );
 
+        // A library refresh can finish after the user has already
+        // started a recommended playlist. Never let that stale async
+        // result replace the recommended queue or stop its player.
+        if (playbackSourceRef.current === "recommended") {
+          return;
+        }
+
+        /* Preserve the song that is currently playing when the
+           playlist is refreshed. The old code always forced index 0,
+           which made the player jump back to the first song after a
+           refresh even though another song was still playing. */
+        const currentSongId =
+          tracksRef.current?.[indexRef.current]?.id ||
+          null;
+
+        const preservedIndex =
+          currentSongId
+            ? songs.findIndex(
+                (song) => song.id === currentSongId
+              )
+            : -1;
+
+        const storedPlayback =
+          playbackRestoreRef.current ||
+          getStoredPlayback();
+
+        const restoredIndex =
+          storedPlayback?.trackId
+            ? songs.findIndex(
+                (song) => song.id === storedPlayback.trackId
+              )
+            : -1;
+
+        const safeIndex =
+          preservedIndex >= 0
+            ? preservedIndex
+            : restoredIndex >= 0
+              ? restoredIndex
+              : 0;
+
+        const hadCurrentSong =
+          Boolean(currentSongId) &&
+          preservedIndex >= 0;
+
+        tracksRef.current =
+          songs;
+
+        indexRef.current =
+          safeIndex;
+
+        setTracks(
+          songs
+        );
+
+        setIndex(
+          safeIndex
+        );
+
+        setQueueFocusIndex(safeIndex);
+
+        /* If the currently playing song still exists, do NOT reload
+           YouTube. This keeps playback and the visible song title in
+           sync. Only load a song when the old one disappeared. */
+        if (
+          !hadCurrentSong &&
+          songs.length &&
+          playerRef.current
+        ) {
+          playerRef.current.loadVideoById({
+            videoId: songs[safeIndex].id,
+            startSeconds:
+              restoredIndex === safeIndex && storedPlayback
+                ? storedPlayback.position
+                : 0,
+          });
+        }
 
         if (!songs.length) {
-
-          throw new Error(
-            "Google Sheet में कोई valid song नहीं मिला।"
-          );
-
+          // An empty playlist is a normal state for a new account.
+          // Keep the complete website UI visible and show the instruction
+          // only inside the video player area.
+          setError("");
+          playerRef.current?.stopVideo?.();
+        } else {
+          setError("");
         }
-
-
-        if (
-          !songsAreEqual(
-            tracksRef.current,
-            songs
-          )
-        ) {
-          tracksRef.current =
-            songs;
-
-          setTracks(
-            songs
-          );
-
-          if (
-            indexRef.current >=
-            songs.length
-          ) {
-            indexRef.current =
-              0;
-
-            setIndex(0);
-          }
-        }
-
-
-        setError("");
-        setLoading(false);
-
-      }
-
-      catch (err) {
-
+} catch (err) {
         console.error(err);
 
         setError(
-          "गीतों की सूची लोड नहीं हो सकी।"
+          err?.message ||
+          "Tumhari playlists se songs load nahi ho sake."
         );
-        setLoading(false);
-      }
-
-      finally {
-        songRefreshInFlightRef.current =
-          false;
-      }
+}
     };
 
 
   useEffect(() => {
 
-    if (!user)
+    if (!user || !token)
       return;
 
 
-    refreshSongs();
-
-    const handleVisibility =
+    /* Let the first ZUNO UI paint before fetching playlist data. */
+    const runInitialSongLoad =
       () => {
-        if (
-          document.visibilityState ===
-          "visible"
-        ) {
-          refreshSongs();
-        }
+        refreshSongs();
       };
 
-    document.addEventListener(
-      "visibilitychange",
-      handleVisibility
-    );
+
+    let cleanupInitialLoad;
+
+
+    if (
+      "requestIdleCallback" in window
+    ) {
+
+      const idleId =
+        window.requestIdleCallback(
+          runInitialSongLoad,
+          {
+            timeout: 1200,
+          }
+        );
+
+
+      cleanupInitialLoad =
+        () =>
+          window.cancelIdleCallback(
+            idleId
+          );
+
+    }
+
+    else {
+
+      const frameId =
+        window.requestAnimationFrame(
+          runInitialSongLoad
+        );
+
+
+      cleanupInitialLoad =
+        () =>
+          window.cancelAnimationFrame(
+            frameId
+          );
+
+    }
+
 
     const interval =
       setInterval(
-        () => {
-          if (
-            document.visibilityState ===
-            "visible"
-          ) {
-            refreshSongs();
-          }
-        },
-        SONG_REFRESH_INTERVAL
+        refreshSongs,
+        60000
       );
 
+
     return () => {
-      document.removeEventListener(
-        "visibilitychange",
-        handleVisibility
-      );
+
+      cleanupInitialLoad?.();
 
       clearInterval(
         interval
       );
+
     };
 
-  }, [user]);
+  }, [user, token]);
 
 
   /* =======================================================
@@ -2348,6 +3211,7 @@ function App() {
           setQueueOpen(false);
           setProfileOpen(false);
           setPlaylistOpen(false);
+          setRecommendedOpen(false);
 
         }
       };
@@ -2374,7 +3238,7 @@ function App() {
       queueOpen ||
       profileOpen ||
       playlistOpen ||
-      sessionLoading ||
+      recommendedOpen ||
       !user
         ? "hidden"
         : "";
@@ -2389,7 +3253,7 @@ function App() {
     queueOpen,
     profileOpen,
     playlistOpen,
-    sessionLoading,
+    recommendedOpen,
     user,
   ]);
 
@@ -2427,13 +3291,22 @@ function App() {
         safeIndex
       );
 
-      setLiked(false);
+      setQueueFocusIndex(safeIndex);
 
-      progressSnapshotRef.current = {
-        progress: 0,
-        elapsed: "0:00",
-        duration: "0:00",
-      };
+      try {
+        localStorage.setItem(
+          "pf_playback_state",
+          JSON.stringify({
+            trackId: songs[safeIndex].id,
+            position: 0,
+          })
+        );
+      } catch {
+        // Ignore storage failures. Playback should continue normally.
+      }
+
+      playbackRestoreRef.current = null;
+      setLiked(false);
 
       setProgress(0);
       setElapsed("0:00");
@@ -2489,13 +3362,6 @@ function App() {
       setInterval(
         () => {
 
-          if (
-            document.visibilityState !==
-            "visible"
-          ) {
-            return;
-          }
-
           const player =
             playerRef.current;
 
@@ -2515,69 +3381,55 @@ function App() {
             player.getCurrentTime() ||
             0;
 
-          const nextProgress =
+
+          setProgress(
             total
               ? (
                   current /
                   total
                 ) *
                 100
-              : 0;
+              : 0
+          );
 
-          const nextElapsed =
+
+          setElapsed(
             formatTime(
               current
-            );
+            )
+          );
 
-          const nextDuration =
+
+          setDuration(
             formatTime(
               total
-            );
+            )
+          );
 
-          const snapshot =
-            progressSnapshotRef.current;
+          // Persist the current song and position without hammering storage.
+          const now = Date.now();
+          if (now - lastPlaybackSaveRef.current >= 2000) {
+            const activeTrack =
+              tracksRef.current[indexRef.current];
 
-          if (
-            snapshot.progress === null ||
-            Math.abs(
-              snapshot.progress -
-              nextProgress
-            ) >= 0.15
-          ) {
-            snapshot.progress =
-              nextProgress;
-
-            setProgress(
-              nextProgress
-            );
-          }
-
-          if (
-            snapshot.elapsed !==
-            nextElapsed
-          ) {
-            snapshot.elapsed =
-              nextElapsed;
-
-            setElapsed(
-              nextElapsed
-            );
-          }
-
-          if (
-            snapshot.duration !==
-            nextDuration
-          ) {
-            snapshot.duration =
-              nextDuration;
-
-            setDuration(
-              nextDuration
-            );
+            if (activeTrack?.id) {
+              try {
+                localStorage.setItem(
+                  "pf_playback_state",
+                  JSON.stringify({
+                    trackId: activeTrack.id,
+                    position: current,
+                  })
+                );
+                lastPlaybackSaveRef.current = now;
+              } catch {
+                // Ignore storage failures.
+              }
+            }
           }
 
         },
-        1000
+        500
       );
 
 
@@ -2598,7 +3450,7 @@ function App() {
             {
 
               videoId:
-                tracks[0].id,
+                tracks[indexRef.current]?.id || tracks[0].id,
 
               playerVars: {
                 playsinline: 1,
@@ -2623,21 +3475,50 @@ function App() {
                     event.target.setVolume(
                       volume
                     );
+
+                    const restored =
+                      playbackRestoreRef.current;
+                    const activeTrack =
+                      tracksRef.current[indexRef.current];
+
+                    if (
+                      restored?.trackId &&
+                      restored.trackId === activeTrack?.id &&
+                      restored.position > 0
+                    ) {
+                      event.target.seekTo(
+                        restored.position,
+                        true
+                      );
+                    }
+
+                    playbackRestoreRef.current = null;
                   },
 
 
                 onStateChange:
                   (event) => {
 
+                    const state =
+                      event.data;
+
                     setPlaying(
-                      event.data ===
+                      state ===
                         YT.PlayerState
                           .PLAYING
                     );
 
+                    if (
+                      state ===
+                      YT.PlayerState.PLAYING
+                    ) {
+                      playerErrorAttemptsRef.current = 0;
+                      setError("");
+                    }
+
 
                     if (
-                      event.data ===
+                      state ===
                         YT.PlayerState
                           .ENDED &&
                       tracksRef.current
@@ -2655,6 +3536,75 @@ function App() {
                         true
                       );
                     }
+
+                  },
+
+                onError:
+                  (event) => {
+
+                    const songs =
+                      tracksRef.current;
+
+                    if (!songs.length) {
+                      return;
+                    }
+
+                    const now =
+                      Date.now();
+
+                    if (
+                      now -
+                        playerErrorSkipRef.current <
+                      900
+                    ) {
+                      return;
+                    }
+
+                    playerErrorSkipRef.current =
+                      now;
+
+                    playerErrorAttemptsRef.current += 1;
+
+                    /*
+                      Recommended YouTube Music mixes can contain
+                      videos that are unavailable, region blocked,
+                      age restricted, or not embeddable.
+
+                      Instead of letting the ZUNO player silently
+                      stop, automatically move to the next playable
+                      track.
+                    */
+                    if (
+                      playerErrorAttemptsRef.current >=
+                      songs.length
+                    ) {
+                      setPlaying(false);
+                      setError(
+                        "Is playlist ke available songs finish ho gaye."
+                      );
+                      return;
+                    }
+
+                    const nextIndex =
+                      (
+                        indexRef.current +
+                        1
+                      ) %
+                      songs.length;
+
+                    setError(
+                      "Skipping unavailable song…"
+                    );
+
+                    setTimeout(
+                      () => {
+                        changeTrack(
+                          nextIndex,
+                          true
+                        );
+                      },
+                      120
+                    );
 
                   },
 
@@ -2713,6 +3663,199 @@ function App() {
     };
 
 
+  /* =======================================================
+     KEYBOARD CONTROLS
+     Space = play / pause
+     Left / Right = previous / next song
+     Shift + Left / Right = seek 10 seconds
+     Up / Down = volume
+     M = mute / restore volume
+     0 = restart current song
+     F = open/focus playlists
+     P = open the queue
+     Queue open: Up / Down = select, Enter = play
+     Esc = already handled above for closing panels
+     ======================================================= */
+  useEffect(() => {
+    const handleKeyboard = (event) => {
+      const target = event.target;
+      const tagName = target?.tagName?.toLowerCase();
+
+      // Never hijack typing inside inputs, textareas, selects,
+      // or contenteditable elements.
+      if (
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select" ||
+        target?.isContentEditable
+      ) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+
+      if (event.key === " ") {
+        event.preventDefault();
+        togglePlay();
+        return;
+      }
+
+      // When the queue is open, arrow keys navigate the queue instead
+      // of changing the song immediately. Enter plays the highlighted one.
+      if (queueOpen) {
+        if (event.key === "ArrowUp" || event.key === "ArrowDown") {
+          event.preventDefault();
+
+          if (!tracksRef.current.length) return;
+
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          const next =
+            (queueFocusIndex + direction + tracksRef.current.length) %
+            tracksRef.current.length;
+
+          setQueueFocusIndex(next);
+          return;
+        }
+
+        if (event.key === "Enter") {
+          event.preventDefault();
+          if (tracksRef.current[queueFocusIndex]) {
+            changeTrack(queueFocusIndex, true);
+          }
+          return;
+        }
+      }
+
+      if (event.key === "ArrowLeft" && event.shiftKey) {
+        event.preventDefault();
+        if (ready && playerRef.current?.getCurrentTime) {
+          const current = playerRef.current.getCurrentTime() || 0;
+          playerRef.current.seekTo(Math.max(0, current - 10), true);
+        }
+        return;
+      }
+
+      if (event.key === "ArrowRight" && event.shiftKey) {
+        event.preventDefault();
+        if (ready && playerRef.current?.getCurrentTime) {
+          const current = playerRef.current.getCurrentTime() || 0;
+          const total = playerRef.current.getDuration() || 0;
+          playerRef.current.seekTo(
+            Math.min(total || Infinity, current + 10),
+            true
+          );
+        }
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        changeTrack(indexRef.current - 1);
+        return;
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        changeTrack(indexRef.current + 1);
+        return;
+      }
+
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+        const nextVolume = Math.min(100, volume + 5);
+        setVolume(nextVolume);
+        playerRef.current?.setVolume(nextVolume);
+        if (nextVolume > 0) {
+          previousVolumeRef.current = nextVolume;
+        }
+        try {
+          localStorage.setItem("pf_volume", String(nextVolume));
+        } catch {
+          // Ignore storage failures.
+        }
+        return;
+      }
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        const nextVolume = Math.max(0, volume - 5);
+        setVolume(nextVolume);
+        playerRef.current?.setVolume(nextVolume);
+        if (nextVolume > 0) {
+          previousVolumeRef.current = nextVolume;
+        }
+        try {
+          localStorage.setItem("pf_volume", String(nextVolume));
+        } catch {
+          // Ignore storage failures.
+        }
+        return;
+      }
+
+      if (key === "m") {
+        event.preventDefault();
+
+        if (volume > 0) {
+          previousVolumeRef.current = volume;
+          setVolume(0);
+          playerRef.current?.setVolume(0);
+          try {
+            localStorage.setItem("pf_volume", "0");
+          } catch {
+            // Ignore storage failures.
+          }
+        } else {
+          const restoredVolume =
+            previousVolumeRef.current > 0
+              ? previousVolumeRef.current
+              : 80;
+
+          setVolume(restoredVolume);
+          playerRef.current?.setVolume(restoredVolume);
+          try {
+            localStorage.setItem("pf_volume", String(restoredVolume));
+          } catch {
+            // Ignore storage failures.
+          }
+        }
+        return;
+      }
+
+      if (key === "0") {
+        event.preventDefault();
+        if (ready && playerRef.current?.seekTo) {
+          playerRef.current.seekTo(0, true);
+        }
+        return;
+      }
+
+      if (key === "f") {
+        event.preventDefault();
+        setRecommendedOpen(true);
+        return;
+      }
+
+      if (key === "p") {
+        event.preventDefault();
+        setQueueFocusIndex(indexRef.current);
+        setQueueOpen(true);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyboard);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyboard);
+    };
+  }, [
+    playing,
+    ready,
+    volume,
+    queueOpen,
+    queueFocusIndex,
+    tracks.length,
+  ]);
+
   const seek =
     (event) => {
 
@@ -2768,6 +3911,10 @@ function App() {
         return;
       }
 
+      // User explicitly chose a personal playlist, so the normal
+      // library refresh is allowed to own the queue again.
+      playbackSourceRef.current = "library";
+
 
       const mapped =
         songs.map(
@@ -2795,8 +3942,26 @@ function App() {
         0;
 
       setIndex(0);
+      setQueueFocusIndex(0);
+      playbackRestoreRef.current = null;
+
+      try {
+        localStorage.setItem(
+          "pf_playback_state",
+          JSON.stringify({
+            trackId: mapped[0].id,
+            position: 0,
+          })
+        );
+      } catch {
+        // Ignore storage failures.
+      }
 
       setPlaylistOpen(
+        false
+      );
+
+      setRecommendedOpen(
         false
       );
 
@@ -2826,38 +3991,217 @@ function App() {
 
 
   /* =======================================================
-     LOADING
+     PLAY RECOMMENDED PLAYLIST INSIDE ZUNO
      ======================================================= */
 
-  if (
-    sessionLoading
-  ) {
+  const playRecommendedPlaylist =
+    async (playlist) => {
 
-    return (
-      <div
-        style={
-          authStyles.page
-        }
-      >
+      if (!playlist?.url) return;
 
-        <div
-          style={
-            authStyles.loading
+      try {
+        setRecommendedOpen(false);
+        setQueueOpen(false);
+
+        const response = await fetch(
+          "/api/youtube",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url: playlist.url,
+            }),
           }
-        >
-          P's favourites
+        );
 
-          <br />
+        const data = await response.json();
 
-          <small>
-            आपकी music world तैयार हो रही है…
-          </small>
+        if (!response.ok) {
+          throw new Error(
+            data?.error ||
+            "Recommended playlist load नहीं हुई।"
+          );
+        }
 
-        </div>
+        if (
+          !Array.isArray(data?.songs) ||
+          !data.songs.length
+        ) {
+          throw new Error(
+            "Is playlist mein playable songs नहीं मिले।"
+          );
+        }
 
-      </div>
-    );
-  }
+        const mapped = data.songs
+          .filter((song) => song?.id)
+          .map((song) => ({
+            id: song.id,
+            title: song.title || "Unknown song",
+            artist: song.artist || "Unknown artist",
+          }));
+
+        if (!mapped.length) {
+          throw new Error(
+            "Is playlist mein playable songs नहीं मिले।"
+          );
+        }
+
+        // From this point onward the recommended playlist owns the
+        // player queue. Background library refreshes must leave it alone.
+        playbackSourceRef.current = "recommended";
+
+        tracksRef.current = mapped;
+        setTracks(mapped);
+        indexRef.current = 0;
+        setIndex(0);
+        setQueueFocusIndex(0);
+        playbackRestoreRef.current = null;
+        setLiked(false);
+        setProgress(0);
+        setElapsed("0:00");
+        setDuration("0:00");
+        setError("");
+
+        try {
+          localStorage.setItem(
+            "pf_playback_state",
+            JSON.stringify({
+              trackId: mapped[0].id,
+              position: 0,
+            })
+          );
+        } catch {
+          // Ignore storage failures.
+        }
+
+        const startPlayback = () => {
+          const player = playerRef.current;
+          if (!player) return false;
+
+          player.loadVideoById({
+            videoId: mapped[0].id,
+            startSeconds: 0,
+          });
+
+          return true;
+        };
+
+        if (!startPlayback()) {
+          setTimeout(startPlayback, 200);
+        }
+
+      } catch (err) {
+        console.error(err);
+        setError(
+          err?.message ||
+          "Recommended playlist play नहीं हो सकी।"
+        );
+      }
+    };
+
+
+  /* =======================================================
+     SAVE PLAYBACK STATE ON PAGE EXIT
+     ======================================================= */
+  useEffect(() => {
+    const savePlaybackState = () => {
+      const activeTrack = tracksRef.current[indexRef.current];
+      const player = playerRef.current;
+
+      if (!activeTrack?.id) return;
+
+      const position =
+        player?.getCurrentTime?.() ||
+        getStoredPlayback()?.position ||
+        0;
+
+      try {
+        localStorage.setItem(
+          "pf_playback_state",
+          JSON.stringify({
+            trackId: activeTrack.id,
+            position,
+          })
+        );
+      } catch {
+        // Ignore storage failures.
+      }
+    };
+
+    window.addEventListener("pagehide", savePlaybackState);
+    window.addEventListener("beforeunload", savePlaybackState);
+
+    return () => {
+      window.removeEventListener("pagehide", savePlaybackState);
+      window.removeEventListener("beforeunload", savePlaybackState);
+    };
+  }, []);
+
+
+  /* =======================================================
+     MEDIA SESSION
+     Lets Chromebook / headset media keys control ZUNO.
+     ======================================================= */
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    const mediaSession = navigator.mediaSession;
+
+    try {
+      const activeTrack = tracksRef.current[indexRef.current];
+
+      if (activeTrack) {
+        mediaSession.metadata = new MediaMetadata({
+          title: activeTrack.title || "ZUNO",
+          artist: activeTrack.artist || "ZUNO",
+          album: "P's favourites",
+        });
+      }
+
+      mediaSession.playbackState = playing ? "playing" : "paused";
+
+      mediaSession.setActionHandler("play", () => {
+        playerRef.current?.playVideo?.();
+      });
+
+      mediaSession.setActionHandler("pause", () => {
+        playerRef.current?.pauseVideo?.();
+      });
+
+      mediaSession.setActionHandler("previoustrack", () => {
+        changeTrack(indexRef.current - 1);
+      });
+
+      mediaSession.setActionHandler("nexttrack", () => {
+        changeTrack(indexRef.current + 1);
+      });
+
+      mediaSession.setActionHandler("seekbackward", (details) => {
+        const current = playerRef.current?.getCurrentTime?.() || 0;
+        const offset = details.seekOffset || 10;
+        playerRef.current?.seekTo?.(
+          Math.max(0, current - offset),
+          true
+        );
+      });
+
+      mediaSession.setActionHandler("seekforward", (details) => {
+        const current = playerRef.current?.getCurrentTime?.() || 0;
+        const total = playerRef.current?.getDuration?.() || 0;
+        const offset = details.seekOffset || 10;
+        playerRef.current?.seekTo?.(
+          Math.min(total || Infinity, current + offset),
+          true
+        );
+      });
+    } catch {
+      // Some browsers expose Media Session but not every action handler.
+    }
+  }, [playing, tracks.length, index]);
 
 
   /* =======================================================
@@ -2906,54 +4250,10 @@ function App() {
       (
         Number(
           profile.background_id
-        ) || 1
+        ) || 5
       ) - 1
     ] ||
-    BACKGROUNDS[0];
-
-
-  /* =======================================================
-     LOADING SONGS
-     ======================================================= */
-
-  if (loading) {
-
-    return (
-      <div
-        className="scene"
-        style={{
-          backgroundImage:
-            `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
-        }}
-      >
-
-        <div
-          style={{
-            minHeight:
-              "100vh",
-
-            display:
-              "flex",
-
-            alignItems:
-              "center",
-
-            justifyContent:
-              "center",
-
-            color:
-              "#f5dfb7",
-
-            fontSize:
-              18,
-          }}
-        >
-          गीतों की सूची तैयार हो रही है...
-        </div>
-
-      </div>
-    );
-  }
+    BACKGROUNDS[4];
 
 
   /* =======================================================
@@ -2965,8 +4265,9 @@ function App() {
     return (
       <div
         className="scene"
+        ref={sceneRef}
         style={{
-          backgroundImage:
+          "--scene-background":
             `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
         }}
       >
@@ -3012,77 +4313,611 @@ function App() {
 
     <div className="site">
 
+
+        {/* ANIMATION STYLES */}
+        <style>{`
+          .ambient-effects{
+            position:absolute;
+            inset:0;
+            z-index:0;
+            pointer-events:none;
+            overflow:hidden;
+          }
+
+          .ambient-glow{
+            position:absolute;
+            width:42vw;
+            height:42vw;
+            min-width:320px;
+            min-height:320px;
+            border-radius:50%;
+            filter:blur(70px);
+            opacity:.16;
+            mix-blend-mode:screen;
+            will-change:transform;
+          }
+
+          .ambient-glow-one{
+            top:-18%;
+            left:-12%;
+            background:radial-gradient(circle,rgba(255,196,116,.72) 0%,rgba(255,196,116,0) 68%);
+            animation:pfAmbientGlowOne 20s ease-in-out infinite alternate;
+          }
+
+          .ambient-glow-two{
+            right:-16%;
+            bottom:-20%;
+            background:radial-gradient(circle,rgba(132,183,255,.48) 0%,rgba(132,183,255,0) 68%);
+            animation:pfAmbientGlowTwo 24s ease-in-out infinite alternate;
+          }
+
+          .ambient-vignette{
+            position:absolute;
+            inset:0;
+            background:radial-gradient(circle at 50% 48%,transparent 34%,rgba(4,7,7,.18) 100%);
+          }
+
+          .ambient-particles{
+            position:absolute;
+            inset:0;
+          }
+
+          .ambient-particle{
+            position:absolute;
+            left:var(--particle-x);
+            top:var(--particle-y);
+            width:var(--particle-size);
+            height:var(--particle-size);
+            border-radius:50%;
+            background:rgba(255,235,196,.72);
+            box-shadow:0 0 10px rgba(255,220,164,.32);
+            opacity:0;
+            animation:pfParticleFloat var(--particle-duration) ease-in-out var(--particle-delay) infinite;
+          }
+
+          .music-visualizer{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:3px;
+            width:58px;
+            height:30px;
+            margin:0 2px;
+            opacity:.48;
+            transition:opacity .35s ease,transform .35s ease;
+            flex-shrink:0;
+          }
+
+          .music-visualizer.is-playing{
+            opacity:.95;
+            transform:translateY(-1px);
+          }
+
+          .music-visualizer.is-idle{
+            opacity:.24;
+          }
+
+          .visualizer-bar{
+            display:block;
+            width:3px;
+            height:var(--bar-height);
+            max-height:24px;
+            border-radius:999px;
+            background:currentColor;
+            transform:scaleY(.22);
+            transform-origin:center;
+            transition:transform .35s ease;
+          }
+
+          .music-visualizer.is-playing .visualizer-bar{
+            animation:pfVisualizer .72s ease-in-out var(--bar-delay) infinite alternate;
+          }
+
+          @keyframes pfAmbientGlowOne{
+            0%{transform:translate3d(-3%,0,0) scale(.96);}
+            50%{transform:translate3d(12%,9%,0) scale(1.08);}
+            100%{transform:translate3d(4%,18%,0) scale(1);}
+          }
+
+          @keyframes pfAmbientGlowTwo{
+            0%{transform:translate3d(4%,5%,0) scale(1);}
+            50%{transform:translate3d(-10%,-8%,0) scale(1.08);}
+            100%{transform:translate3d(-3%,-16%,0) scale(.96);}
+          }
+
+          @keyframes pfParticleFloat{
+            0%{
+              opacity:0;
+              transform:translate3d(0,12px,0) scale(.72);
+            }
+            18%{opacity:.28;}
+            50%{
+              opacity:.55;
+              transform:translate3d(12px,-24px,0) scale(1);
+            }
+            82%{opacity:.2;}
+            100%{
+              opacity:0;
+              transform:translate3d(-8px,-52px,0) scale(.65);
+            }
+          }
+
+          @keyframes pfVisualizer{
+            0%{transform:scaleY(.18);}
+            25%{transform:scaleY(.58);}
+            50%{transform:scaleY(1);}
+            75%{transform:scaleY(.42);}
+            100%{transform:scaleY(.82);}
+          }
+
+
+          .site .scene > *:not(.ambient-effects){
+            position:relative;
+            z-index:1;
+          }
+
+          @media (max-width:700px){
+            .ambient-glow{
+              filter:blur(55px);
+              opacity:.12;
+            }
+
+            .music-visualizer{
+              width:44px;
+              gap:2px;
+            }
+
+            .visualizer-bar{
+              width:2.5px;
+              max-height:20px;
+            }
+
+            .ambient-particle:nth-child(n+13){
+              display:none;
+            }
+          }
+
+          @media (prefers-reduced-motion:reduce){
+            .ambient-glow-one,
+            .ambient-glow-two,
+            .ambient-particle,
+            .music-visualizer.is-playing .visualizer-bar{
+              animation:none !important;
+            }
+
+            .ambient-particle{
+              opacity:.12;
+              transform:none;
+            }
+          }
+        `}</style>
+
       <div
         className="scene"
+        ref={sceneRef}
         style={{
-          backgroundImage:
+          "--scene-background":
             `linear-gradient(90deg,rgba(5,10,9,.22),rgba(5,8,8,.02) 48%,rgba(5,8,8,.14)),url(${bg.value})`,
         }}
       >
 
+        {/* AMBIENT BACKGROUND ANIMATION */}
+        <div className="ambient-effects" aria-hidden="true">
+          <div className="ambient-glow ambient-glow-one" />
+          <div className="ambient-glow ambient-glow-two" />
+          <div className="ambient-vignette" />
+          <div className="ambient-particles">
+            {Array.from({ length: 18 }).map((_, particleIndex) => (
+              <span
+                key={particleIndex}
+                className="ambient-particle"
+                style={{
+                  "--particle-x": `${6 + ((particleIndex * 37) % 88)}%`,
+                  "--particle-y": `${12 + ((particleIndex * 19) % 76)}%`,
+                  "--particle-delay": `${(particleIndex * 0.73) % 8}s`,
+                  "--particle-duration": `${8 + ((particleIndex * 1.7) % 7)}s`,
+                  "--particle-size": `${2 + (particleIndex % 3)}px`,
+                }}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* NAV */}
 
-        <header className="nav">
+        <style>{`
+          .zuno-nav{
+            position:relative !important;
+            z-index:20 !important;
+            display:flex !important;
+            align-items:center !important;
+            justify-content:space-between !important;
+            gap:24px !important;
+            width:100% !important;
+            box-sizing:border-box !important;
+            padding:18px 42px !important;
+          }
 
-          <div className="logo">
-            P's{" "}
-            <span>
-              favourites
-            </span>
-          </div>
+          .zuno-nav::after{
+            content:none !important;
+            display:none !important;
+          }
 
+          .zuno-nav-brand{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            color:#fff;
+            text-decoration:none;
+            font-family:"DM Sans",sans-serif !important;
+            letter-spacing:3px;
+            font-size:20px;
+            font-weight:900;
+            text-shadow:0 2px 18px rgba(0,0,0,.45);
+            transition:transform .35s ease,letter-spacing .35s ease,opacity .35s ease;
+          }
+
+          .zuno-nav-brand::after{
+            content:"";
+            position:absolute;
+            left:0;
+            bottom:-7px;
+            width:0;
+            height:2px;
+            border-radius:999px;
+            background:#fff;
+            box-shadow:0 0 12px rgba(255,255,255,.55);
+            transition:width .35s ease;
+          }
+
+          .zuno-nav-brand:hover{
+            transform:translateY(-1px);
+            letter-spacing:5px;
+          }
+
+          .zuno-nav-brand:hover::after{
+            width:100%;
+          }
+
+          .zuno-nav-actions{
+            display:flex;
+            align-items:center;
+            justify-content:flex-end;
+            gap:22px;
+            padding:0;
+            border:0;
+            border-radius:0;
+            background:transparent;
+            box-shadow:none;
+            backdrop-filter:none;
+            -webkit-backdrop-filter:none;
+          }
+
+          .zuno-nav-actions:hover{
+            background:transparent;
+            border-color:transparent;
+            transform:none;
+          }
+
+          .zuno-nav-action{
+            position:relative;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            font-family:"DM Sans",sans-serif !important;
+            min-height:36px;
+            padding:0;
+            border:0;
+            border-radius:0;
+            background:transparent;
+            color:rgba(255,255,255,.9);
+            cursor:pointer;
+            font-size:12px;
+            font-weight:800;
+            letter-spacing:.1px;
+            text-shadow:0 1px 10px rgba(0,0,0,.35);
+            transition:color .28s ease,opacity .28s ease,transform .28s ease;
+          }
+
+          .zuno-nav-action:hover{
+            background:transparent;
+            border-color:transparent;
+            color:#fff;
+            opacity:1;
+            transform:translateY(-1px);
+          }
+
+          .zuno-nav-action:active{
+            transform:translateY(0) scale(.97);
+          }
+
+          .zuno-playlist-trigger{
+            gap:7px;
+            border:0;
+            background:transparent;
+            box-shadow:none;
+            text-shadow:0 0 14px rgba(255,225,195,.18);
+          }
+
+          .zuno-playlist-trigger-dot{
+            width:6px;
+            height:6px;
+            border-radius:50%;
+            background:#fff;
+            box-shadow:0 0 7px rgba(255,244,225,.95),0 0 15px rgba(255,207,158,.55);
+            animation:zunoPlaylistDot 2.4s ease-in-out infinite;
+          }
+
+          .zuno-playlist-trigger:hover{
+            background:transparent;
+            border-color:transparent;
+            box-shadow:none;
+            text-shadow:0 0 18px rgba(255,225,195,.28);
+          }
+
+          @keyframes zunoPlaylistDot{
+            0%,100%{opacity:.62;transform:scale(.82)}
+            50%{opacity:1;transform:scale(1.16)}
+          }
+
+          .zuno-nav-count{
+            display:inline-flex;
+            align-items:center;
+            font-family:"DM Sans",sans-serif !important;
+            min-height:36px;
+            padding:0 15px;
+            border-left:0;
+            border-radius:0;
+            color:#fff;
+            font-size:12px;
+            font-weight:800;
+            white-space:nowrap;
+            text-shadow:0 1px 10px rgba(0,0,0,.4);
+          }
+
+          @media (max-width:700px){
+            .zuno-nav{
+              padding:14px 16px !important;
+            }
+
+            .zuno-nav::after{
+              display:none !important;
+            }
+
+            .zuno-nav-actions{
+              gap:12px;
+              padding:0;
+            }
+
+            .zuno-nav-action{
+              min-height:34px;
+              padding:0 9px;
+              font-size:11px;
+            }
+
+            .zuno-nav-count{
+              min-height:34px;
+              padding:0 9px;
+              font-size:11px;
+            }
+
+            .zuno-nav-brand{
+              font-size:17px;
+              letter-spacing:2.5px;
+            }
+          }
+
+          @media (max-width:470px){
+            .zuno-nav{
+              gap:8px !important;
+            }
+
+            .zuno-nav-count{
+              display:none;
+            }
+
+            .zuno-nav-actions{
+              margin-left:auto;
+            }
+          }
+        `}</style>
+
+        <style>{`
+          .zuno-recommended-overlay{
+            position:fixed !important; inset:0 !important; z-index:9999 !important;
+            display:flex; align-items:center; justify-content:center; padding:28px;
+            background:rgba(4,4,4,.62);
+            backdrop-filter:blur(18px) saturate(115%); -webkit-backdrop-filter:blur(18px) saturate(115%);
+            animation:zunoRecommendedFade .22s ease both;
+          }
+          .zuno-recommended-panel{
+            position:relative; width:min(1080px,94vw); max-height:min(760px,88vh); overflow:auto;
+            padding:28px; border:1px solid rgba(255,255,255,.18); border-radius:28px;
+            background:linear-gradient(145deg,rgba(24,20,17,.94),rgba(9,9,9,.88));
+            box-shadow:0 30px 100px rgba(0,0,0,.52),inset 0 1px 0 rgba(255,255,255,.08);
+            color:#fff; animation:zunoRecommendedEnter .3s cubic-bezier(.2,.75,.2,1) both;
+          }
+          .zuno-recommended-panel::before{
+            content:""; position:absolute; inset:-1px; border-radius:inherit; pointer-events:none;
+            background:linear-gradient(120deg,rgba(255,255,255,.08),transparent 30%,transparent 70%,rgba(255,220,185,.08));
+          }
+          .zuno-recommended-panel-head{
+            position:relative; display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:22px;
+          }
+          .zuno-recommended-panel-kicker{
+            margin:0 0 7px; color:rgba(255,255,255,.5); font-size:10px; font-weight:800; letter-spacing:2.4px; text-transform:uppercase;
+          }
+          .zuno-recommended-panel-title{
+            margin:0; font-family:"DM Sans",sans-serif; font-size:clamp(30px,4vw,44px); line-height:.98; letter-spacing:-1.5px; font-weight:800;
+            text-shadow:0 4px 25px rgba(0,0,0,.32);
+          }
+          .zuno-recommended-panel-sub{
+            margin:9px 0 0; max-width:600px; color:rgba(255,255,255,.58); font-size:12px; line-height:1.55;
+          }
+          .zuno-recommended-panel-close{
+            flex:0 0 auto; width:42px; height:42px; border:1px solid rgba(255,255,255,.14); border-radius:50%;
+            background:rgba(255,255,255,.06); color:#fff; font-size:23px; line-height:1; cursor:pointer;
+            transition:background .25s ease,border-color .25s ease,transform .25s ease;
+          }
+          .zuno-recommended-panel-close:hover{
+            background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.25); transform:rotate(4deg);
+          }
+          .zuno-recommended-panel-label{
+            position:relative; margin:0 0 12px; color:rgba(255,255,255,.62); font-size:10px; font-weight:800; letter-spacing:1.8px; text-transform:uppercase;
+          }
+          .zuno-recommended-grid{
+            position:relative; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px;
+          }
+          @keyframes zunoRecommendedFade{from{opacity:0}to{opacity:1}}
+          @keyframes zunoRecommendedEnter{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+          .zuno-recommended-card{
+            appearance:none;
+            -webkit-appearance:none;
+            position:relative;
+            min-height:138px;
+            border:1px solid rgba(255,255,255,.13);
+            border-radius:18px;
+            padding:0;
+            width:100%;
+            font:inherit;
+            text-align:left;
+            cursor:pointer;
+            overflow:hidden;
+            text-decoration:none;
+            color:#fff;
+            background:var(--playlist-bg) center/cover no-repeat;
+            box-shadow:0 16px 35px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.08);
+            transition:transform .28s ease,border-color .28s ease,box-shadow .28s ease;
+          }
+
+          .zuno-recommended-card::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:linear-gradient(
+              180deg,
+              rgba(0,0,0,.04) 0%,
+              rgba(0,0,0,.08) 38%,
+              rgba(0,0,0,.72) 100%
+            );
+            pointer-events:none;
+          }
+
+          .zuno-recommended-card:hover{
+            transform:translateY(-4px);
+            border-color:rgba(255,255,255,.28);
+            box-shadow:0 22px 42px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.12);
+          }
+
+          .zuno-recommended-card:active{
+            transform:translateY(-1px) scale(.99);
+          }
+
+          .zuno-recommended-card-inner{
+            position:relative;
+            z-index:1;
+            min-height:138px;
+            display:flex;
+            align-items:flex-end;
+            padding:16px 15px;
+          }
+
+          .zuno-recommended-card-inner h3{
+            margin:0;
+            max-width:100%;
+            color:#fff;
+            font-family:"DM Sans",sans-serif;
+            font-size:15px;
+            line-height:1.12;
+            font-weight:800;
+            letter-spacing:-.2px;
+            text-shadow:0 2px 12px rgba(0,0,0,.55);
+          }
+
+          .zuno-recommended-card:hover .zuno-recommended-open{
+            transform:translateY(0); opacity:1;
+          }
+          .zuno-recommended-open{
+            display:inline-flex; align-items:center; gap:4px; margin-top:13px;
+            color:rgba(255,255,255,.78); font-size:10px; font-weight:800;
+            letter-spacing:.8px; text-transform:uppercase;
+            transform:translateY(4px); opacity:.72;
+            transition:transform .25s ease,opacity .25s ease;
+          }
+          @media(max-width:900px){
+            .zuno-recommended-grid{display:flex;overflow-x:auto;gap:10px;padding-bottom:5px;scrollbar-width:none}
+            .zuno-recommended-grid::-webkit-scrollbar{display:none}
+            .zuno-recommended-card{flex:0 0 190px;min-height:138px}
+
+          }
+          @media(max-width:700px){
+            .zuno-recommended-trigger,.zuno-my-playlists-trigger{padding:0 9px !important;font-size:10px !important}
+          }
+          @media(max-width:600px){
+            .zuno-recommended-overlay{align-items:flex-end;padding:0}
+            .zuno-recommended-panel{width:100%;max-height:91vh;padding:20px 16px 24px;border-radius:26px 26px 0 0}
+            .zuno-recommended-panel-title{font-size:30px}
+            .zuno-recommended-panel-sub{font-size:11px}
+            .zuno-recommended-card{flex-basis:72vw;max-width:260px;min-height:150px}
+            .zuno-recommended-card-inner{min-height:150px;padding:17px}
+          }
+          @media(max-width:470px){
+            .zuno-recommended-trigger,.zuno-my-playlists-trigger{padding:0 6px !important;font-size:8.5px !important}
+          }
+          @media(prefers-reduced-motion:reduce){
+            .zuno-recommended-overlay,.zuno-recommended-panel,.zuno-playlist-trigger-dot{animation:none !important}
+          }
+        `}</style>
+
+        <header
+          className="nav zuno-nav"
+          style={{
+            background: "transparent",
+          }}
+        >
 
           <div
-            style={{
-              display:
-                "flex",
-
-              alignItems:
-                "center",
-
-              gap:
-                10,
-            }}
+            className="brand-mark zuno-nav-brand"
+            aria-label="ZUNO"
           >
+            <div className="brand-copy brand-zuno">
+              <strong>ZUNO</strong>
+            </div>
+          </div>
+
+          <div className="zuno-nav-actions">
 
             <button
               type="button"
-              onClick={() =>
-                setPlaylistOpen(
-                  true
-                )
-              }
-              style={
-                topButton
-              }
+              className="zuno-nav-action zuno-playlist-trigger zuno-recommended-trigger"
+              onClick={() => setRecommendedOpen(true)}
+              aria-haspopup="dialog"
+              aria-expanded={recommendedOpen}
             >
-              ♫ Playlists
+              <span className="zuno-playlist-trigger-dot" aria-hidden="true" />
+              ♫ Recommended
             </button>
 
+            <button
+              type="button"
+              className="zuno-nav-action zuno-my-playlists-trigger"
+              onClick={() => setPlaylistOpen(true)}
+            >
+              ♡ My Playlists
+            </button>
 
             <button
               type="button"
-              onClick={() =>
-                setProfileOpen(
-                  true
-                )
-              }
-              style={
-                topButton
-              }
+              className="zuno-nav-action"
+              onClick={() => setProfileOpen(true)}
             >
               Hi,{" "}
-              {
-                profile.display_name ||
-                profile.username
-              }
+              {profile.display_name || profile.username}
             </button>
 
-
-            <div className="badge">
-              मेरी पसंद ·{" "}
-              {tracks.length} गीत
+            <div className="zuno-nav-count">
+              मेरी पसंद · {tracks.length} गीत
             </div>
 
           </div>
@@ -3094,42 +4929,34 @@ function App() {
 
         <main className="layout">
 
-
-          {/* HERO */}
-
-          <section className="hero">
-
-            <div className="eyebrow">
-              मेरी पसंद · मेरी धुनें
-            </div>
-
-
+          {/* TIME-BASED HERO */}
+          <section className="hero greeting-hero" aria-label="Personal time greeting">
             <h1>
-              {
-                profile.display_name ||
-                profile.username
-              }
-
-              की
-
-              <br />
-
-              पसंद
+              <span className="hero-name">{getFirstName(profile)}</span>
+              <span className="hero-time">{timePhrase}</span>
             </h1>
-
-
-            <p>
-              हर गीत की अपनी एक कहानी होती है।
-              ये वही धुनें हैं जिन्हें मैं बार-बार
-              सुनना पसंद करता हूँ।
-            </p>
-
           </section>
+
+          {/* HIDDEN YOUTUBE HOST
+              The actual YouTube player remains mounted for audio playback,
+              while its visual video card is intentionally hidden. */}
+          <div id="youtube-player" className="youtube-player-hidden" aria-hidden="true" />
 
 
           {/* PLAYER */}
 
-          <section className="player-card">
+          <section
+            className={`player-card ${
+              playing ? "is-playing" : ""
+            }`}
+            onDoubleClick={(event) => {
+              if (event.target.closest("button, input")) {
+                return;
+              }
+              togglePlay();
+            }}
+            title="Double-click to play / pause"
+          >
 
             <div className="player-heading">
 
@@ -3144,37 +4971,13 @@ function App() {
             </div>
 
 
-            <div className="video-shell">
-
-              <div id="youtube-player" />
-
-            </div>
-
-
             <div className="now-row">
-
-              <div>
-
-                <div className="kicker">
-                  अभी बज रहा है
-                </div>
-
-
-                <div className="song-title">
-                  {
-                    currentTrack.title
-                  }
-                </div>
-
-
-                <div className="artist">
-                  {
-                    currentTrack.artist
-                  }
-                </div>
-
+              <div className="player-song-label">
+                {
+                  currentTrack?.title ||
+                  "अपनी पसंद से कोई गीत चुनें"
+                }
               </div>
-
 
               <button
                 type="button"
@@ -3183,11 +4986,12 @@ function App() {
                     ? "active"
                     : ""
                 }`}
-                onClick={() =>
-                  setLiked(
-                    !liked
-                  )
-                }
+                onClick={() => {
+                  if (currentTrack) {
+                    setLiked(!liked);
+                  }
+                }}
+                disabled={!currentTrack}
               >
                 {
                   liked
@@ -3195,7 +4999,6 @@ function App() {
                     : "♡"
                 }
               </button>
-
             </div>
 
 
@@ -3229,6 +5032,25 @@ function App() {
 
 
             <div className="controls">
+
+              {/* MUSIC-REACTIVE VISUALIZER */}
+              <div
+                className={`music-visualizer ${
+                  playing ? "is-playing" : ""
+                } ${!currentTrack ? "is-idle" : ""}`}
+                aria-hidden="true"
+              >
+                {Array.from({ length: 9 }).map((_, barIndex) => (
+                  <span
+                    key={barIndex}
+                    className="visualizer-bar"
+                    style={{
+                      "--bar-delay": `${barIndex * 0.08}s`,
+                      "--bar-height": `${8 + ((barIndex * 11) % 17)}px`,
+                    }}
+                  />
+                ))}
+              </div>
 
               <button
                 type="button"
@@ -3298,6 +5120,19 @@ function App() {
                     value
                   );
 
+                  if (value > 0) {
+                    previousVolumeRef.current = value;
+                  }
+
+                  try {
+                    localStorage.setItem(
+                      "pf_volume",
+                      String(value)
+                    );
+                  } catch {
+                    // Ignore storage failures.
+                  }
+
                   playerRef.current?.setVolume(
                     value
                   );
@@ -3308,11 +5143,10 @@ function App() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setQueueOpen(
-                    true
-                  )
-                }
+                onClick={() => {
+                  setQueueFocusIndex(indexRef.current);
+                  setQueueOpen(true);
+                }}
               >
                 आगे की सूची
               </button>
@@ -3326,6 +5160,7 @@ function App() {
             </div>
 
           </section>
+
 
         </main>
 
@@ -3390,6 +5225,14 @@ function App() {
                         ? "active"
                         : ""
                     }`}
+                    style={
+                      i === queueFocusIndex
+                        ? {
+                            outline: "1px solid rgba(255,255,255,.55)",
+                            outlineOffset: -1,
+                          }
+                        : undefined
+                    }
                     onClick={() =>
                       changeTrack(
                         i,
@@ -3458,6 +5301,66 @@ function App() {
         )}
 
 
+        {/* RECOMMENDED PLAYLISTS */}
+        {recommendedOpen && (
+          <div
+            className="zuno-recommended-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="zuno-recommended-panel-title"
+            onClick={(event) => {
+              if (event.target === event.currentTarget) {
+                setRecommendedOpen(false);
+              }
+            }}
+          >
+            <div
+              className="zuno-recommended-panel"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="zuno-recommended-panel-head">
+                <div>
+                  <p className="zuno-recommended-panel-kicker">ZUNO MUSIC</p>
+                  <h2 id="zuno-recommended-panel-title" className="zuno-recommended-panel-title">
+                    Recommended playlists.
+                  </h2>
+                  <p className="zuno-recommended-panel-sub">
+                    Ready-made playlists curated by ZUNO. Pick a mood and let the music take it from there.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="zuno-recommended-panel-close"
+                  onClick={() => setRecommendedOpen(false)}
+                  aria-label="Close recommended playlists"
+                >
+                  ×
+                </button>
+              </div>
+              <p className="zuno-recommended-panel-label">5 curated moods</p>
+              <div className="zuno-recommended-grid">
+                {RECOMMENDED_PLAYLISTS.map((playlist) => (
+                  <button
+                    key={playlist.id}
+                    type="button"
+                    className="zuno-recommended-card"
+                    onClick={() => playRecommendedPlaylist(playlist)}
+                    aria-label={`Play ${playlist.title} in ZUNO`}
+                    style={{
+                      "--playlist-bg": `linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.08)),url(${playlist.background})`,
+                    }}
+                  >
+                    <div className="zuno-recommended-card-inner">
+                      <h3>{playlist.title}</h3>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+
         {/* PLAYLISTS */}
 
         {playlistOpen && (
@@ -3471,6 +5374,9 @@ function App() {
             onPlayPlaylist={
               playPlaylist
             }
+            onLibraryChanged={
+              refreshSongs
+            }
             onClose={() =>
               setPlaylistOpen(
                 false
@@ -3482,21 +5388,6 @@ function App() {
 
       </div>
 
-
-      {/* FOOTER */}
-
-      <footer className="footer">
-
-        This website is owned by{" "}
-
-        <strong>
-          {
-            profile.display_name ||
-            profile.username
-          }
-        </strong>
-
-      </footer>
 
     </div>
   );
@@ -3558,10 +5449,10 @@ const authStyles = {
       20,
 
     background:
-      "radial-gradient(circle at 20% 10%,rgba(245,223,183,.18),transparent 30%),linear-gradient(135deg,#111,#25221d)",
+      "#000",
 
     color:
-      "#f5dfb7",
+      "#fff",
 
     fontFamily:
       '"DM Sans",sans-serif',
@@ -3583,7 +5474,7 @@ const authStyles = {
       26,
 
     background:
-      "rgba(255,255,255,.09)",
+      "rgba(8,8,8,.94)",
 
     backdropFilter:
       "blur(24px) saturate(140%)",
@@ -3614,7 +5505,7 @@ const authStyles = {
       "center",
 
     background:
-      "rgba(255,255,255,.13)",
+      "rgba(255,255,255,.08)",
 
     fontSize:
       22,
@@ -3687,7 +5578,7 @@ const authStyles = {
       14,
 
     background:
-      "rgba(0,0,0,.18)",
+      "rgba(255,255,255,.05)",
 
     marginBottom:
       18,
@@ -3725,7 +5616,7 @@ const authStyles = {
   activeTab: {
 
     background:
-      "rgba(255,255,255,.15)",
+      "rgba(255,255,255,.10)",
 
     color:
       "#fff",
@@ -3763,7 +5654,7 @@ const authStyles = {
       "none",
 
     background:
-      "rgba(255,255,255,.09)",
+      "rgba(255,255,255,.04)",
 
     color:
       "#fff",
@@ -3807,10 +5698,10 @@ const authStyles = {
       14,
 
     background:
-      "#f5dfb7",
+      "#fff",
 
     color:
-      "#171411",
+      "#000",
 
     fontWeight:
       800,
@@ -3876,13 +5767,13 @@ const panelStyles = {
       20,
 
     background:
-      "rgba(0,0,0,.38)",
+      "rgba(0,0,0,.46)",
 
     backdropFilter:
-      "blur(9px)",
+      "blur(12px)",
 
     WebkitBackdropFilter:
-      "blur(9px)",
+      "blur(12px)",
   },
 
 
@@ -3904,22 +5795,22 @@ const panelStyles = {
       22,
 
     border:
-      "1px solid rgba(255,255,255,.48)",
+      "1px solid rgba(255,255,255,.22)",
 
     background:
-      "rgba(247,239,221,.78)",
+      "rgba(18,18,18,.42)",
 
     color:
-      "#171411",
+      "#fff",
 
     backdropFilter:
-      "blur(26px) saturate(140%)",
+      "blur(24px) saturate(125%)",
 
     WebkitBackdropFilter:
-      "blur(26px) saturate(140%)",
+      "blur(24px) saturate(125%)",
 
     boxShadow:
-      "0 30px 90px rgba(0,0,0,.28)",
+      "0 30px 90px rgba(0,0,0,.42)",
   },
 
 
@@ -3948,7 +5839,7 @@ const panelStyles = {
       2,
 
     opacity:
-      0.5,
+      0.58,
 
     fontWeight:
       800,
@@ -3965,13 +5856,16 @@ const panelStyles = {
 
     fontSize:
       32,
+
+    color:
+      "#fff",
   },
 
 
   close: {
 
     border:
-      "1px solid rgba(20,20,20,.18)",
+      "1px solid rgba(255,255,255,.22)",
 
     width:
       38,
@@ -3983,10 +5877,10 @@ const panelStyles = {
       "50%",
 
     background:
-      "rgba(255,255,255,.25)",
+      "rgba(255,255,255,.10)",
 
     color:
-      "#111",
+      "#fff",
 
     cursor:
       "pointer",
@@ -4014,7 +5908,7 @@ const panelStyles = {
       "14px 0 6px",
 
     opacity:
-      0.65,
+      0.68,
   },
 
 
@@ -4027,10 +5921,13 @@ const panelStyles = {
       11,
 
     background:
-      "rgba(255,255,255,.35)",
+      "rgba(255,255,255,.09)",
 
     border:
-      "1px solid rgba(20,20,20,.08)",
+      "1px solid rgba(255,255,255,.13)",
+
+    color:
+      "#fff",
   },
 
 
@@ -4049,13 +5946,13 @@ const panelStyles = {
       11,
 
     border:
-      "1px solid rgba(20,20,20,.14)",
+      "1px solid rgba(255,255,255,.15)",
 
     background:
-      "rgba(255,255,255,.45)",
+      "rgba(255,255,255,.09)",
 
     color:
-      "#111",
+      "#fff",
 
     outline:
       "none",
@@ -4124,10 +6021,10 @@ const panelStyles = {
   bgActive: {
 
     borderColor:
-      "#111",
+      "rgba(255,255,255,.85)",
 
     boxShadow:
-      "0 0 0 2px rgba(255,255,255,.7) inset",
+      "0 0 0 2px rgba(255,255,255,.22) inset",
   },
 
 
@@ -4150,7 +6047,7 @@ const panelStyles = {
   logout: {
 
     border:
-      "1px solid rgba(150,30,20,.25)",
+      "1px solid rgba(255,255,255,.16)",
 
     borderRadius:
       11,
@@ -4159,10 +6056,10 @@ const panelStyles = {
       "11px 15px",
 
     background:
-      "rgba(180,50,40,.08)",
+      "rgba(255,255,255,.07)",
 
     color:
-      "#8a2e24",
+      "rgba(255,255,255,.86)",
 
     cursor:
       "pointer",
@@ -4184,10 +6081,10 @@ const panelStyles = {
       "11px 17px",
 
     background:
-      "#171411",
+      "rgba(255,255,255,.92)",
 
     color:
-      "#fff",
+      "#111",
 
     cursor:
       "pointer",
@@ -4238,7 +6135,7 @@ const panelStyles = {
       "uppercase",
 
     opacity:
-      0.55,
+      0.58,
 
     marginBottom:
       8,
@@ -4260,13 +6157,13 @@ const panelStyles = {
       "center",
 
     border:
-      "1px solid rgba(20,20,20,.1)",
+      "1px solid rgba(255,255,255,.12)",
 
     borderRadius:
       11,
 
     background:
-      "rgba(255,255,255,.3)",
+      "rgba(255,255,255,.08)",
 
     padding:
       "12px 13px",
@@ -4281,7 +6178,7 @@ const panelStyles = {
       "left",
 
     color:
-      "#111",
+      "#fff",
 
     fontWeight:
       700,
@@ -4291,10 +6188,10 @@ const panelStyles = {
   playlistActive: {
 
     background:
-      "rgba(20,20,20,.09)",
+      "rgba(255,255,255,.16)",
 
     borderColor:
-      "rgba(20,20,20,.3)",
+      "rgba(255,255,255,.32)",
   },
 
 
@@ -4304,7 +6201,7 @@ const panelStyles = {
       15,
 
     opacity:
-      0.55,
+      0.58,
 
     fontSize:
       13,
@@ -4320,7 +6217,7 @@ const panelStyles = {
       "100%",
 
     border:
-      "1px solid rgba(20,20,20,.16)",
+      "1px solid rgba(255,255,255,.14)",
 
     borderRadius:
       10,
@@ -4329,7 +6226,10 @@ const panelStyles = {
       11,
 
     background:
-      "rgba(255,255,255,.35)",
+      "rgba(255,255,255,.08)",
+
+    color:
+      "#fff",
 
     cursor:
       "pointer",
@@ -4348,7 +6248,10 @@ const panelStyles = {
       "9px 10px",
 
     borderBottom:
-      "1px solid rgba(20,20,20,.08)",
+      "1px solid rgba(255,255,255,.09)",
+
+    color:
+      "rgba(255,255,255,.92)",
   },
 
 
@@ -4370,10 +6273,10 @@ const panelStyles = {
       12,
 
     background:
-      "#171411",
+      "rgba(255,255,255,.92)",
 
     color:
-      "#fff",
+      "#111",
 
     cursor:
       "pointer",
@@ -4389,7 +6292,7 @@ const panelStyles = {
       12,
 
     color:
-      "#8a2e24",
+      "#ffb7aa",
 
     fontSize:
       12,
