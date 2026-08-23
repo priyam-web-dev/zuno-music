@@ -3377,11 +3377,29 @@ function App() {
 
   useEffect(() => {
 
-    if (!user) {
-      return;
-    }
-
     let cancelled = false;
+
+    // Create the YouTube host at App mount so the player can warm up before
+    // the user finishes logging in. This removes the first-click race.
+    let playerHost = document.getElementById("youtube-player");
+
+    if (!playerHost) {
+      playerHost = document.createElement("div");
+      playerHost.id = "youtube-player";
+      playerHost.setAttribute("aria-hidden", "true");
+      Object.assign(playerHost.style, {
+        position: "fixed",
+        width: "2px",
+        height: "2px",
+        left: "-20px",
+        top: "-20px",
+        opacity: "0",
+        pointerEvents: "none",
+        overflow: "hidden",
+        zIndex: "0",
+      });
+      document.body.appendChild(playerHost);
+    }
 
     const interval =
       setInterval(() => {
@@ -3692,7 +3710,7 @@ function App() {
                   }
 
                   setPlaying(false);
-                  setError("Play dabao, song ready hai.");
+                  setError("Music player ready hai. Play button dabao.");
                 },
               },
             }
@@ -3719,8 +3737,14 @@ function App() {
       playerRef.current = null;
       setReady(false);
       setPlaying(false);
+
+      try {
+        playerHost?.remove?.();
+      } catch {
+        // Ignore host cleanup failures.
+      }
     };
-  }, [user]);
+  }, []);
 
 
   /* =======================================================
@@ -5092,12 +5116,6 @@ function App() {
               <span className="hero-time">{timePhrase}</span>
             </h1>
           </section>
-
-          {/* HIDDEN YOUTUBE HOST
-              The actual YouTube player remains mounted for audio playback,
-              while its visual video card is intentionally hidden. */}
-          <div id="youtube-player" className="youtube-player-hidden" aria-hidden="true" />
-
 
           {/* PLAYER */}
 
