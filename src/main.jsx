@@ -5489,6 +5489,10 @@ function App() {
             className={`player-card zuno-player-shell ${
               playing ? "is-playing" : ""
             }`}
+            style={{
+              width:
+                "min(620px, calc(100vw - 32px))",
+            }}
             onDoubleClick={(event) => {
               if (event.target.closest("button, input")) {
                 return;
@@ -5511,8 +5515,35 @@ function App() {
             </div>
 
 
-            <div className="now-row">
-              <div className="player-song-label zuno-player-title">
+            <div
+              className="now-row"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                minWidth: 0,
+                gap: "12px",
+              }}
+            >
+              <div
+                className="player-song-label zuno-player-title"
+                style={{
+                  flex:
+                    "1 1 210px",
+                  width: "210px",
+                  minWidth: "190px",
+                  maxWidth: "250px",
+                  overflow: "hidden",
+                  textOverflow:
+                    "ellipsis",
+                  whiteSpace:
+                    "nowrap",
+                }}
+                title={
+                  currentTrack?.title ||
+                  "अपनी पसंद से कोई गीत चुनें"
+                }
+              >
                 {
                   currentTrack?.title ||
                   "अपनी पसंद से कोई गीत चुनें"
