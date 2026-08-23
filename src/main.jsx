@@ -2472,6 +2472,10 @@ function App() {
   const playerErrorAttemptsRef =
     useRef(0);
 
+  const playerErrorTrackRef = useRef("");
+  const playerRetryTimerRef = useRef(null);
+  const autoplayIntentRef = useRef(false);
+
 
   /* =======================================================
      BACKGROUND MOTION
@@ -3311,6 +3315,10 @@ function App() {
       clearInterval(
         interval
       );
+      if (playerRetryTimerRef.current) {
+        clearTimeout(playerRetryTimerRef.current);
+        playerRetryTimerRef.current = null;
+      }
 
       document.removeEventListener(
         "visibilitychange",
@@ -3442,25 +3450,45 @@ function App() {
       const player =
         playerRef.current;
 
-
       if (!player)
         return;
 
-
-      player.loadVideoById({
-        videoId:
-          songs[
-            safeIndex
-          ].id,
-
-        startSeconds: 0,
-      });
-
-
-      if (!autoplay) {
-        player.pauseVideo();
+      if (playerRetryTimerRef.current) {
+        clearTimeout(playerRetryTimerRef.current);
+        playerRetryTimerRef.current = null;
       }
 
+      const nextVideoId = songs[safeIndex]?.id;
+      if (!nextVideoId) return;
+
+      playerErrorTrackRef.current = nextVideoId;
+      playerErrorAttemptsRef.current = 0;
+      autoplayIntentRef.current = Boolean(autoplay);
+
+      try {
+        player.loadVideoById({
+          videoId: nextVideoId,
+          startSeconds: 0,
+        });
+
+        if (autoplay) {
+          window.setTimeout(() => {
+            try {
+              if (playerRef.current === player) {
+                if (volume > 0) {
+                  player.setVolume(volume);
+                  player.unMute?.();
+                }
+                player.playVideo();
+              }
+            } catch {}
+          }, 80);
+        } else {
+          player.pauseVideo();
+        }
+      } catch (loadError) {
+        console.warn("ZUNO playback load failed:", loadError);
+      }
 
       setQueueOpen(false);
     };
@@ -3619,9 +3647,12 @@ function App() {
 
                     setReady(true);
 
-                    event.target.setVolume(
-                      volume
-                    );
+                    if (volume > 0) {
+                      event.target.setVolume(volume);
+                      event.target.unMute?.();
+                    } else {
+                      event.target.setVolume(0);
+                    }
 
                     const restored =
                       playbackRestoreRef.current;
@@ -3640,6 +3671,20 @@ function App() {
                     }
 
                     playbackRestoreRef.current = null;
+
+                    if (autoplayIntentRef.current) {
+                      window.setTimeout(() => {
+                        try {
+                          if (playerRef.current === event.target) {
+                            if (volume > 0) {
+                              event.target.setVolume(volume);
+                              event.target.unMute?.();
+                            }
+                            event.target.playVideo();
+                          }
+                        } catch {}
+                      }, 60);
+                    }
                   },
 
 
@@ -3660,6 +3705,12 @@ function App() {
                       YT.PlayerState.PLAYING
                     ) {
                       playerErrorAttemptsRef.current = 0;
+                      playerErrorTrackRef.current =
+                        tracksRef.current[indexRef.current]?.id || "";
+                      if (playerRetryTimerRef.current) {
+                        clearTimeout(playerRetryTimerRef.current);
+                        playerRetryTimerRef.current = null;
+                      }
                       setError("");
                     }
 
@@ -3688,71 +3739,71 @@ function App() {
 
                 onError:
                   (event) => {
+                    const songs = tracksRef.current;
+                    if (!songs.length) return;
 
-                    const songs =
-                      tracksRef.current;
+                    const currentId = songs[indexRef.current]?.id || "";
+                    if (!currentId) return;
 
-                    if (!songs.length) {
-                      return;
+                    if (playerErrorTrackRef.current !== currentId) {
+                      playerErrorTrackRef.current = currentId;
+                      playerErrorAttemptsRef.current = 0;
                     }
-
-                    const now =
-                      Date.now();
-
-                    if (
-                      now -
-                        playerErrorSkipRef.current <
-                      900
-                    ) {
-                      return;
-                    }
-
-                    playerErrorSkipRef.current =
-                      now;
 
                     playerErrorAttemptsRef.current += 1;
+                    const attempts = playerErrorAttemptsRef.current;
+                    const hardUnavailable = [2, 100, 101, 150].includes(event.data);
 
-                    /*
-                      Recommended YouTube Music mixes can contain
-                      videos that are unavailable, region blocked,
-                      age restricted, or not embeddable.
+                    if (hardUnavailable || attempts >= 3) {
+                      if (playerRetryTimerRef.current) {
+                        clearTimeout(playerRetryTimerRef.current);
+                        playerRetryTimerRef.current = null;
+                      }
 
-                      Instead of letting the ZUNO player silently
-                      stop, automatically move to the next playable
-                      track.
-                    */
-                    if (
-                      playerErrorAttemptsRef.current >=
-                      songs.length
-                    ) {
-                      setPlaying(false);
-                      setError(
-                        "Is playlist ke available songs finish ho gaye."
-                      );
+                      const nextIndex =
+                        (indexRef.current + 1) % songs.length;
+
+                      setError("Skipping unavailable song…");
+                      playerErrorTrackRef.current = songs[nextIndex]?.id || "";
+                      playerErrorAttemptsRef.current = 0;
+
+                      playerRetryTimerRef.current = window.setTimeout(() => {
+                        playerRetryTimerRef.current = null;
+                        changeTrack(nextIndex, true);
+                      }, 140);
                       return;
                     }
 
-                    const nextIndex =
-                      (
-                        indexRef.current +
-                        1
-                      ) %
-                      songs.length;
+                    setError("Trying to restore playback…");
 
-                    setError(
-                      "Skipping unavailable song…"
-                    );
+                    if (playerRetryTimerRef.current) {
+                      clearTimeout(playerRetryTimerRef.current);
+                    }
 
-                    setTimeout(
-                      () => {
-                        changeTrack(
-                          nextIndex,
-                          true
-                        );
-                      },
-                      120
-                    );
+                    const retryDelay = attempts === 1 ? 250 : 700;
+                    playerRetryTimerRef.current = window.setTimeout(() => {
+                      playerRetryTimerRef.current = null;
+                      const player = playerRef.current;
 
+                      if (!player || tracksRef.current[indexRef.current]?.id !== currentId) {
+                        return;
+                      }
+
+                      try {
+                        if (volume > 0) {
+                          player.setVolume(volume);
+                          player.unMute?.();
+                        }
+                        autoplayIntentRef.current = true;
+                        player.loadVideoById({
+                          videoId: currentId,
+                          startSeconds: 0,
+                        });
+                        player.playVideo();
+                      } catch (retryError) {
+                        console.warn("ZUNO playback retry failed:", retryError);
+                      }
+                    }, retryDelay);
                   },
 
               },
@@ -3785,28 +3836,23 @@ function App() {
 
   const togglePlay =
     () => {
+      if (!ready || !playerRef.current) return;
 
-      if (
-        !ready ||
-        !playerRef.current
-      ) {
+      if (playing) {
+        autoplayIntentRef.current = false;
+        playerRef.current.pauseVideo();
         return;
       }
 
-
-      if (playing) {
-
-        playerRef.current
-          .pauseVideo();
-
+      autoplayIntentRef.current = true;
+      if (volume > 0) {
+        playerRef.current.setVolume(volume);
+        playerRef.current.unMute?.();
       }
 
-      else {
-
-        playerRef.current
-          .playVideo();
-
-      }
+      try {
+        playerRef.current.playVideo();
+      } catch {}
     };
 
 
