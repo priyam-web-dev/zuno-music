@@ -4815,19 +4815,17 @@ function App() {
           }
 
           .zuno-player-title{
-            transition:
-              opacity .25s ease,
-              transform .32s cubic-bezier(.22,1,.36,1);
-            display:block;
-            min-width:0;
-            max-width:330px;
+            flex:1 1 340px !important;
+            width:340px !important;
+            min-width:300px !important;
+            max-width:390px !important;
+            font-size:13px !important;
+            font-weight:600 !important;
+            color:rgba(255,255,255,.98) !important;
+            white-space:nowrap;
             overflow:hidden;
             text-overflow:ellipsis;
-            white-space:nowrap;
-            font-size:13px;
-            line-height:1.25;
-            font-weight:600;
-            color:rgba(255,255,255,.96);
+            text-align:left;
           }
 
           .zuno-clean-controls{
@@ -4924,7 +4922,8 @@ function App() {
           }
 
           .zuno-clean-controls{
-            gap:11px;
+            gap:10px;
+            flex:0 0 auto;
             flex-shrink:0;
           }
 
@@ -5004,8 +5003,10 @@ function App() {
 
           @media(max-width:700px){
             .zuno-player-title{
-              max-width:180px !important;
-              min-width:140px !important;
+              flex:1 1 150px !important;
+              width:150px !important;
+              max-width:190px !important;
+              min-width:125px !important;
               font-size:12px !important;
             }
 
