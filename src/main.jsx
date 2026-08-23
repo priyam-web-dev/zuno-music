@@ -4776,103 +4776,6 @@ function App() {
             }
           }
 
-
-          /* Clean functional player */
-          .zuno-song-title{
-            max-width:280px;
-            min-width:0;
-            font-size:13px;
-            line-height:1.2;
-            font-weight:600;
-            color:rgba(255,255,255,.96);
-            white-space:nowrap;
-            overflow:hidden;
-            text-overflow:ellipsis;
-            letter-spacing:-.1px;
-          }
-
-          .zuno-song-title.track-change{
-            animation:zunoTrackIn .35s cubic-bezier(.22,1,.36,1);
-          }
-
-          .favourite-control{
-            width:30px;
-            height:30px;
-            padding:0;
-            display:grid;
-            place-items:center;
-            border:0;
-            background:transparent;
-            color:rgba(255,255,255,.7);
-            font-size:20px;
-            line-height:1;
-            cursor:pointer;
-            transition:
-              color .2s ease,
-              transform .2s cubic-bezier(.22,1,.36,1),
-              background .2s ease;
-            border-radius:50%;
-          }
-
-          .favourite-control:hover{
-            color:#fff;
-            transform:scale(1.08);
-            background:rgba(255,255,255,.07);
-          }
-
-          .favourite-control:active{
-            transform:scale(.9);
-          }
-
-          .player-skip-button{
-            min-width:34px;
-            padding:4px 2px;
-            font-size:9px;
-            letter-spacing:-.15px;
-            opacity:.68;
-          }
-
-          .player-skip-button:hover{
-            color:#fff;
-            transform:translateY(-1px);
-            background:rgba(255,255,255,.07);
-          }
-
-          .player-skip-button:active{
-            transform:scale(.92);
-          }
-
-          .controls{
-            gap:10px;
-          }
-
-          .zuno-player-control{
-            min-width:28px;
-            min-height:28px;
-          }
-
-          @media(max-width:700px){
-            .zuno-song-title{
-              max-width:150px;
-              font-size:12px;
-            }
-
-            .controls{
-              gap:6px;
-            }
-
-            .player-skip-button{
-              min-width:29px;
-              font-size:8px;
-            }
-
-            .favourite-control{
-              width:27px;
-              height:27px;
-              font-size:18px;
-            }
-          }
-
           @media (prefers-reduced-motion:reduce){
             .ambient-glow-one,
             .ambient-glow-two,
@@ -4915,6 +4818,47 @@ function App() {
             transition:
               opacity .25s ease,
               transform .32s cubic-bezier(.22,1,.36,1);
+            display:block;
+            min-width:0;
+            max-width:330px;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            font-size:13px;
+            line-height:1.25;
+            font-weight:600;
+            color:rgba(255,255,255,.96);
+          }
+
+          .zuno-clean-controls{
+            gap:12px;
+          }
+
+          .player-skip-button{
+            border:0;
+            background:transparent;
+            color:rgba(255,255,255,.62);
+            font-family:"DM Sans",sans-serif;
+            cursor:pointer;
+            min-width:34px;
+            padding:5px 2px;
+            font-size:9px;
+            letter-spacing:-.1px;
+            transition:
+              color .2s ease,
+              background .2s ease,
+              transform .2s cubic-bezier(.22,1,.36,1);
+            border-radius:8px;
+          }
+
+          .player-skip-button:hover{
+            color:#fff;
+            background:rgba(255,255,255,.07);
+            transform:translateY(-1px);
+          }
+
+          .player-skip-button:active{
+            transform:scale(.92);
           }
 
           .zuno-play-button{
@@ -4966,21 +4910,9 @@ function App() {
           .zuno-player-shell .visualizer-bar{
             transform-origin:center bottom;
             will-change:height, transform;
-          }          .player-skip-button,
-          .volume-toggle{
-            border:0;
-            background:transparent;
-            color:rgba(255,255,255,.68);
-            font-family:"DM Sans",sans-serif;
-            cursor:pointer;
-            transition:
-              color .2s ease,
-              opacity .2s ease,
-              transform .2s cubic-bezier(.22,1,.36,1),
-              background .2s ease;
           }
 
-.player-skip-button{
+          .player-skip-button{
             min-width:34px;
             padding:5px 3px;
             font-size:9px;
@@ -5010,21 +4942,20 @@ function App() {
           .volume-toggle:active{
             transform:scale(.92);
           }
-@media(max-width:700px){
-            .player-mode-button{
-              width:27px;
-              height:27px;
-              font-size:13px;
+
+          @media(max-width:700px){
+            .zuno-player-title{
+              max-width:180px;
+              font-size:12px;
+            }
+
+            .zuno-clean-controls{
+              gap:7px;
             }
 
             .player-skip-button{
-              min-width:30px;
+              min-width:29px;
               font-size:8px;
-            }
-
-            .player-extra-row{
-              gap:9px;
-              font-size:7px;
             }
           }
 
@@ -5640,44 +5571,7 @@ function App() {
             </div>
 
 
-            <div className="controls">
-
-              <button
-                type="button"
-                className="control favourite-control"
-                onClick={toggleFavourite}
-                aria-label={
-                  currentTrack &&
-                  favourites.some(
-                    (item) =>
-                      item.id ===
-                      currentTrack.id
-                  )
-                    ? "Remove from favourites"
-                    : "Add to favourites"
-                }
-                title={
-                  currentTrack &&
-                  favourites.some(
-                    (item) =>
-                      item.id ===
-                      currentTrack.id
-                  )
-                    ? "Remove favourite"
-                    : "Add to favourites"
-                }
-              >
-                {
-                  currentTrack &&
-                  favourites.some(
-                    (item) =>
-                      item.id ===
-                      currentTrack.id
-                  )
-                    ? "♥"
-                    : "♡"
-                }
-              </button>
+            <div className="controls zuno-clean-controls">
 
               <button
                 type="button"
@@ -5707,22 +5601,10 @@ function App() {
                 type="button"
                 className="control play zuno-play-button"
                 onClick={togglePlay}
-                aria-label={
-                  playing
-                    ? "Pause"
-                    : "Play"
-                }
-                title={
-                  playing
-                    ? "Pause"
-                    : "Play"
-                }
+                aria-label={playing ? "Pause" : "Play"}
+                title={playing ? "Pause" : "Play"}
               >
-                {
-                  playing
-                    ? "Ⅱ"
-                    : "▶"
-                }
+                {playing ? "Ⅱ" : "▶"}
               </button>
 
               <button
@@ -5831,7 +5713,8 @@ function App() {
               </button>
 
             </div>
-<div className="note">
+
+            <div className="note">
               संगीत YouTube के आधिकारिक
               प्लेयर के माध्यम से चल रहा है।
             </div>
