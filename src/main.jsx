@@ -5093,6 +5093,57 @@ function App() {
             }
           }
 
+
+          /* =====================================================
+             FINAL PLAYER TITLE FIX
+             Keep the existing ZUNO player design.
+             Give the song title a real, readable area.
+             ===================================================== */
+
+          .player-card.zuno-player-shell{
+            width:min(760px, calc(100vw - 32px)) !important;
+          }
+
+          .player-card.zuno-player-shell .now-row{
+            display:grid !important;
+            grid-template-columns:minmax(0, 1fr) auto !important;
+            align-items:center !important;
+            column-gap:14px !important;
+            width:100% !important;
+            min-width:0 !important;
+          }
+
+          .player-card.zuno-player-shell .zuno-player-title,
+          .player-card.zuno-player-shell .player-song-label{
+            display:block !important;
+            flex:none !important;
+            width:auto !important;
+            min-width:0 !important;
+            max-width:none !important;
+            font-size:13px !important;
+            font-weight:600 !important;
+            color:rgba(255,255,255,.98) !important;
+            text-align:left !important;
+            white-space:nowrap !important;
+            overflow:hidden !important;
+            text-overflow:ellipsis !important;
+          }
+
+          .player-card.zuno-player-shell .heart{
+            flex:0 0 auto !important;
+          }
+
+          @media(max-width:700px){
+            .player-card.zuno-player-shell{
+              width:min(calc(100vw - 20px), 620px) !important;
+            }
+
+            .player-card.zuno-player-shell .zuno-player-title,
+            .player-card.zuno-player-shell .player-song-label{
+              font-size:12px !important;
+            }
+          }
+
         `}</style>
 
       <div
