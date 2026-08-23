@@ -574,209 +574,6 @@ function AuthScreen({
     };
 
 
-
-      <style>{`
-        /* =========================================================
-           ZUNO MOTION + PLAYER POLISH
-           UI/interaction layer only. Playback/data logic untouched.
-           ========================================================= */
-
-        .zuno-nav-action,
-        .zuno-nav-count,
-        .zuno-nav-brand{
-          transition:
-            opacity .25s ease,
-            transform .25s cubic-bezier(.22,1,.36,1);
-        }
-
-        .zuno-nav-action:hover{
-          transform:translateY(-1px);
-          opacity:.92;
-        }
-
-        .zuno-nav-action:active{
-          transform:translateY(0) scale(.98);
-        }
-
-        .zuno-player-shell{
-          transition:
-            transform .45s cubic-bezier(.22,1,.36,1),
-            box-shadow .35s ease,
-            border-color .35s ease;
-          will-change:transform;
-        }
-
-        .zuno-player-shell:hover{
-          transform:translateY(-2px);
-        }
-
-        .zuno-player-shell.is-playing{
-          box-shadow:
-            0 18px 55px rgba(0,0,0,.34),
-            0 0 0 1px rgba(255,255,255,.08);
-        }
-
-        .zuno-player-title{
-          transition:
-            opacity .22s ease,
-            transform .32s cubic-bezier(.22,1,.36,1);
-        }
-
-        .zuno-player-title.track-change{
-          animation:zunoTrackIn .42s cubic-bezier(.22,1,.36,1);
-        }
-
-        @keyframes zunoTrackIn{
-          0%{
-            opacity:0;
-            transform:translateY(5px);
-          }
-          100%{
-            opacity:1;
-            transform:translateY(0);
-          }
-        }
-
-        .zuno-play-button{
-          transition:
-            transform .2s cubic-bezier(.22,1,.36,1),
-            box-shadow .25s ease,
-            background .25s ease;
-        }
-
-        .zuno-play-button:hover{
-          transform:scale(1.045);
-        }
-
-        .zuno-play-button:active{
-          transform:scale(.94);
-        }
-
-        .zuno-player-shell.is-playing .zuno-play-button{
-          box-shadow:
-            0 0 0 5px rgba(255,255,255,.045),
-            0 8px 24px rgba(0,0,0,.28);
-        }
-
-        .zuno-eq{
-          display:flex;
-          align-items:flex-end;
-          justify-content:center;
-          gap:2px;
-          width:18px;
-          height:15px;
-          overflow:hidden;
-        }
-
-        .zuno-eq span{
-          display:block;
-          width:2px;
-          height:5px;
-          border-radius:2px;
-          background:currentColor;
-          opacity:.72;
-          transform-origin:bottom;
-        }
-
-        .zuno-player-shell.is-playing .zuno-eq span:nth-child(1){
-          animation:zunoEq1 .72s ease-in-out infinite alternate;
-        }
-        .zuno-player-shell.is-playing .zuno-eq span:nth-child(2){
-          animation:zunoEq2 .55s ease-in-out infinite alternate;
-        }
-        .zuno-player-shell.is-playing .zuno-eq span:nth-child(3){
-          animation:zunoEq3 .68s ease-in-out infinite alternate;
-        }
-        .zuno-player-shell.is-playing .zuno-eq span:nth-child(4){
-          animation:zunoEq2 .48s ease-in-out infinite alternate;
-        }
-
-        @keyframes zunoEq1{
-          from{height:4px}
-          to{height:13px}
-        }
-        @keyframes zunoEq2{
-          from{height:6px}
-          to{height:10px}
-        }
-        @keyframes zunoEq3{
-          from{height:3px}
-          to{height:12px}
-        }
-
-        .zuno-player-control{
-          transition:
-            opacity .2s ease,
-            transform .2s cubic-bezier(.22,1,.36,1);
-        }
-
-        .zuno-player-control:hover{
-          opacity:1 !important;
-          transform:scale(1.08);
-        }
-
-        .zuno-player-control:active{
-          transform:scale(.92);
-        }
-
-        .zuno-player-progress{
-          transition:opacity .25s ease;
-        }
-
-        .zuno-player-shell:hover .zuno-player-progress{
-          opacity:1 !important;
-        }
-
-        .zuno-hero-copy{
-          animation:zunoHeroIn .8s cubic-bezier(.22,1,.36,1) both;
-        }
-
-        .zuno-hero-subtitle{
-          animation:zunoHeroSub .7s .12s cubic-bezier(.22,1,.36,1) both;
-        }
-
-        @keyframes zunoHeroIn{
-          from{
-            opacity:0;
-            transform:translateY(12px);
-          }
-          to{
-            opacity:1;
-            transform:translateY(0);
-          }
-        }
-
-        @keyframes zunoHeroSub{
-          from{
-            opacity:0;
-            transform:translateY(7px);
-          }
-          to{
-            opacity:1;
-            transform:translateY(0);
-          }
-        }
-
-        @media (prefers-reduced-motion:reduce){
-          .zuno-nav-action,
-          .zuno-nav-count,
-          .zuno-nav-brand,
-          .zuno-player-shell,
-          .zuno-player-title,
-          .zuno-play-button,
-          .zuno-player-control{
-            transition:none !important;
-          }
-
-          .zuno-player-title.track-change,
-          .zuno-eq span,
-          .zuno-hero-copy,
-          .zuno-hero-subtitle{
-            animation:none !important;
-          }
-        }
-      `}</style>
-
   return (
     <div style={authStyles.page}>
 
@@ -4850,6 +4647,165 @@ function App() {
               transform:none;
             }
           }
+
+          /* =====================================================
+             ZUNO MOTION PASS
+             Cinematic, restrained, interaction-first.
+             ===================================================== */
+
+          .zuno-player-shell{
+            transform:translateZ(0);
+            will-change:transform;
+            transition:
+              transform .45s cubic-bezier(.22,1,.36,1),
+              box-shadow .4s ease,
+              border-color .35s ease;
+          }
+
+          .zuno-player-shell:hover{
+            transform:translateY(-2px) translateZ(0);
+          }
+
+          .zuno-player-shell.is-playing{
+            box-shadow:
+              0 18px 55px rgba(0,0,0,.28),
+              0 0 0 1px rgba(255,255,255,.055);
+          }
+
+          .zuno-player-title{
+            transition:
+              opacity .25s ease,
+              transform .32s cubic-bezier(.22,1,.36,1);
+          }
+
+          .zuno-play-button{
+            transition:
+              transform .2s cubic-bezier(.22,1,.36,1),
+              box-shadow .25s ease,
+              opacity .2s ease;
+          }
+
+          .zuno-play-button:hover{
+            transform:scale(1.055);
+          }
+
+          .zuno-play-button:active{
+            transform:scale(.93);
+          }
+
+          .zuno-player-control{
+            transition:
+              transform .2s cubic-bezier(.22,1,.36,1),
+              opacity .2s ease;
+          }
+
+          .zuno-player-control:hover{
+            transform:scale(1.08);
+          }
+
+          .zuno-player-control:active{
+            transform:scale(.92);
+          }
+
+          .zuno-player-progress{
+            transition:opacity .25s ease;
+          }
+
+          .zuno-player-shell:hover .zuno-player-progress{
+            opacity:1;
+          }
+
+          .zuno-player-shell .music-visualizer{
+            transform:translateZ(0);
+            transition:opacity .3s ease, transform .35s ease;
+          }
+
+          .zuno-player-shell.is-playing .music-visualizer{
+            transform:translateY(-1px) translateZ(0);
+          }
+
+          .zuno-player-shell .visualizer-bar{
+            transform-origin:center bottom;
+            will-change:height, transform;
+          }
+
+          .zuno-player-shell.is-playing .visualizer-bar{
+            animation:
+              zunoBarPulse .72s ease-in-out infinite alternate;
+            animation-delay:var(--bar-delay);
+          }
+
+          @keyframes zunoBarPulse{
+            0%{
+              transform:scaleY(.55);
+              opacity:.52;
+            }
+            100%{
+              transform:scaleY(1);
+              opacity:.92;
+            }
+          }
+
+          .zuno-nav-action{
+            transition:
+              opacity .22s ease,
+              transform .22s cubic-bezier(.22,1,.36,1);
+          }
+
+          .zuno-nav-action:hover{
+            transform:translateY(-1px);
+            opacity:.9;
+          }
+
+          .zuno-nav-action:active{
+            transform:scale(.98);
+          }
+
+          .zuno-hero-copy{
+            animation:zunoHeroIn .7s cubic-bezier(.22,1,.36,1) both;
+          }
+
+          .zuno-hero-subtitle{
+            animation:zunoHeroSub .65s .08s cubic-bezier(.22,1,.36,1) both;
+          }
+
+          @keyframes zunoHeroIn{
+            from{
+              opacity:0;
+              transform:translateY(9px);
+            }
+            to{
+              opacity:1;
+              transform:translateY(0);
+            }
+          }
+
+          @keyframes zunoHeroSub{
+            from{
+              opacity:0;
+              transform:translateY(5px);
+            }
+            to{
+              opacity:1;
+              transform:translateY(0);
+            }
+          }
+
+          @media (prefers-reduced-motion:reduce){
+            .zuno-player-shell,
+            .zuno-play-button,
+            .zuno-player-control,
+            .zuno-nav-action{
+              transition:none !important;
+            }
+
+            .zuno-player-shell.is-playing .visualizer-bar,
+            .zuno-hero-copy,
+            .zuno-hero-subtitle{
+              animation:none !important;
+            }
+          }
+
         `}</style>
 
       <div
@@ -5300,7 +5256,7 @@ function App() {
           {/* PLAYER */}
 
           <section
-            className={`player-card ${
+            className={`player-card zuno-player-shell ${
               playing ? "is-playing" : ""
             }`}
             onDoubleClick={(event) => {
@@ -5326,7 +5282,7 @@ function App() {
 
 
             <div className="now-row">
-              <div className="player-song-label">
+              <div className="player-song-label zuno-player-title">
                 {
                   currentTrack?.title ||
                   "अपनी पसंद से कोई गीत चुनें"
@@ -5357,7 +5313,7 @@ function App() {
 
 
             <div
-              className="seek"
+              className="seek zuno-player-progress"
               onClick={seek}
             >
 
@@ -5408,7 +5364,7 @@ function App() {
 
               <button
                 type="button"
-                className="control"
+                className="control zuno-player-control"
                 onClick={() =>
                   changeTrack(
                     indexRef.current -
@@ -5422,7 +5378,7 @@ function App() {
 
               <button
                 type="button"
-                className="control play"
+                className="control play zuno-play-button"
                 onClick={
                   togglePlay
                 }
@@ -5437,7 +5393,7 @@ function App() {
 
               <button
                 type="button"
-                className="control"
+                className="control zuno-player-control"
                 onClick={() =>
                   changeTrack(
                     indexRef.current +
