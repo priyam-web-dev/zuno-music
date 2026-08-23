@@ -168,6 +168,13 @@ function loadYouTubeAPI() {
 }
 
 
+// Start loading the YouTube IFrame API as early as the module loads.
+// This removes the cold-start race where the user clicks a song before the
+// API script has even begun loading. The actual player is still created only
+// after the authenticated ZUNO screen exists.
+const youtubeAPIPreload = loadYouTubeAPI();
+
+
 /* =========================================================
    SUPABASE HELPERS
    ========================================================= */
@@ -3430,7 +3437,7 @@ function App() {
         }
       }, 500);
 
-    loadYouTubeAPI()
+    youtubeAPIPreload
       .then((YT) => {
         if (
           cancelled ||
@@ -3452,6 +3459,7 @@ function App() {
 
               playerVars: {
                 playsinline: 1,
+                autoplay: 0,
                 controls: 1,
                 rel: 0,
                 iv_load_policy: 3,
@@ -3493,6 +3501,15 @@ function App() {
 
                       if (pending.autoplay) {
                         event.target.playVideo?.();
+                        requestAnimationFrame(() => {
+                          try {
+                            if (event.target.getPlayerState?.() !== YT.PlayerState.PLAYING) {
+                              event.target.playVideo?.();
+                            }
+                          } catch {
+                            // YouTube will emit onError/onAutoplayBlocked if playback cannot start.
+                          }
+                        });
                       } else {
                         event.target.pauseVideo?.();
                       }
@@ -3541,6 +3558,7 @@ function App() {
                     YT.PlayerState.PLAYING
                   ) {
                     playerErrorAttemptsRef.current = 0;
+                    pendingPlaybackRef.current = null;
                     setError("");
                   }
 
@@ -3735,6 +3753,15 @@ function App() {
           });
 
           player.playVideo?.();
+          requestAnimationFrame(() => {
+            try {
+              if (player.getPlayerState?.() !== 1) {
+                player.playVideo?.();
+              }
+            } catch {
+              // Let YouTube's next state/error event handle recovery.
+            }
+          });
         } catch {
           // Let YouTube's next state/error event handle recovery.
         }
