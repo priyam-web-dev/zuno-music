@@ -4912,41 +4912,101 @@ function App() {
             will-change:height, transform;
           }
 
-          .player-skip-button{
-            min-width:34px;
-            padding:5px 3px;
+          /* RETAINED ZUNO PLAYER POLISH
+             Same layout, same pill, clearer controls. */
+
+          .zuno-player-title{
+            max-width:290px !important;
+            min-width:240px !important;
+            font-size:13px !important;
+            font-weight:600 !important;
+            color:rgba(255,255,255,.98) !important;
+          }
+
+          .zuno-clean-controls{
+            gap:11px;
+            flex-shrink:0;
+          }
+
+          .zuno-clean-controls .control,
+          .zuno-clean-controls .heart,
+          .zuno-clean-controls .player-skip-button{
+            color:rgba(255,255,255,.82);
+            opacity:1;
+          }
+
+          .zuno-clean-controls .player-skip-button{
+            min-width:38px;
+            padding:5px 4px;
             font-size:9px;
-            opacity:.62;
+            font-weight:600;
+            letter-spacing:0;
+            border:1px solid rgba(255,255,255,.13);
+            background:rgba(255,255,255,.035);
+            border-radius:8px;
+          }
+
+          .zuno-clean-controls .zuno-player-control{
+            opacity:.86;
+            min-width:30px;
+            min-height:30px;
+            font-size:18px;
+          }
+
+          .zuno-clean-controls .zuno-player-control:hover{
+            opacity:1;
+            color:#fff;
+            background:rgba(255,255,255,.055);
+            border-radius:50%;
+          }
+
+          .zuno-clean-controls .zuno-play-button{
+            opacity:1;
+            box-shadow:
+              0 5px 18px rgba(0,0,0,.18),
+              0 0 0 1px rgba(255,255,255,.12);
+          }
+
+          .zuno-clean-controls .heart{
+            opacity:.9;
+            font-size:20px;
+          }
+
+          .zuno-clean-controls .heart:hover{
+            opacity:1;
           }
 
           .volume-toggle{
-            width:27px;
-            height:27px;
+            width:29px;
+            height:29px;
             padding:0;
             display:grid;
             place-items:center;
             border-radius:50%;
             font-size:15px;
+            color:rgba(255,255,255,.78);
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.10);
           }
 
-          .player-mode-button:hover,
           .player-skip-button:hover,
           .volume-toggle:hover{
             color:#fff;
+            border-color:rgba(255,255,255,.22);
             transform:translateY(-1px);
-            background:rgba(255,255,255,.07);
+            background:rgba(255,255,255,.075);
           }
 
-          .player-mode-button:active,
           .player-skip-button:active,
           .volume-toggle:active{
-            transform:scale(.92);
+            transform:scale(.93);
           }
 
           @media(max-width:700px){
             .zuno-player-title{
-              max-width:180px;
-              font-size:12px;
+              max-width:180px !important;
+              min-width:140px !important;
+              font-size:12px !important;
             }
 
             .zuno-clean-controls{
