@@ -1000,58 +1000,75 @@ async function loadUserSongs(
       token
     );
 
-  if (!Array.isArray(playlists) || !playlists.length) {
+  if (
+    !Array.isArray(playlists) ||
+    !playlists.length
+  ) {
     return [];
   }
 
-  const results =
-    await Promise.all(
-      playlists.map(async (playlist) => {
-        const songs =
-          await getPlaylistSongs(
-            playlist.id,
-            token
-          );
+  /*
+    Performance:
+    Fetch all playlist songs in one request instead of making one
+    playlist_songs request for every playlist.
+  */
+  const playlistIds =
+    playlists
+      .map((playlist) => playlist?.id)
+      .filter(Boolean);
 
-        return Array.isArray(songs)
-          ? songs
-          : [];
-      })
+  if (!playlistIds.length) {
+    return [];
+  }
+
+  const inList =
+    playlistIds
+      .map((id) => `"${String(id).replace(/"/g, '\\"')}"`)
+      .join(",");
+
+  const songs =
+    await supabaseRequest(
+      `/rest/v1/playlist_songs?playlist_id=in.(${inList})&select=id,playlist_id,youtube_id,song_name,artist,position&order=position.asc`,
+      {
+        method: "GET",
+      },
+      token
     );
 
   const seen = new Set();
   const tracks = [];
 
-  for (const songs of results) {
-    for (const song of songs) {
-      const id =
-        String(song?.youtube_id || "").trim();
+  for (
+    const song of
+    Array.isArray(songs)
+      ? songs
+      : []
+  ) {
+    const id =
+      String(
+        song?.youtube_id || ""
+      ).trim();
 
-      if (!id || seen.has(id)) {
-        continue;
-      }
-
-      seen.add(id);
-
-      tracks.push({
-        id,
-        title:
-          song?.song_name ||
-          "Unknown song",
-        artist:
-          song?.artist ||
-          "Unknown artist",
-      });
+    if (!id || seen.has(id)) {
+      continue;
     }
+
+    seen.add(id);
+
+    tracks.push({
+      id,
+      title:
+        song?.song_name ||
+        "Unknown song",
+      artist:
+        song?.artist ||
+        "Unknown artist",
+    });
   }
 
   return tracks;
 }
 
-
-/* =========================================================
-   PLAYLIST PANEL
-   ========================================================= */
 
 function PlaylistPanel({
   user,
@@ -2373,6 +2390,22 @@ function App() {
   const tracksRef =
     useRef([]);
 
+  /*
+    Library performance cache:
+    - Per-user, so accounts never share song data.
+    - Avoids repeated Supabase reads while the library is unchanged.
+    - Prevents duplicate refresh requests.
+  */
+  const libraryCacheRef =
+    useRef({
+      userId: null,
+      tracks: [],
+      savedAt: 0,
+    });
+
+  const libraryRefreshInFlightRef =
+    useRef(false);
+
   // Which source currently owns the player queue.
   // "recommended" must never be overwritten by the background
   // refresh of the user's personal playlists.
@@ -3011,11 +3044,52 @@ function App() {
      ======================================================= */
 
   const refreshSongs =
-    async () => {
+    async (
+      force = false
+    ) => {
 
       if (!user || !token) {
         return;
       }
+
+      // Recommended playlists own the player while they are active.
+      // Never let a background library refresh interfere with them.
+      if (
+        playbackSourceRef.current ===
+        "recommended"
+      ) {
+        return;
+      }
+
+      if (
+        libraryRefreshInFlightRef.current
+      ) {
+        return;
+      }
+
+      const CACHE_TTL =
+        5 * 60 * 1000;
+
+      const cache =
+        libraryCacheRef.current;
+
+      const cacheIsFresh =
+        cache.userId === user.id &&
+        Array.isArray(cache.tracks) &&
+        cache.savedAt > 0 &&
+        Date.now() - cache.savedAt <
+          CACHE_TTL;
+
+      // Normal background refreshes use the cache.
+      if (
+        !force &&
+        cacheIsFresh
+      ) {
+        return;
+      }
+
+      libraryRefreshInFlightRef.current =
+        true;
 
       try {
         const songs =
@@ -3024,25 +3098,25 @@ function App() {
             token
           );
 
-        // A library refresh can finish after the user has already
-        // started a recommended playlist. Never let that stale async
-        // result replace the recommended queue or stop its player.
-        if (playbackSourceRef.current === "recommended") {
+        if (
+          playbackSourceRef.current ===
+          "recommended"
+        ) {
           return;
         }
 
-        /* Preserve the song that is currently playing when the
-           playlist is refreshed. The old code always forced index 0,
-           which made the player jump back to the first song after a
-           refresh even though another song was still playing. */
         const currentSongId =
-          tracksRef.current?.[indexRef.current]?.id ||
+          tracksRef.current?.[
+            indexRef.current
+          ]?.id ||
           null;
 
         const preservedIndex =
           currentSongId
             ? songs.findIndex(
-                (song) => song.id === currentSongId
+                (song) =>
+                  song.id ===
+                  currentSongId
               )
             : -1;
 
@@ -3053,7 +3127,9 @@ function App() {
         const restoredIndex =
           storedPlayback?.trackId
             ? songs.findIndex(
-                (song) => song.id === storedPlayback.trackId
+                (song) =>
+                  song.id ===
+                  storedPlayback.trackId
               )
             : -1;
 
@@ -3067,6 +3143,31 @@ function App() {
         const hadCurrentSong =
           Boolean(currentSongId) &&
           preservedIndex >= 0;
+
+        const oldIds =
+          tracksRef.current
+            .map((track) => track?.id)
+            .join("|");
+
+        const newIds =
+          songs
+            .map((track) => track?.id)
+            .join("|");
+
+        libraryCacheRef.current = {
+          userId: user.id,
+          tracks: songs,
+          savedAt: Date.now(),
+        };
+
+        // Don't cause a React queue update if nothing actually changed.
+        if (
+          oldIds === newIds &&
+          tracksRef.current.length ===
+            songs.length
+        ) {
+          return;
+        }
 
         tracksRef.current =
           songs;
@@ -3082,42 +3183,49 @@ function App() {
           safeIndex
         );
 
-        setQueueFocusIndex(safeIndex);
+        setQueueFocusIndex(
+          safeIndex
+        );
 
-        /* If the currently playing song still exists, do NOT reload
-           YouTube. This keeps playback and the visible song title in
-           sync. Only load a song when the old one disappeared. */
+        // Do not reload YouTube if the current song still exists.
         if (
           !hadCurrentSong &&
           songs.length &&
           playerRef.current
         ) {
           playerRef.current.loadVideoById({
-            videoId: songs[safeIndex].id,
+            videoId:
+              songs[safeIndex].id,
             startSeconds:
-              restoredIndex === safeIndex && storedPlayback
+              restoredIndex ===
+                safeIndex &&
+              storedPlayback
                 ? storedPlayback.position
                 : 0,
           });
         }
 
         if (!songs.length) {
-          // An empty playlist is a normal state for a new account.
-          // Keep the complete website UI visible and show the instruction
-          // only inside the video player area.
           setError("");
           playerRef.current?.stopVideo?.();
         } else {
           setError("");
         }
-} catch (err) {
+
+      } catch (err) {
         console.error(err);
 
-        setError(
-          err?.message ||
-          "Tumhari playlists se songs load nahi ho sake."
-        );
-}
+        // Keep already-loaded songs playable if a refresh fails.
+        if (!tracksRef.current.length) {
+          setError(
+            err?.message ||
+            "Tumhari playlists se songs load nahi ho sake."
+          );
+        }
+      } finally {
+        libraryRefreshInFlightRef.current =
+          false;
+      }
     };
 
 
@@ -3126,21 +3234,17 @@ function App() {
     if (!user || !token)
       return;
 
-
     /* Let the first ZUNO UI paint before fetching playlist data. */
     const runInitialSongLoad =
       () => {
-        refreshSongs();
+        refreshSongs(true);
       };
 
-
     let cleanupInitialLoad;
-
 
     if (
       "requestIdleCallback" in window
     ) {
-
       const idleId =
         window.requestIdleCallback(
           runInitialSongLoad,
@@ -3149,38 +3253,56 @@ function App() {
           }
         );
 
-
       cleanupInitialLoad =
         () =>
           window.cancelIdleCallback(
             idleId
           );
 
-    }
-
-    else {
-
+    } else {
       const frameId =
         window.requestAnimationFrame(
           runInitialSongLoad
         );
-
 
       cleanupInitialLoad =
         () =>
           window.cancelAnimationFrame(
             frameId
           );
-
     }
 
-
+    /*
+      Personal playlists do not need a database request every minute.
+      Refresh at most every five minutes, and only while the tab is visible.
+    */
     const interval =
       setInterval(
-        refreshSongs,
-        60000
+        () => {
+          if (
+            document.visibilityState ===
+            "visible"
+          ) {
+            refreshSongs(false);
+          }
+        },
+        5 * 60 * 1000
       );
 
+    const handleVisibility =
+      () => {
+        if (
+          document.visibilityState ===
+          "visible"
+        ) {
+          refreshSongs(false);
+        }
+      };
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibility
+    );
 
     return () => {
 
@@ -3190,10 +3312,14 @@ function App() {
         interval
       );
 
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibility
+      );
+
     };
 
   }, [user, token]);
-
 
   /* =======================================================
      ESCAPE / BODY LOCK
@@ -3382,28 +3508,49 @@ function App() {
             0;
 
 
-          setProgress(
+          const nextProgress =
             total
               ? (
                   current /
                   total
                 ) *
                 100
-              : 0
-          );
+              : 0;
 
-
-          setElapsed(
+          const nextElapsed =
             formatTime(
               current
-            )
-          );
+            );
 
-
-          setDuration(
+          const nextDuration =
             formatTime(
               total
-            )
+            );
+
+          setProgress(
+            (previous) =>
+              Math.abs(
+                previous -
+                nextProgress
+              ) < 0.15
+                ? previous
+                : nextProgress
+          );
+
+          setElapsed(
+            (previous) =>
+              previous ===
+              nextElapsed
+                ? previous
+                : nextElapsed
+          );
+
+          setDuration(
+            (previous) =>
+              previous ===
+              nextDuration
+                ? previous
+                : nextDuration
           );
 
           // Persist the current song and position without hammering storage.
@@ -3429,7 +3576,7 @@ function App() {
           }
 
         },
-        500
+        1000
       );
 
 
@@ -5374,8 +5521,8 @@ function App() {
             onPlayPlaylist={
               playPlaylist
             }
-            onLibraryChanged={
-              refreshSongs
+            onLibraryChanged={() =>
+              refreshSongs(true)
             }
             onClose={() =>
               setPlaylistOpen(
