@@ -2417,16 +2417,8 @@ function App() {
   const [duration, setDuration] =
     useState("0:00");
 
-  const [volume, setVolume] =
-    useState(() =>
-      Math.min(
-        100,
-        Math.max(
-          0,
-          getStoredNumber("pf_volume", 80)
-        )
-      )
-    );
+  const [volume, setVolume] = useState(100);
+  const userHasChosenVolumeRef = useRef(false);
 
   const previousVolumeRef =
     useRef(80);
@@ -3753,60 +3745,44 @@ function App() {
 
   const togglePlay =
     () => {
+      const player =
+        playerRef.current;
 
-      const player = playerRef.current;
-
-      if (!player || !playerReadyRef.current) {
+      if (
+        !ready ||
+        !player
+      ) {
         return;
       }
-
-      if (pendingPlaybackRef.current?.videoId) {
-        const pending = pendingPlaybackRef.current;
-        pendingPlaybackRef.current = null;
-
-        try {
-          player.setVolume(volume);
-
-          if (volume > 0) {
-            player.unMute?.();
-          }
-
-          player.loadVideoById({
-            videoId: pending.videoId,
-            startSeconds: 0,
-          });
-
-          player.playVideo?.();
-          requestAnimationFrame(() => {
-            try {
-              if (player.getPlayerState?.() !== 1) {
-                player.playVideo?.();
-              }
-            } catch {
-              // Let YouTube's next state/error event handle recovery.
-            }
-          });
-        } catch {
-          // Let YouTube's next state/error event handle recovery.
-        }
-
-        return;
-      }
-
 
       if (playing) {
+        if (autoplay) {
+        if (!userHasChosenVolumeRef.current) {
+          setVolume(100);
+          player.setVolume(100);
+          player.unMute();
+        } else if (volume > 0) {
+          player.setVolume(volume);
+          player.unMute();
+        }
 
-        playerRef.current
-          .pauseVideo();
-
+        player.playVideo();
+      } else {
+        player.pauseVideo();
+      }
+        return;
       }
 
-      else {
-
-        playerRef.current
-          .playVideo();
-
+      if (!userHasChosenVolumeRef.current) {
+        setVolume(100);
+        player.setVolume(100);
+        player.unMute();
+      } else if (volume > 0) {
+        player.setVolume(volume);
+        player.unMute();
       }
+
+      player.playVideo();
     };
 
 
@@ -3910,6 +3886,7 @@ function App() {
       if (event.key === "ArrowUp") {
         event.preventDefault();
         const nextVolume = Math.min(100, volume + 5);
+        userHasChosenVolumeRef.current = true;
         setVolume(nextVolume);
         playerRef.current?.setVolume(nextVolume);
         if (nextVolume > 0) {
