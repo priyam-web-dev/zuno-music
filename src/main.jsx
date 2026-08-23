@@ -5003,21 +5003,17 @@ function App() {
 
           @media(max-width:700px){
             .zuno-player-title{
-              flex:1 1 150px !important;
-              width:150px !important;
-              max-width:190px !important;
-              min-width:125px !important;
-              font-size:12px !important;
-            }
-
-            .zuno-clean-controls{
-              gap:7px;
-            }
-
-            .player-skip-button{
-              min-width:29px;
-              font-size:8px;
-            }
+            flex:1 1 340px !important;
+            width:340px !important;
+            min-width:300px !important;
+            max-width:390px !important;
+            font-size:13px !important;
+            font-weight:600 !important;
+            color:rgba(255,255,255,.98) !important;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            text-align:left;
           }
 
           .zuno-player-shell.is-playing .visualizer-bar{
@@ -5552,7 +5548,7 @@ function App() {
             }`}
             style={{
               width:
-                "min(620px, calc(100vw - 32px))",
+                "min(760px, calc(100vw - 32px))",
             }}
             onDoubleClick={(event) => {
               if (event.target.closest("button, input")) {
@@ -5583,17 +5579,20 @@ function App() {
                 alignItems: "center",
                 width: "100%",
                 minWidth: 0,
-                gap: "12px",
+                gap: "14px",
               }}
             >
               <div
                 className="player-song-label zuno-player-title"
                 style={{
                   flex:
-                    "1 1 210px",
-                  width: "210px",
-                  minWidth: "190px",
-                  maxWidth: "250px",
+                    "1 1 340px",
+                  width:
+                    "340px",
+                  minWidth:
+                    "300px",
+                  maxWidth:
+                    "390px",
                   overflow: "hidden",
                   textOverflow:
                     "ellipsis",
