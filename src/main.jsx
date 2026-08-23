@@ -2435,6 +2435,18 @@ function App() {
   const [queueFocusIndex, setQueueFocusIndex] =
     useState(0);
 
+  const [shuffle, setShuffle] =
+    useState(false);
+
+  const [repeatMode, setRepeatMode] =
+    useState("all");
+
+  const shuffleRef =
+    useRef(false);
+
+  const repeatModeRef =
+    useRef("all");
+
   const playbackRestoreRef =
     useRef(getStoredPlayback());
 
@@ -2446,6 +2458,14 @@ function App() {
 
   const playerErrorAttemptsRef =
     useRef(0);
+
+  useEffect(() => {
+    shuffleRef.current = shuffle;
+  }, [shuffle]);
+
+  useEffect(() => {
+    repeatModeRef.current = repeatMode;
+  }, [repeatMode]);
 
 
   /* =======================================================
@@ -3267,6 +3287,109 @@ function App() {
 
 
   /* =======================================================
+     PLAYER ACTIONS
+     ======================================================= */
+
+  const seekBy =
+    (seconds) => {
+      const player =
+        playerRef.current;
+
+      if (
+        !ready ||
+        !player?.getCurrentTime
+      ) {
+        return;
+      }
+
+      const current =
+        player.getCurrentTime() || 0;
+
+      const total =
+        player.getDuration() || 0;
+
+      player.seekTo(
+        Math.max(
+          0,
+          Math.min(
+            total || Infinity,
+            current + seconds
+          )
+        ),
+        true
+      );
+    };
+
+
+  const getNextIndex =
+    () => {
+      const songs =
+        tracksRef.current;
+
+      if (!songs.length) {
+        return 0;
+      }
+
+      if (
+        shuffleRef.current &&
+        songs.length > 1
+      ) {
+        let next =
+          Math.floor(
+            Math.random() *
+              songs.length
+          );
+
+        while (
+          next === indexRef.current
+        ) {
+          next =
+            Math.floor(
+              Math.random() *
+                songs.length
+            );
+        }
+
+        return next;
+      }
+
+      return (
+        indexRef.current + 1
+      ) % songs.length;
+    };
+
+
+  const getPreviousIndex =
+    () => {
+      const songs =
+        tracksRef.current;
+
+      if (!songs.length) {
+        return 0;
+      }
+
+      return (
+        indexRef.current -
+        1 +
+        songs.length
+      ) % songs.length;
+    };
+
+
+  const cycleRepeat =
+    () => {
+      setRepeatMode(
+        (current) =>
+          current === "all"
+            ? "one"
+            : current === "one"
+            ? "off"
+            : "all"
+      );
+    };
+
+
+  /* =======================================================
      CHANGE TRACK
      ======================================================= */
 
@@ -3577,10 +3700,29 @@ function App() {
                       YT.PlayerState.ENDED &&
                     tracksRef.current.length
                   ) {
+                    if (
+                      repeatModeRef.current ===
+                      "one"
+                    ) {
+                      changeTrack(
+                        indexRef.current,
+                        true
+                      );
+                      return;
+                    }
+
+                    if (
+                      repeatModeRef.current ===
+                        "off" &&
+                      indexRef.current ===
+                        tracksRef.current.length - 1
+                    ) {
+                      setPlaying(false);
+                      return;
+                    }
+
                     changeTrack(
-                      (
-                        indexRef.current + 1
-                      ) % tracksRef.current.length,
+                      getNextIndex(),
                       true
                     );
                   }
@@ -3873,13 +4015,13 @@ function App() {
 
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        changeTrack(indexRef.current - 1);
+        changeTrack(getPreviousIndex());
         return;
       }
 
       if (event.key === "ArrowRight") {
         event.preventDefault();
-        changeTrack(indexRef.current + 1);
+        changeTrack(getNextIndex());
         return;
       }
 
@@ -4729,6 +4871,102 @@ function App() {
             will-change:height, transform;
           }
 
+          .player-mode-button,
+          .player-skip-button,
+          .volume-toggle{
+            border:0;
+            background:transparent;
+            color:rgba(255,255,255,.62);
+            font-family:"DM Sans",sans-serif;
+            cursor:pointer;
+            transition:
+              color .2s ease,
+              opacity .2s ease,
+              transform .2s cubic-bezier(.22,1,.36,1),
+              background .2s ease;
+          }
+
+          .player-mode-button{
+            width:30px;
+            height:30px;
+            display:grid;
+            place-items:center;
+            border-radius:50%;
+            font-size:15px;
+          }
+
+          .player-mode-button.active{
+            color:#fff;
+            background:rgba(255,255,255,.08);
+          }
+
+          .player-skip-button{
+            min-width:34px;
+            padding:5px 3px;
+            font-size:9px;
+            opacity:.62;
+          }
+
+          .volume-toggle{
+            width:27px;
+            height:27px;
+            padding:0;
+            display:grid;
+            place-items:center;
+            border-radius:50%;
+            font-size:15px;
+          }
+
+          .player-mode-button:hover,
+          .player-skip-button:hover,
+          .volume-toggle:hover{
+            color:#fff;
+            transform:translateY(-1px);
+            background:rgba(255,255,255,.07);
+          }
+
+          .player-mode-button:active,
+          .player-skip-button:active,
+          .volume-toggle:active{
+            transform:scale(.92);
+          }
+
+          .player-extra-row{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:14px;
+            min-height:20px;
+            margin-top:5px;
+            color:rgba(255,255,255,.38);
+            font-family:"DM Sans",sans-serif;
+            font-size:8px;
+            letter-spacing:.3px;
+            text-transform:uppercase;
+          }
+
+          .player-extra-row span{
+            white-space:nowrap;
+          }
+
+          @media(max-width:700px){
+            .player-mode-button{
+              width:27px;
+              height:27px;
+              font-size:13px;
+            }
+
+            .player-skip-button{
+              min-width:30px;
+              font-size:8px;
+            }
+
+            .player-extra-row{
+              gap:9px;
+              font-size:7px;
+            }
+          }
+
           .zuno-player-shell.is-playing .visualizer-bar{
             animation:
               zunoBarPulse .72s ease-in-out infinite alternate;
@@ -5343,7 +5581,30 @@ function App() {
 
             <div className="controls">
 
-              {/* MUSIC-REACTIVE VISUALIZER */}
+              <button
+                type="button"
+                className={`player-mode-button ${
+                  shuffle ? "active" : ""
+                }`}
+                onClick={() =>
+                  setShuffle((value) => !value)
+                }
+                aria-label="Toggle shuffle"
+                title="Shuffle"
+              >
+                ⇄
+              </button>
+
+              <button
+                type="button"
+                className="player-skip-button"
+                onClick={() => seekBy(-10)}
+                aria-label="Back 10 seconds"
+                title="Back 10 seconds"
+              >
+                −10
+              </button>
+
               <div
                 className={`music-visualizer ${
                   playing ? "is-playing" : ""
@@ -5367,41 +5628,65 @@ function App() {
                 className="control zuno-player-control"
                 onClick={() =>
                   changeTrack(
-                    indexRef.current -
-                      1
+                    getPreviousIndex()
                   )
                 }
+                aria-label="Previous song"
+                title="Previous"
               >
                 ‹
               </button>
 
-
               <button
                 type="button"
                 className="control play zuno-play-button"
-                onClick={
-                  togglePlay
-                }
+                onClick={togglePlay}
+                aria-label={playing ? "Pause" : "Play"}
+                title={playing ? "Pause" : "Play"}
               >
-                {
-                  playing
-                    ? "Ⅱ"
-                    : "▶"
-                }
+                {playing ? "Ⅱ" : "▶"}
               </button>
-
 
               <button
                 type="button"
                 className="control zuno-player-control"
                 onClick={() =>
                   changeTrack(
-                    indexRef.current +
-                      1
+                    getNextIndex()
                   )
                 }
+                aria-label="Next song"
+                title="Next"
               >
                 ›
+              </button>
+
+              <button
+                type="button"
+                className="player-skip-button"
+                onClick={() => seekBy(10)}
+                aria-label="Forward 10 seconds"
+                title="Forward 10 seconds"
+              >
+                +10
+              </button>
+
+              <button
+                type="button"
+                className={`player-mode-button ${
+                  repeatMode !== "off" ? "active" : ""
+                }`}
+                onClick={cycleRepeat}
+                aria-label={`Repeat ${repeatMode}`}
+                title={
+                  repeatMode === "one"
+                    ? "Repeat one"
+                    : repeatMode === "all"
+                    ? "Repeat all"
+                    : "Repeat off"
+                }
+              >
+                {repeatMode === "one" ? "↻¹" : "↻"}
               </button>
 
             </div>
@@ -5409,9 +5694,31 @@ function App() {
 
             <div className="utility">
 
-              <span className="volume-icon">
-                ⌁
-              </span>
+              <button
+                type="button"
+                className="volume-toggle"
+                onClick={() => {
+                  if (volume > 0) {
+                    previousVolumeRef.current = volume;
+                    setVolume(0);
+                    playerRef.current?.setVolume(0);
+                  } else {
+                    const restored =
+                      previousVolumeRef.current > 0
+                        ? previousVolumeRef.current
+                        : 80;
+
+                    userHasChosenVolumeRef.current = true;
+                    setVolume(restored);
+                    playerRef.current?.setVolume(restored);
+                    playerRef.current?.unMute?.();
+                  }
+                }}
+                aria-label={volume > 0 ? "Mute" : "Unmute"}
+                title={volume > 0 ? "Mute" : "Unmute"}
+              >
+                {volume === 0 ? "×" : "⌁"}
+              </button>
 
 
               <input
@@ -5425,6 +5732,8 @@ function App() {
                     Number(
                       e.target.value
                     );
+
+                  userHasChosenVolumeRef.current = true;
 
                   setVolume(
                     value
@@ -5463,6 +5772,28 @@ function App() {
 
             </div>
 
+
+            <div className="player-extra-row">
+              <span>
+                {shuffle ? "Shuffle on" : "Queue order"}
+              </span>
+              <span>
+                {
+                  repeatMode === "one"
+                    ? "Repeat one"
+                    : repeatMode === "all"
+                    ? "Repeat all"
+                    : "Repeat off"
+                }
+              </span>
+              <span>
+                {
+                  currentTrack
+                    ? `${indexRef.current + 1} / ${tracks.length}`
+                    : "No song selected"
+                }
+              </span>
+            </div>
 
             <div className="note">
               संगीत YouTube के आधिकारिक
