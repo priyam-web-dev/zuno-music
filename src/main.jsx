@@ -3885,47 +3885,29 @@ function App() {
      PLAYER CONTROLS
      ======================================================= */
 
-  const togglePlay =
-    () => {
-      const player =
-        playerRef.current;
+  const togglePlay = () => {
+    const player = playerRef.current;
 
-      if (
-        !ready ||
-        !player
-      ) {
-        return;
-      }
+    if (!ready || !player) {
+      return;
+    }
 
-      if (playing) {
-        if (autoplay) {
-        if (!userHasChosenVolumeRef.current) {
-          setVolume(100);
-          player.setVolume(100);
-          player.unMute();
-        } else if (volume > 0) {
-          player.setVolume(volume);
-          player.unMute();
-        }
+    if (playing) {
+      player.pauseVideo();
+      return;
+    }
 
-        player.playVideo();
-      } else {
-        player.pauseVideo();
-      }
-        return;
-      }
+    if (!userHasChosenVolumeRef.current) {
+      setVolume(100);
+      player.setVolume(100);
+      player.unMute();
+    } else if (volume > 0) {
+      player.setVolume(volume);
+      player.unMute();
+    }
 
-      if (!userHasChosenVolumeRef.current) {
-        setVolume(100);
-        player.setVolume(100);
-        player.unMute();
-      } else if (volume > 0) {
-        player.setVolume(volume);
-        player.unMute();
-      }
-
-      player.playVideo();
-    };
+    player.playVideo();
+  };
 
 
   /* =======================================================
